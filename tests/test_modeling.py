@@ -33,5 +33,7 @@ def test_held_out_validation(synthetic_runner):
     assert metrics["test_samples"] > 0
     assert "regression_eval" in metrics
     assert "lookup_eval" in metrics
-    assert model_record.r2_score > 0.60
-    assert model_record.validation_rmse_ms > 0
+    assert model_record.validation_rmse_ms < 2.5
+    assert metrics["chosen_eval"]["mae"] < 2.5
+    assert metrics["group_based_leakage_free"] is True
+    assert model_record.is_validated is True

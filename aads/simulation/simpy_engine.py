@@ -36,17 +36,38 @@ class SimPyEngine:
         warnings: List[str] = []
 
         # 1. Retrieve component performance models from registry
-        # PostgreSQL model
-        db_status, pg_model, pg_warn = self.registry.check_compatibility("postgres_db", "postgres:16-alpine", workload)
-        warnings.extend(pg_warn)
-        if pg_model:
-            pg_params = pg_model.fitted_parameters
-            pg_base_read_ms = pg_params.get("base_read_service_ms", 2.8)
-            pg_base_write_ms = pg_params.get("base_write_service_ms", 6.5)
+        # Dynamically lookup DB component model (PostgreSQL, MongoDB, etc.)
+        db_conf = architecture.components.get("db")
+        db_name = db_conf.name if db_conf else "postgres_db"
+        db_ver = db_conf.version if db_conf else "postgres:16-alpine"
+        db_status, db_model, db_warn = self.registry.check_compatibility(db_name, db_ver, workload)
+        warnings.extend(db_warn)
+        if db_model:
+            db_params = db_model.fitted_parameters
+            if db_model.model_type == "piecewise_ridge" and "intercept" in db_params:
+                from aads.modeling.regression_model import RegressionPerformanceModel
+                reg_m = RegressionPerformanceModel(
+                    intercept=db_params["intercept"],
+                    coef_concurrency=db_params["coef_concurrency"],
+                    coef_log_rps=db_params["coef_log_rps"],
+                    coef_is_write=db_params["coef_is_write"],
+                    min_concurrency=db_params["min_concurrency"],
+                    max_concurrency=db_params["max_concurrency"],
+                    min_rps=db_params["min_rps"],
+                    max_rps=db_params["max_rps"],
+                    rmse=db_params["rmse"],
+                )
+                pred_r, _, _ = reg_m.predict_service_time_ms("read", concurrency=4, offered_rps=workload.request_rate_rps)
+                pred_w, _, _ = reg_m.predict_service_time_ms("write", concurrency=4, offered_rps=workload.request_rate_rps)
+                pg_base_read_ms = max(0.5, pred_r)
+                pg_base_write_ms = max(1.0, pred_w)
+            else:
+                pg_base_read_ms = db_params.get("base_read_service_ms", 2.8)
+                pg_base_write_ms = db_params.get("base_write_service_ms", 6.5)
         else:
             pg_base_read_ms = 3.0
             pg_base_write_ms = 7.0
-            warnings.append("Using fallback uncalibrated PostgreSQL parameters.")
+            warnings.append(f"Using fallback uncalibrated {db_name} parameters.")
 
         # Redis model
         redis_base_hit_ms = 0.55
@@ -65,7 +86,9 @@ class SimPyEngine:
         db_conf = architecture.components.get("db")
         db_capacity = db_conf.concurrency_limit if db_conf else 25
         db_resource = simpy.Resource(env, capacity=db_capacity)
-        collector.register_resource("db", db_capacity)
+        db_cpu_cores = max(1, int(round(db_conf.cpu_cores if db_conf else 2.0)))
+        db_cpu = simpy.Resource(env, capacity=db_cpu_cores)
+        collector.register_resource("db", db_cpu_cores)
 
         cache_resource = None
         if "cache" in architecture.components:
@@ -91,6 +114,7 @@ class SimPyEngine:
                         worker_id=worker_id,
                         queue_store=queue_store,
                         db_resource=db_resource,
+                        db_cpu=db_cpu,
                         pg_base_write_ms=pg_base_write_ms,
                         collector=collector,
                         rng=rng,
@@ -118,6 +142,7 @@ class SimPyEngine:
                         workload=workload,
                         api_resource=api_resource,
                         db_resource=db_resource,
+                        db_cpu=db_cpu,
                         cache_resource=cache_resource,
                         queue_store=queue_store,
                         pg_base_read_ms=pg_base_read_ms,
@@ -168,6 +193,7 @@ class SimPyEngine:
         workload: WorkloadSpec,
         api_resource: simpy.Resource,
         db_resource: simpy.Resource,
+        db_cpu: simpy.Resource,
         cache_resource: Optional[simpy.Resource],
         queue_store: Optional[simpy.Store],
         pg_base_read_ms: float,
@@ -194,17 +220,19 @@ class SimPyEngine:
             collector.record_busy_time("api", api_overhead_s)
 
             # Routing based on Architecture
-            if architecture.id == "arch_a_simple":
+            if architecture.id in ("arch_a_simple", "arch_mongo_unregistered"):
                 # Direct DB access for both reads and writes
                 collector.record_queue_length("db", len(db_resource.queue))
                 with db_resource.request() as db_req:
                     yield db_req
-                    db_start_s = env.now
-                    base_ms = pg_base_read_ms if op_type == "read" else pg_base_write_ms
-                    service_ms = base_ms * rng.uniform(0.90, 1.15)
-                    service_s = service_ms / 1000.0
-                    yield env.timeout(service_s)
-                    collector.record_busy_time("db", service_s)
+                    with db_cpu.request() as d_cpu:
+                        yield d_cpu
+                        db_start_s = env.now
+                        base_ms = pg_base_read_ms if op_type == "read" else pg_base_write_ms
+                        service_ms = base_ms * rng.uniform(0.90, 1.15)
+                        service_s = service_ms / 1000.0
+                        yield env.timeout(service_s)
+                        collector.record_busy_time("db", service_s)
 
             elif architecture.id == "arch_b_cached":
                 if op_type == "read":
@@ -230,17 +258,21 @@ class SimPyEngine:
                         collector.record_queue_length("db", len(db_resource.queue))
                         with db_resource.request() as db_req:
                             yield db_req
-                            service_s = (pg_base_read_ms * rng.uniform(0.90, 1.15)) / 1000.0
-                            yield env.timeout(service_s)
-                            collector.record_busy_time("db", service_s)
+                            with db_cpu.request() as d_cpu:
+                                yield d_cpu
+                                service_s = (pg_base_read_ms * rng.uniform(0.90, 1.15)) / 1000.0
+                                yield env.timeout(service_s)
+                                collector.record_busy_time("db", service_s)
                 else:
                     # Write: write to DB and invalidate/update cache
                     collector.record_queue_length("db", len(db_resource.queue))
                     with db_resource.request() as db_req:
                         yield db_req
-                        service_s = (pg_base_write_ms * rng.uniform(0.90, 1.20)) / 1000.0
-                        yield env.timeout(service_s)
-                        collector.record_busy_time("db", service_s)
+                        with db_cpu.request() as d_cpu:
+                            yield d_cpu
+                            service_s = (pg_base_write_ms * rng.uniform(0.90, 1.20)) / 1000.0
+                            yield env.timeout(service_s)
+                            collector.record_busy_time("db", service_s)
 
             elif architecture.id == "arch_c_async":
                 if op_type == "read":
@@ -256,9 +288,11 @@ class SimPyEngine:
                     else:
                         with db_resource.request() as db_req:
                             yield db_req
-                            service_s = (pg_base_read_ms * rng.uniform(0.90, 1.15)) / 1000.0
-                            yield env.timeout(service_s)
-                            collector.record_busy_time("db", service_s)
+                            with db_cpu.request() as d_cpu:
+                                yield d_cpu
+                                service_s = (pg_base_read_ms * rng.uniform(0.90, 1.15)) / 1000.0
+                                yield env.timeout(service_s)
+                                collector.record_busy_time("db", service_s)
                 else:
                     # Write: Enqueue task into queue and acknowledge immediately!
                     # Synchronous path: enqueueing overhead ~0.5ms
@@ -294,6 +328,7 @@ class SimPyEngine:
         worker_id: int,
         queue_store: simpy.Store,
         db_resource: simpy.Resource,
+        db_cpu: simpy.Resource,
         pg_base_write_ms: float,
         collector: SimulationMetricsCollector,
         rng: random.Random,
@@ -302,10 +337,12 @@ class SimPyEngine:
         while True:
             item = yield queue_store.get()
             collector.record_queue_length("worker", len(db_resource.queue))
-            # Claim DB connection and write asynchronously
+            # Claim DB connection and CPU core, then write asynchronously
             with db_resource.request() as db_req:
                 yield db_req
-                service_s = (pg_base_write_ms * rng.uniform(0.90, 1.25)) / 1000.0
-                yield env.timeout(service_s)
-                collector.record_busy_time("worker", service_s)
-                collector.record_busy_time("db", service_s)
+                with db_cpu.request() as d_cpu:
+                    yield d_cpu
+                    service_s = (pg_base_write_ms * rng.uniform(0.90, 1.25)) / 1000.0
+                    yield env.timeout(service_s)
+                    collector.record_busy_time("worker", service_s)
+                    collector.record_busy_time("db", service_s)

@@ -64,6 +64,10 @@ def main():
     print("\n[Step 3] Checking Component Registry & Discovering Missing Models...")
     registry = ComponentRegistry()
     registry.seed_baseline_data()
+    # Reset uncalibrated demonstration component so model discovery triggers reliably
+    with registry._get_connection() as conn:
+        conn.cursor().execute("DELETE FROM models WHERE component_name = 'mongodb_cluster'")
+        conn.commit()
 
     missing_components = []
     for c in candidates:
@@ -97,7 +101,11 @@ def main():
     # 5. Discrete-Event SimPy Simulation
     print("\n[Step 5] Simulating Candidate Architectures under Identical Workload in SimPy...")
     sim_engine = SimPyEngine(registry=registry)
-    simulatable = [c for c in candidates if c.id != "arch_mongo_unregistered"]
+    # Simulate all candidate architectures that have validated models registered
+    simulatable = [
+        c for c in candidates
+        if all(registry.get_model(*(m.split(":", 1) if ":" in m else (m, "latest"))) is not None for m in c.required_models)
+    ]
     sim_results = []
 
     for c in simulatable:

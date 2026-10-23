@@ -80,13 +80,13 @@ class FeasibilityFilter:
 
         if cost > max_budget:
             cost_status = FeasibilityStatus.INFEASIBLE
-            exp = f"Monthly infrastructure cost () exceeds budget cap ()."
+            exp = f"Monthly infrastructure cost (${cost:.2f}) exceeds budget cap (${max_budget:.2f})."
         elif cost > max_budget * 0.92:
             cost_status = FeasibilityStatus.UNCERTAIN
-            exp = f"Cost () is within 8% of budget cap (), leaving limited headroom."
+            exp = f"Cost (${cost:.2f}) is within 8% of budget cap (${max_budget:.2f}), leaving limited headroom."
         else:
             cost_status = FeasibilityStatus.FEASIBLE
-            exp = f"Cost () is within budget cap ()."
+            exp = f"Cost (${cost:.2f}) is within budget cap (${max_budget:.2f})."
 
         checks.append(
             FeasibilityCheck(
