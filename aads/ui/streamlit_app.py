@@ -149,7 +149,8 @@ with st.sidebar:
     )
 
 # Tabs
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab0, tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "🤖 AI Architecture Agent",
     "1. Requirements & Assumptions",
     "2. Candidate Architectures",
     "3. Registry & Model Discovery",
@@ -157,6 +158,126 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "5. SimPy Simulation",
     "6. Recommendation & Trade-offs",
 ])
+
+# ----------------- TAB 0: AI Architecture Agent -----------------
+with tab0:
+    st.subheader("🤖 LangChain & LangGraph Architecture Assistant")
+    st.markdown(
+        "Describe your application requirements in plain English. The agent converts them into "
+        "validated workload specifications, generates candidate architectures, runs SimPy discrete-event "
+        "simulations, checks component registry models, and delivers an evidence-backed recommendation."
+    )
+
+    from aads.agent.provider import LLMProviderManager, ExecutionMode
+    from aads.agent.orchestrator import AADSOrchestrator
+
+    prov_mgr = LLMProviderManager()
+    mode_status = prov_mgr.get_status_summary()
+
+    if mode_status["is_fallback"]:
+        st.info(f"ℹ️ **Execution Mode**: `DETERMINISTIC FALLBACK` ({mode_status['reason']}). Running rule-based heuristic extraction without external API calls.")
+    else:
+        st.success(f"⚡ **Execution Mode**: `LLM POWERED` ({mode_status['provider']}:{mode_status['model_name']}).")
+
+    default_prompt = "Social media feed system handling 500 RPS with peak 1000 RPS, 90% reads, p95 latency under 50ms, and budget under $250/mo"
+    prompt_input = st.text_area(
+        "Enter your backend workload requirements in natural language:",
+        value=default_prompt,
+        height=90,
+        help="Specify throughput (RPS), latency SLAs (p95 ms), budget cap ($/mo), read/write traffic mix, or application domain."
+    )
+
+    col_btn1, col_btn2, col_btn3 = st.columns(3)
+    auto_bench = col_btn1.checkbox("Auto-Benchmark Missing Models", value=True, help="Authorize bounded benchmarking if models are missing from registry.")
+    force_syn = col_btn2.checkbox("Force Synthetic Fixtures", value=True, help="Use deterministic mathematical fixtures rather than spinning up Docker containers.")
+    include_unsupp = col_btn3.checkbox("Include Document Store Candidate", value=False, help="Include MongoDB candidate to demonstrate missing-model discovery.")
+
+    if st.button("🚀 Run Agentic Architecture Workflow", type="primary"):
+        with st.spinner("Executing LangGraph multi-stage evaluation pipeline..."):
+            orch = AADSOrchestrator(registry=registry, provider_mgr=prov_mgr)
+            state = orch.run(
+                request_text=prompt_input,
+                auto_benchmark_missing=auto_bench,
+                force_synthetic=force_syn,
+                simulation_duration_seconds=5.0,
+                include_unsupported=include_unsupp,
+            )
+
+        st.markdown("---")
+        status = state.get("workflow_status")
+        st.markdown(f"### Workflow Status: `{status}`")
+
+        # 1. Clarification Handling
+        if state.get("clarification_questions"):
+            st.warning("⚠️ **Clarifying Questions Required Before Finalizing Architecture:**")
+            for q in state["clarification_questions"]:
+                st.markdown(f"- {q}")
+
+        # 2. Stated Assumptions
+        if state.get("assumptions"):
+            with st.expander("ℹ️ Explicit Assumptions Formulated", expanded=False):
+                for a in state["assumptions"]:
+                    st.markdown(f"- {a}")
+
+        # 3. Workload Specification
+        workload = state.get("workload_spec")
+        if workload:
+            with st.expander("📋 Extracted Workload Specification", expanded=True):
+                w_cols = st.columns(4)
+                w_cols[0].metric("Offered Load", f"{workload.request_rate_rps} RPS")
+                w_cols[1].metric("Traffic Mix", f"{workload.read_ratio:.0%} Read / {workload.write_ratio:.0%} Write")
+                w_cols[2].metric("p95 SLA Target", f"<= {workload.p95_latency_target_ms} ms")
+                w_cols[3].metric("Budget Cap", f"${workload.max_monthly_budget_usd:.2f}/mo")
+
+        # 4. Simulation Results & Feasibility
+        sim_res = state.get("simulation_results", [])
+        if sim_res:
+            st.markdown("#### 📊 Discrete-Event Simulation & Tail-Latency Percentiles")
+            sim_table = []
+            for r in sim_res:
+                hit_rate = f"{r.cache_hit_rate:.1%}" if r.cache_hit_rate is not None else "No Cache"
+                ci_str = f"[{r.latency_uncertainty_p95_ms[0]:.2f}, {r.latency_uncertainty_p95_ms[1]:.2f}]"
+                sim_table.append({
+                    "Architecture": r.architecture_name,
+                    "Throughput": f"{r.throughput_achieved_rps:.1f} RPS",
+                    "p50 (ms)": f"{r.p50_latency_ms:.2f}",
+                    "p90 (ms)": f"{r.p90_latency_ms:.2f}",
+                    "p95 (ms)": f"{r.p95_latency_ms:.2f}",
+                    "p95 95% CI": ci_str,
+                    "p99 (ms)": f"{r.p99_latency_ms:.2f}",
+                    "Bottleneck": r.bottleneck_component.upper(),
+                    "Cost ($/mo)": f"${r.estimated_monthly_cost_usd:.2f}",
+                    "Cache Hit": hit_rate,
+                })
+            st.table(pd.DataFrame(sim_table))
+
+        # 5. Recommendation
+        rec = state.get("recommendation")
+        if rec:
+            st.markdown(f"### 🏆 Recommendation: {rec.selected_architecture_name}")
+            rec_badge = "badge-feasible" if rec.status.value == "FEASIBLE" else "badge-infeasible"
+            st.markdown(f'<span class="{rec_badge}">{rec.status.value}</span>', unsafe_allow_html=True)
+            st.write(f"**Executive Summary:** {rec.executive_summary}")
+
+            col_rat, col_trade = st.columns(2)
+            with col_rat:
+                st.markdown("#### ✔ Decision Rationale")
+                for r in rec.rationale:
+                    st.markdown(f"- {r}")
+            with col_trade:
+                st.markdown("#### ⚠ Trade-offs & Risks")
+                for t in rec.trade_offs_and_risks:
+                    st.markdown(f"- {t}")
+
+            if rec.recommended_next_experiment:
+                st.info(f"🔬 **Recommended Next Experiment:** {rec.recommended_next_experiment}")
+
+            # Option to sync to session state
+            if st.button("Apply Agent Results to Session State"):
+                st.session_state.workload = workload
+                st.session_state.sim_results = sim_res
+                st.session_state.recommendation = rec
+                st.success("Session state updated! You can now explore the detailed tabs below.")
 
 # ----------------- TAB 1: Requirements & Assumptions -----------------
 with tab1:

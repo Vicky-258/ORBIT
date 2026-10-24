@@ -1,7 +1,9 @@
 """
 Global configuration and externalized constants for AADS.
 """
+import os
 from pathlib import Path
+from typing import Optional
 from pydantic import BaseModel, Field
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -20,14 +22,25 @@ class PricingConfig(BaseModel):
 class BenchmarkConfig(BaseModel):
     """Resource isolation and timeout bounds for benchmarks."""
     default_timeout_seconds: int = 120
-    docker_cpu_limit: str = "1.0"
-    docker_memory_limit: str = "512m"
+    docker_cpu_limit: str = "2.0"
+    docker_memory_limit: str = "2g"
     default_replications: int = 3
     warmup_duration_seconds: int = 3
+
+class LLMConfig(BaseModel):
+    """LLM provider configuration for Architecture Agent."""
+    openai_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
+    openai_model_name: str = Field(default_factory=lambda: os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"))
+    openai_api_base: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_BASE"))
+    temperature: float = Field(default=0.0, ge=0.0, le=1.0)
+    timeout_seconds: float = Field(default=30.0, gt=0.0)
+    max_retries: int = Field(default=2, ge=0)
+    force_fallback: bool = Field(default_factory=lambda: os.getenv("AADS_FORCE_FALLBACK", "false").lower() in ("true", "1"))
 
 class Settings(BaseModel):
     pricing: PricingConfig = PricingConfig()
     benchmark: BenchmarkConfig = BenchmarkConfig()
+    llm: LLMConfig = LLMConfig()
     default_p95_target_ms: float = 60.0
     default_min_throughput_rps: float = 400.0
     default_max_budget_usd: float = 200.0

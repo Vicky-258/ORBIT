@@ -4,7 +4,7 @@
 [![SimPy](https://img.shields.io/badge/simulation-SimPy-orange.svg)](https://simpy.readthedocs.io/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B.svg)](https://streamlit.io/)
-[![Tests](https://img.shields.io/badge/tests-27%20passed-brightgreen.svg)](tests/)
+[![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen.svg)](tests/)
 
 A working proof-of-concept for an AI agent that designs, benchmarks, simulates, and recommends backend system architectures based on empirical evidence and discrete-event simulation.
 
@@ -16,13 +16,13 @@ A working proof-of-concept for an AI agent that designs, benchmarks, simulates, 
 
 Rather than relying on LLM hallucinations or static rulebooks, AADS:
 1. Validates application requirements and explicitly tracks information provenance (User Facts vs. Agent Assumptions vs. Empirical Measurements).
-2. Generates candidate architectures (Simple, Cached Reads, Async Write Queue).
-3. Discovers missing or out-of-range performance models in a persistent SQLite registry.
-4. Executes controlled, repeatable benchmarks (using real Docker containers with fixed CPU/RAM limits or labeled synthetic fixtures).
-5. Fits performance models using strict held-out validation (70/30 split, RMSE, MAPE, $R^2$).
-6. Simulates candidate architectures under the same workload using **SimPy** request-level discrete events.
+2. Generates candidate architectures (Simple, Cached Reads, Async Write Queue, Document Store).
+3. Discovers missing or uncalibrated performance models in a persistent SQLite registry.
+4. Executes controlled, repeatable benchmarks (using real Docker containers with hard cgroup CPU/RAM limits or labeled synthetic fixtures).
+5. Fits performance models using **Group-Based Validation** (holding out entire load levels to guarantee zero replication data leakage; evaluating RMSE, MAE, MAPE, Max Error, and $R^2$).
+6. Simulates candidate architectures under identical workloads using a **SimPy request-level discrete-event engine** modeling database connection pools, physical CPU core contention, and cache shielding.
 7. Evaluates architectures via a **Two-Stage Decision Engine**:
-   - **Stage 1 (Feasibility Filtering):** Checks hard SLA targets (p95 latency, throughput, budget cap) and detects uncertainty boundary overlaps.
+   - **Stage 1 (Feasibility Filtering):** Evaluates hard SLA targets (p95 latency, throughput, budget cap) and uncertainty boundary overlaps.
    - **Stage 2 (Trade-off Comparison):** Performs Pareto dominance analysis, multi-objective preference scoring, and produces explainable recommendations.
 
 ---
@@ -41,19 +41,22 @@ flowchart TD
     ArchA & ArchB & ArchC & ArchM --> Registry[(Component & Model Registry)]
     
     Registry -- "Missing Model?" --> BenchMgr[Adaptive Experiment Manager]
-    BenchMgr --> DockerRunner[Real Docker Benchmark Runner\nFixed --cpus 1.0 --memory 512m]
-    BenchMgr --> SynRunner[Synthetic Calibrated Fixture Runner]
+    BenchMgr --> DockerRunner[Real Docker Benchmark Runner
+Fixed --cpus 2.0 --memory 2g]
+    BenchMgr --> SynRunner[Synthetic Calibrated Fixture Runner
+Deterministic Seeded Fixtures]
     
-    DockerRunner & SynRunner --> ModelTrainer[Model Fitting & Held-out Validation]
+    DockerRunner & SynRunner --> ModelTrainer[Group-Based Validation & Model Fitting]
     ModelTrainer --> Registry
     
-    Registry --> SimPy[SimPy Discrete-Event Simulation Engine]
+    Registry --> SimPy[SimPy Discrete-Event Simulation Engine
+CPU Contention + Connection Pools]
     SimPy --> Metrics[Request Traces & Latency Percentiles]
     
     Metrics --> Stage1[Stage 1: Feasibility Filtering]
     Stage1 --> Stage2[Stage 2: Multi-Objective Trade-Off & Pareto]
     Stage2 --> Recommender[Explainable Recommendation Engine]
-    Recommender --> UI[Streamlit UI / FastAPI REST API]
+    Recommender --> UI[Streamlit UI / FastAPI REST API / CLI Demo]
 ```
 
 ---
@@ -62,30 +65,95 @@ flowchart TD
 
 | Architecture | Request Path | Monthly Cost | Key Trade-off |
 | :--- | :--- | :--- | :--- |
-| **Architecture A — Simple** | API $\rightarrow$ PostgreSQL | **$133.00** | Lowest cost and zero cache complexity; DB is primary bottleneck. |
-| **Architecture B — Cached Reads** | API $\rightarrow$ Redis $\rightarrow$ PostgreSQL on miss | **$176.00** | Sub-millisecond reads (85% cache hits shield DB); added Redis cost & invalidation. |
-| **Architecture C — Async Processing** | API $\rightarrow$ Queue $\rightarrow$ Worker $\rightarrow$ PostgreSQL (+ Redis) | **$216.00** | Decoupled write spikes & rapid HTTP 202 ack; highest operational complexity. |
-| **Architecture M — Document Store** | API $\rightarrow$ MongoDB 7.0 | **$127.00** | Used to demonstrate automated missing-model discovery and calibration. |
+| **Architecture A — Simple** | API $
+ightarrow$ PostgreSQL | **$133.00** | Lowest cost and zero cache complexity; DB CPU saturates under heavy write/read load (>600 RPS). |
+| **Architecture B — Cached Reads** | API $
+ightarrow$ Redis $
+ightarrow$ PostgreSQL on miss | **$176.00** | Sub-millisecond reads (85% cache hits shield DB); added Redis cost & cache invalidation complexity. |
+| **Architecture C — Async Processing** | API $
+ightarrow$ Queue $
+ightarrow$ Worker $
+ightarrow$ PostgreSQL (+ Redis) | **$216.00** | Decoupled write spikes & rapid HTTP 202 ack; highest operational complexity. |
+| **Architecture M — Document Store** | API $
+ightarrow$ MongoDB 7.0 | **$127.00** | Used to demonstrate automated missing-model discovery and calibration. |
 
 ---
 
 ## 4. Scientific Credibility & Anti-Hallucination Guarantees
 
-- **No Fabricated Measurements:** Synthetic fixtures are explicitly tagged with `is_synthetic_fixture = True`. Real container benchmarks record full container fingerprints (`docker:postgres:16-alpine:cpus=1.0:mem=512m`).
+- **No Fabricated Measurements:** Synthetic fixtures are explicitly tagged with `is_synthetic_fixture = True`. Real container benchmarks record full container fingerprints (`docker:postgres:16-alpine:cpus=2.0:mem=2g`).
 - **Repeated Benchmark Trials:** Controlled trials execute 3 replications per configuration, recording variance $\sigma^2$ across runs.
-- **Decomposition of Service Time vs. Queuing:** End-to-end benchmark response time is strictly decomposed into pure service demand ($S \le \frac{N}{X} \times 1000$). SimPy independently simulates queuing contention, preventing double-counting of congestion.
-- **Held-Out Model Validation:** Empirical models are fitted on 70% of benchmark configurations and evaluated on a held-out 30% test split. Models must satisfy $R^2 \ge 0.70$ and $\text{MAPE} \le 35\%$ to be validated.
-- **Out-of-Range Extrapolation Guard:** Workloads exceeding benchmarked operating boundaries `[min_rps, max_rps]` are flagged with `OUT_OF_RANGE` status and subject to uncertainty penalties ($2.5\times$).
+- **Decomposition of Service Time vs. Queuing:** End-to-end benchmark response time is decomposed into pure service demand ($S \le rac{N}{X} 	imes 1000$). SimPy independently simulates queuing contention, preventing double-counting of congestion.
+- **CPU Core Resource Contention:** SimPy models both connection pool limits and physical CPU core saturation (`db_cpu = simpy.Resource(capacity=2)`), correctly reflecting queue explosion under heavy offered load.
+- **Group-Based Zero-Leakage Validation:** Empirical models are validated by holding out entire concurrency levels `(concurrency, read_ratio)` rather than interleaved random records, preventing cross-trial replication data leakage.
+- **Out-of-Range Extrapolation Guard:** Workloads exceeding benchmarked operating boundaries `[min_rps, max_rps]` are flagged with `OUT_OF_RANGE` status and subject to uncertainty penalties ($2.5	imes$).
 - **Uncertainty-Aware Feasibility:** If the 95% confidence interval around p95 latency crosses the user SLA threshold, the architecture is classified as `UNCERTAIN` rather than falsely guaranteed as feasible.
 
 ---
+
+
+---
+
+## Phase 3B: LangChain & LangGraph Agent Integration
+
+AADS features an agentic reasoning and orchestration layer built with **LangChain and LangGraph**:
+
+1. **Architecture Agent (`aads.agent.architecture_agent`)**:
+   - Converts natural-language user requests into formal, validated `WorkloadSpec` models using LangChain structured outputs (`with_structured_output(WorkloadExtractionResult)`).
+   - Distinguishes explicitly provided **User Facts** from **Agent Assumptions & Defaults**.
+   - Identifies missing or ambiguous requirements and generates targeted clarification questions rather than making unfounded architecture recommendations.
+   - Generates candidate architecture graphs and validates their DAG topology.
+
+2. **LangGraph Orchestrator (`aads.agent.orchestrator`)**:
+   - Manages workflow state (`AgentWorkflowState`) with explicit conditional routing across 6 stages:
+     - `parse_workload` $ightarrow$ (if ambiguous) $ightarrow$ `END` (`NEEDS_CLARIFICATION`)
+     - `generate_candidates` $ightarrow$ `check_models`
+     - `check_models` $ightarrow$ (if missing models & authorized) $ightarrow$ `benchmark_and_train` $ightarrow$ `simulate`
+     - `check_models` $ightarrow$ (if missing models & unauthorized) $ightarrow$ `END` (`UNRESOLVED / INSUFFICIENT_EVIDENCE`)
+     - `simulate` $ightarrow$ `evaluate_and_recommend` $ightarrow$ `END` (`RECOMMENDED`)
+
+3. **Safe Typed Tool Layer (`aads.agent.tools`)**:
+   - Exposes narrowly scoped `@tool` wrappers: `validate_workload`, `generate_architecture_candidates`, `check_component_models`, `run_benchmark`, `fit_and_validate_model`, `simulate_architecture`, `evaluate_candidates`.
+   - Enforces component whitelisting, preventing arbitrary execution.
+
+4. **Deterministic Labeled Fallback (`aads.agent.provider`)**:
+   - When `OPENAI_API_KEY` is not present, or `AADS_FORCE_FALLBACK=true` is set, AADS automatically runs in an **explicitly labeled deterministic fallback mode**.
+   - No mock is presented as a real LLM call; execution mode is transparently labeled in responses.
+
+### Running Natural-Language Requests
+
+#### Via CLI:
+```bash
+# Natural-language architecture design (runs with deterministic fallback or LLM if key is set)
+.venv/bin/python run_demo.py --prompt "I need a social feed architecture for 500 RPS with peak 1000 RPS, 90% reads, p95 under 50ms, and budget $250/mo"
+
+# Ambiguous request triggering clarification questions:
+.venv/bin/python run_demo.py --prompt "Help me design a scalable backend"
+```
+
+#### Via FastAPI REST API:
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/agent/run \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Social feed 500 RPS, peak 1000 RPS, 90% reads, p95 under 50ms, budget $250/mo",
+    "simulation_duration_seconds": 3.0,
+    "force_synthetic": true
+  }' | jq '{status: .workflow_status, mode: .execution_mode, winner: .recommendation.selected_architecture_name}'
+```
+
+#### Via Streamlit Web Dashboard:
+Launch the Streamlit app and navigate to the **🤖 AI Architecture Agent** tab:
+```bash
+.venv/bin/python -m streamlit run aads/ui/streamlit_app.py --server.port 8501
+```
 
 ## 5. Getting Started & Installation
 
 ### Prerequisites
 - Python 3.11+ (Python 3.12 recommended)
-- `uv` package manager (or standard `pip`)
-- Docker (optional, for running live container benchmarks with `pgbench`)
+- `uv` package manager (or standard `pip` / `venv`)
+- Docker (optional; required only for live container benchmarking via `--mode docker`)
 
 ### Setup Virtual Environment
 ```bash
@@ -104,17 +172,45 @@ uv pip install -e .
 
 ## 6. How to Run
 
-### Option 1: Run the Complete End-to-End CLI Demo
-Demonstrates the full lifecycle from requirements to missing-model discovery, benchmarking, SimPy simulation, and recommendation:
+### Option 1: Primary Demo Command (End-to-End CLI Demo)
+Demonstrates the full lifecycle from requirements to missing-model discovery, benchmarking, SimPy simulation, and explainable recommendation:
 ```bash
+# Default deterministic run (synthetic mode, seed 42)
 .venv/bin/python run_demo.py
+
+# Customize workload parameters
+.venv/bin/python run_demo.py --rps 750 --budget 300 --seed 42
+
+# Export structured JSON for automated audit
+.venv/bin/python run_demo.py --json-output demo_results.json
+
+# Use live Docker container benchmarks (if Docker daemon is active)
+.venv/bin/python run_demo.py --mode docker
 ```
 
+#### CLI Options Reference
+| Flag | Default | Description |
+| :--- | :--- | :--- |
+| `--seed <int>` | `42` | Fixed random seed for deterministic fixtures and simulation |
+| `--mode {synthetic,docker,auto}` | `synthetic` | Benchmark execution mode (`synthetic`: fast offline fixtures; `docker`: live container benchmark; `auto`: detect Docker) |
+| `--rps <float>` | `500.0` | Offered steady-state request rate (req/s) |
+| `--peak-factor <float>` | `2.0` | Peak load multiplier for burst headroom |
+| `--budget <float>` | `250.0` | Monthly infrastructure budget cap (USD) |
+| `--p95-target <float>` | `50.0` | Maximum allowable p95 latency target (ms) |
+| `--min-throughput <float>` | `450.0` | Minimum acceptable throughput target (req/s) |
+| `--duration <float>` | `5.0` | SimPy simulation duration per candidate (seconds) |
+| `--json-output <path>` | `None` | Optional file path to export structured JSON results |
+
+---
+
 ### Option 2: Launch the Streamlit Web Application
-Provides an interactive dashboard to customize workloads, view DAGs, trigger live benchmarks, run SimPy simulations, and inspect Pareto trade-offs:
+Provides an interactive dashboard to customize workloads, view DAGs, trigger benchmarks, run SimPy simulations, and inspect Pareto trade-offs:
 ```bash
 .venv/bin/python -m streamlit run aads/ui/streamlit_app.py --server.port 8501
 ```
+Open `http://localhost:8501` in your browser.
+
+---
 
 ### Option 3: Start the FastAPI Backend Server
 Launches the REST API server with interactive Swagger documentation at `http://localhost:8000/docs`:
@@ -122,10 +218,46 @@ Launches the REST API server with interactive Swagger documentation at `http://l
 .venv/bin/python -m uvicorn aads.api.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Option 4: Run the Full Test Suite
-Runs all 27 unit and end-to-end integration tests:
+Test the end-to-end workflow endpoint via `curl`:
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/workflow/run   -H "Content-Type: application/json"   -d '{
+    "workload": {
+      "app_type": "social_media_feed",
+      "request_rate_rps": 400.0,
+      "peak_load_factor": 2.0,
+      "read_ratio": 0.90,
+      "write_ratio": 0.10,
+      "p95_latency_target_ms": 50.0,
+      "min_throughput_rps": 350.0,
+      "max_monthly_budget_usd": 250.0,
+      "cache_assumed_hit_rate": 0.85
+    },
+    "include_async": true,
+    "include_unsupported": false,
+    "simulation_duration_seconds": 3.0,
+    "force_synthetic": true
+  }' | jq '{recommendation: .recommendation.selected_architecture_id, status: .recommendation.status}'
+```
+
+---
+
+### Option 4: Run the Complete Pytest Suite
+Runs all 31 unit, integration, and scientific validation tests:
 ```bash
 .venv/bin/pytest -v
+```
+
+To run only the scientific validation suite:
+```bash
+.venv/bin/pytest -v tests/test_scientific_validation.py
+```
+
+---
+
+### Option 5: Run Live Docker End-to-End Calibration
+Spins up isolated PostgreSQL 16 and Redis 7 containers, runs a live client workload, and compares real measurements against SimPy simulation:
+```bash
+.venv/bin/python aads/benchmark/e2e_calibration.py
 ```
 
 ---
@@ -134,63 +266,94 @@ Runs all 27 unit and end-to-end integration tests:
 
 ```
 AADS/
-├── pyproject.toml              # Project dependencies and pytest configuration
-├── README.md                   # System documentation and execution guide
-├── run_demo.py                 # Standalone end-to-end CLI demonstration script
+├── pyproject.toml                     # Dependencies, build metadata, and pytest configuration
+├── README.md                          # System documentation and execution guide
+├── run_demo.py                        # Standalone reproducible CLI demonstration script
 ├── aads/
 │   ├── core/
-│   │   ├── config.py           # Externalized system settings, pricing, and resource limits
-│   │   └── schemas.py          # Pydantic data contracts (Workload, Component, Experiment, Result)
+│   │   ├── config.py                  # Externalized system settings, pricing, and resource limits
+│   │   └── schemas.py                 # Pydantic data contracts (Workload, Component, Experiment, Result)
 │   ├── generator/
-│   │   └── candidate_generator.py # Generates Architectures A, B, C, M with DAG validation
+│   │   └── candidate_generator.py     # Generates Architectures A, B, C, M with DAG validation
 │   ├── registry/
-│   │   └── component_registry.py  # SQLite-backed model and experiment registry
+│   │   └── component_registry.py      # SQLite-backed model and experiment registry
 │   ├── benchmark/
-│   │   ├── runner_interface.py    # Abstract BenchmarkRunner contract
-│   │   ├── docker_runner.py       # Live Docker pgbench runner with resource isolation
-│   │   ├── synthetic_runner.py    # Calibrated synthetic fixture runner with trial variance
-│   │   └── experiment_manager.py  # Adaptive fixed-baseline-then-adaptive experiment runner
+│   │   ├── runner_interface.py        # Abstract BenchmarkRunner contract
+│   │   ├── docker_runner.py           # Live Docker pgbench runner with cgroup resource isolation
+│   │   ├── synthetic_runner.py        # Deterministic calibrated synthetic fixture runner
+│   │   ├── experiment_manager.py      # Adaptive experiment runner (baseline matrix + targeted points)
+│   │   └── e2e_calibration.py         # Empirical calibration harness (PostgreSQL + Redis vs. SimPy)
 │   ├── modeling/
-│   │   ├── model_interface.py     # ComponentPerformanceModel base contract
-│   │   ├── lookup_model.py        # Baseline k-NN / inverse-distance interpolation
-│   │   ├── regression_model.py    # Piecewise Ridge regression isolating service demand
-│   │   └── model_trainer.py       # 70/30 held-out evaluator computing RMSE, MAPE, R²
+│   │   ├── model_interface.py         # ComponentPerformanceModel base contract
+│   │   ├── lookup_model.py            # Baseline k-NN / inverse-distance interpolation
+│   │   ├── regression_model.py        # Piecewise Ridge regression isolating service demand
+│   │   └── model_trainer.py           # Group-based held-out evaluator (zero leakage, RMSE, MAE, R²)
 │   ├── simulation/
-│   │   ├── simpy_engine.py        # SimPy request-level discrete-event simulation engine
-│   │   └── metrics_collector.py   # Latency percentiles (p50, p90, p95, p99), utilizations, bottlenecks
+│   │   ├── simpy_engine.py            # SimPy discrete-event simulation (DB CPU cores, connection pool)
+│   │   └── metrics_collector.py       # Latency percentiles (p50, p90, p95, p99), utilizations, bottlenecks
 │   ├── evaluation/
-│   │   ├── feasibility_filter.py  # Stage 1: Hard constraint evaluation & uncertainty boundaries
-│   │   ├── tradeoff_analyzer.py   # Stage 2: Pareto dominance & multi-objective preference scoring
-│   │   └── recommender.py         # Synthesizes explainable recommendation with rationale & risks
+│   │   ├── feasibility_filter.py      # Stage 1: Hard constraint evaluation & uncertainty boundaries
+│   │   ├── tradeoff_analyzer.py       # Stage 2: Pareto dominance & multi-objective preference scoring
+│   │   └── recommender.py             # Synthesizes explainable recommendation with rationale & risks
 │   ├── api/
-│   │   ├── app.py                 # FastAPI application entrypoint
-│   │   └── routes.py              # REST API endpoints
+│   │   ├── app.py                     # FastAPI application entrypoint
+│   │   └── routes.py                  # REST API endpoints
 │   └── ui/
-│       └── streamlit_app.py       # Rich interactive Streamlit dashboard
+│       └── streamlit_app.py           # Rich interactive Streamlit dashboard
 └── tests/
-    ├── conftest.py                # Reusable test fixtures
-    ├── test_schemas.py            # Workload and provenance schema validation tests
-    ├── test_candidate_generator.py # Candidate DAG and topology tests
-    ├── test_registry.py           # Registry CRUD and compatibility check tests
-    ├── test_benchmarks.py         # Synthetic and Docker benchmark runner tests
-    ├── test_modeling.py           # Model fitting and held-out validation tests
-    ├── test_simulation.py         # SimPy discrete-event simulation tests
-    ├── test_evaluation.py         # Feasibility filtering and Pareto analysis tests
-    └── test_end_to_end.py         # Full end-to-end Python & FastAPI integration tests
+    ├── conftest.py                    # Reusable test fixtures
+    ├── test_schemas.py                # Workload and provenance schema validation tests
+    ├── test_candidate_generator.py    # Candidate DAG and topology tests
+    ├── test_registry.py               # Registry CRUD and compatibility check tests
+    ├── test_benchmarks.py             # Synthetic and Docker benchmark runner tests
+    ├── test_modeling.py               # Model fitting and group-based validation tests
+    ├── test_simulation.py             # SimPy discrete-event simulation tests
+    ├── test_evaluation.py             # Feasibility filtering and Pareto analysis tests
+    ├── test_scientific_validation.py  # Leakage-free split, error tolerance, load ranking shift tests
+    └── test_end_to_end.py             # Full end-to-end Python & FastAPI integration tests
 ```
 
 ---
 
-## 8. Summary of Capabilities vs. Limitations
+## 8. Troubleshooting & FAQ
+
+### Docker Unavailable or Permission Denied
+- **Issue:** Running with `--mode docker` fails with `Cannot connect to Docker daemon`.
+- **Solution:** Ensure the Docker service is running (`systemctl status docker` or start Docker Desktop).
+- **Graceful Fallback:** AADS automatically detects when Docker is unavailable and falls back to deterministic labeled synthetic fixtures (`[PROVENANCE: SYNTHETIC CALIBRATED FIXTURE]`). To force synthetic mode explicitly, use:
+  ```bash
+  .venv/bin/python run_demo.py --mode synthetic
+  ```
+
+### Port Conflicts (FastAPI / Streamlit)
+- **FastAPI (8000):** If port 8000 is occupied, run with `--port <port>`:
+  ```bash
+  .venv/bin/python -m uvicorn aads.api.app:app --port 8080
+  ```
+- **Streamlit (8501):** If port 8501 is occupied, run with `--server.port <port>`:
+  ```bash
+  .venv/bin/python -m streamlit run aads/ui/streamlit_app.py --server.port 8502
+  ```
+
+### Deterministic Repeatability
+- To reproduce identical simulation results and model parameters across runs, specify the same random seed:
+  ```bash
+  .venv/bin/python run_demo.py --seed 42 --json-output /tmp/run.json
+  ```
+  Comparing two runs with `--seed 42` yields zero semantic differences across candidates, models, percentiles, and recommendations.
+
+---
+
+## 9. Summary of Capabilities vs. Limitations
 
 | Capability | Status | Implementation Details |
 | :--- | :---: | :--- |
 | **Requirements Validation** | ✅ Active | Explicit tracking of User Facts vs. Agent Assumptions. |
 | **Candidate Generation** | ✅ Active | Deterministic template graphs with DAG connectivity validation. |
 | **Missing Model Discovery** | ✅ Active | Detects unsupported components (e.g. MongoDB 7.0) and triggers calibration. |
-| **Controlled Benchmarks** | ✅ Active | Real Docker containers (`--cpus 1.0 --memory 512m`) or labeled synthetic fixtures. |
-| **Statistical Model Fitting** | ✅ Active | 70/30 held-out split, RMSE/MAPE/$R^2$ quality gating, operating bounds. |
-| **Discrete-Event SimPy** | ✅ Active | Request-level Poisson arrivals, contention, cache hit rate, and async workers. |
+| **Controlled Benchmarks** | ✅ Active | Real Docker containers (`--cpus 2.0 --memory 2g`) or labeled synthetic fixtures. |
+| **Statistical Model Fitting** | ✅ Active | Group-based held-out validation (zero leakage), RMSE/MAE/$R^2$ gating, operating bounds. |
+| **Discrete-Event SimPy** | ✅ Active | Request-level Poisson arrivals, connection pool (25 slots), physical CPU core contention (2 cores). |
 | **Multi-Objective Evaluator** | ✅ Active | Stage 1 SLA filtering, Stage 2 Pareto ranking, and explainable recommendations. |
 | *Network Partition / Chaos* | ⚠️ Limitation | Simulates timeouts/queuing; cross-datacenter partition splits not modeled. |
 | *Hardware Virtualization* | ⚠️ Limitation | Assumes fixed container cgroups; noisy-neighbor hypervisor jitter not modeled. |

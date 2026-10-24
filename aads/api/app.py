@@ -38,6 +38,7 @@ def root():
             "/api/simulate",
             "/api/evaluate",
             "/api/workflow/run",
+            "/api/agent/run",
         ],
     }
 

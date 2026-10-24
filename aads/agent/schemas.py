@@ -1,0 +1,57 @@
+"""
+Pydantic contracts for Architecture Agent inputs, extractions, and responses.
+"""
+from enum import Enum
+from typing import Dict, List, Optional, Any
+from pydantic import BaseModel, Field
+
+from aads.core.schemas import (
+    WorkloadSpec,
+    ArchitectureGraph,
+    SimulationResult,
+    RecommendationResult,
+)
+
+
+class AgentExecutionMode(str, Enum):
+    LLM = "llm"
+    FALLBACK = "fallback"
+
+
+class ExtractedWorkloadRequirements(BaseModel):
+    """Structured extraction of workload requirements from natural language."""
+    app_type: str = Field(default="social_media_feed", description="Target application domain or workload type")
+    request_rate_rps: Optional[float] = Field(default=None, description="Target steady-state throughput in requests/sec")
+    peak_load_factor: Optional[float] = Field(default=None, description="Multiplier for peak traffic burst headroom")
+    read_ratio: Optional[float] = Field(default=None, description="Proportion of read operations (0.0 - 1.0)")
+    write_ratio: Optional[float] = Field(default=None, description="Proportion of write operations (0.0 - 1.0)")
+    dataset_records: Optional[int] = Field(default=None, description="Estimated total dataset size in records/items")
+    p95_latency_target_ms: Optional[float] = Field(default=None, description="Target p95 latency threshold in milliseconds")
+    min_throughput_rps: Optional[float] = Field(default=None, description="Minimum acceptable throughput in requests/sec")
+    max_monthly_budget_usd: Optional[float] = Field(default=None, description="Maximum monthly infrastructure budget in USD")
+    cache_assumed_hit_rate: Optional[float] = Field(default=None, description="Assumed cache hit rate (0.0 - 1.0)")
+    soft_preferences: Dict[str, float] = Field(
+        default_factory=lambda: {"cost": 0.35, "latency": 0.45, "simplicity": 0.20},
+        description="User preference weights across cost, latency, and simplicity (sum to 1.0)",
+    )
+    user_provided_facts: List[str] = Field(default_factory=list, description="Requirements explicitly stated by the user")
+    agent_assumptions: List[str] = Field(default_factory=list, description="Defaults or assumptions inferred by the agent")
+    clarification_needed: bool = Field(default=False, description="True if critical information is missing or contradictory")
+    clarification_questions: List[str] = Field(default_factory=list, description="Targeted questions to ask user if clarification is needed")
+    ambiguities_identified: List[str] = Field(default_factory=list, description="Ambiguities or conflicts detected in the request")
+
+
+class AgentResponse(BaseModel):
+    """Complete structured response from the AADS agentic workflow."""
+    workflow_status: str = Field(description="Workflow outcome status: COMPLETED, CLARIFICATION_NEEDED, INSUFFICIENT_EVIDENCE, or FAILED")
+    execution_mode: str = Field(description="Mode used: 'llm' (LangChain LLM-powered) or 'fallback' (deterministic labeled fallback)")
+    request_text: str = Field(default="", description="Original user prompt")
+    workload: Optional[WorkloadSpec] = Field(default=None, description="Validated workload specification")
+    clarification_questions: List[str] = Field(default_factory=list, description="Questions for user if clarification is required")
+    candidate_architectures: List[ArchitectureGraph] = Field(default_factory=list, description="Generated candidate architecture topologies")
+    missing_models: List[str] = Field(default_factory=list, description="Component performance models missing from registry")
+    simulation_results: List[SimulationResult] = Field(default_factory=list, description="Discrete-event simulation results per candidate")
+    recommendation: Optional[RecommendationResult] = Field(default=None, description="Evidence-backed architectural recommendation")
+    evidence_provenance: Dict[str, str] = Field(default_factory=dict, description="Provenance tracking for all metrics and data sources")
+    errors: List[str] = Field(default_factory=list, description="Errors or validation failures encountered during workflow")
+    executive_summary: str = Field(default="", description="High-level executive explanation of findings")

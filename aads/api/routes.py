@@ -252,3 +252,48 @@ def run_end_to_end_workflow(req: WorkflowRequest) -> Dict[str, Any]:
         "simulation_results": sim_results,
         "recommendation": recommendation,
     }
+
+
+class AgentPromptRequest(BaseModel):
+    prompt: str
+    auto_benchmark_missing: bool = True
+    force_synthetic: bool = True
+    simulation_duration_seconds: float = 5.0
+    random_seed: int = 42
+    include_async: bool = True
+    include_unsupported: bool = False
+
+
+@router.post("/agent/run")
+def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
+    """
+    Natural-language architecture design & simulation agent endpoint.
+    Orchestrates LangChain parsing and LangGraph multi-stage evaluation.
+    """
+    from aads.agent.orchestrator import AADSOrchestrator
+    orchestrator = AADSOrchestrator(registry=registry)
+    state = orchestrator.run(
+        request_text=req.prompt,
+        auto_benchmark_missing=req.auto_benchmark_missing,
+        force_synthetic=req.force_synthetic,
+        simulation_duration_seconds=req.simulation_duration_seconds,
+        random_seed=req.random_seed,
+        include_async=req.include_async,
+        include_unsupported=req.include_unsupported,
+    )
+    return {
+        "workflow_status": state.get("workflow_status"),
+        "execution_mode": state.get("execution_mode"),
+        "workload_spec": state.get("workload_spec"),
+        "clarification_questions": state.get("clarification_questions", []),
+        "assumptions": state.get("assumptions", []),
+        "candidates": state.get("candidate_architectures", []),
+        "validation_results": state.get("validation_results", {}),
+        "missing_models": state.get("missing_models", []),
+        "benchmark_results": state.get("benchmark_results", []),
+        "model_fit_results": state.get("model_fit_results", []),
+        "simulation_results": state.get("simulation_results", []),
+        "recommendation": state.get("recommendation"),
+        "provenance": state.get("provenance", {}),
+        "errors": state.get("errors", []),
+    }

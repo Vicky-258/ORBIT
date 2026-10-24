@@ -1,3 +1,4 @@
+import hashlib
 """
 Synthetic Benchmark Runner.
 Generates controlled, reproducible synthetic fixture measurements with explicit variance.
@@ -116,7 +117,7 @@ class SyntheticBenchmarkRunner(BenchmarkRunner):
                 memory_mb = 180.0 + (conc * 4.5) + self.rng.uniform(-5, 5)
 
                 exp = ExperimentRecord(
-                    experiment_id=f"exp_syn_{uuid.uuid4().hex[:10]}",
+                    experiment_id=f"exp_syn_{hashlib.sha256(f"{component_name}_{version}_{conc}_{rr}_{self.seed}".encode()).hexdigest()[:10]}",
                     component_name=component_name,
                     version=version,
                     env_fingerprint=env_fp,

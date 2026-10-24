@@ -1,3 +1,4 @@
+import hashlib
 """
 Model Trainer and Held-Out Evaluator.
 Performs group-based train/validation split (holding out entire load levels to prevent data leakage),
@@ -128,7 +129,7 @@ class ModelTrainer:
         held_out_concs = sorted(list(set(e.concurrency for e in test_exps)))
 
         model_record = ModelRecord(
-            model_id=f"model_{component_name}_{uuid.uuid4().hex[:8]}",
+            model_id=f"model_{component_name}_{hashlib.sha256(f"{component_name}_{version}_{chosen_type}_{round(chosen_metrics["rmse"], 3)}".encode()).hexdigest()[:8]}",
             component_name=component_name,
             version=version,
             env_fingerprint=env_fp,
