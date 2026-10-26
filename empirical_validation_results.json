@@ -1,0 +1,407 @@
+{
+  "timestamp": "2026-10-26T08:29:24.110514+00:00",
+  "mode": "docker",
+  "is_real_docker": true,
+  "docker_environment": {
+    "runner_type": "DockerBenchmarkRunner",
+    "docker_available": true,
+    "docker_version": "29.9.2",
+    "cpu_limit": "1.0",
+    "memory_limit": "512m",
+    "host_os": "Linux-6.18.57-2-lts-x86_64-with-glibc2.44"
+  },
+  "microbenchmarks": {
+    "postgres_trials": 5,
+    "redis_trials": 5,
+    "postgres_held_out_validation": {
+      "status": "REJECTED",
+      "model_type": "piecewise_ridge",
+      "metrics": {
+        "chosen_model_type": "piecewise_ridge",
+        "train_samples": 3,
+        "test_samples": 2,
+        "held_out_concurrencies": [
+          2,
+          4
+        ],
+        "regression_eval": {
+          "rmse": 0.036,
+          "mae": 0.03,
+          "mape": 53.85,
+          "max_error": 0.05,
+          "r2": 0.187
+        },
+        "lookup_eval": {
+          "rmse": 0.111,
+          "mae": 0.105,
+          "mape": 123.85,
+          "max_error": 0.14,
+          "r2": -6.656
+        },
+        "chosen_eval": {
+          "rmse": 0.036,
+          "mae": 0.03,
+          "mape": 53.85,
+          "max_error": 0.05,
+          "r2": 0.187
+        },
+        "is_validated": true,
+        "group_based_leakage_free": true
+      }
+    },
+    "redis_held_out_validation": {
+      "status": "REJECTED",
+      "model_type": "piecewise_ridge",
+      "metrics": {
+        "chosen_model_type": "piecewise_ridge",
+        "train_samples": 3,
+        "test_samples": 2,
+        "held_out_concurrencies": [
+          2,
+          4
+        ],
+        "regression_eval": {
+          "rmse": 0.085,
+          "mae": 0.085,
+          "mape": 170.0,
+          "max_error": 0.09,
+          "r2": -289.0
+        },
+        "lookup_eval": {
+          "rmse": 0.085,
+          "mae": 0.085,
+          "mape": 170.0,
+          "max_error": 0.09,
+          "r2": -289.0
+        },
+        "chosen_eval": {
+          "rmse": 0.085,
+          "mae": 0.085,
+          "mape": 170.0,
+          "max_error": 0.09,
+          "r2": -289.0
+        },
+        "is_validated": true,
+        "group_based_leakage_free": true
+      }
+    }
+  },
+  "end_to_end_calibration": {
+    "status": "VALIDATED",
+    "sample_size": 8,
+    "overall_throughput_metrics": {
+      "mae": 7.175,
+      "rmse": 7.964,
+      "mape": 7.99,
+      "max_error": 11.1,
+      "mbe": -1.8,
+      "r2": 0.964,
+      "sample_size": 8
+    },
+    "overall_p95_latency_metrics": {
+      "mae": 3.961,
+      "rmse": 4.006,
+      "mape": 141.23,
+      "max_error": 4.89,
+      "mbe": 3.961,
+      "r2": -53.17,
+      "sample_size": 8
+    },
+    "by_architecture": {
+      "arch_a_simple": {
+        "architecture_name": "Architecture A \u2014 Simple (API -> PostgreSQL)",
+        "points": [
+          {
+            "real_tps": 39.7,
+            "pred_tps": 32.0,
+            "tps_error_pct": 19.5,
+            "real_p50_ms": 0.54,
+            "pred_p50_ms": 3.18,
+            "real_p95_ms": 3.66,
+            "pred_p95_ms": 6.94,
+            "p95_error_pct": 89.8,
+            "mae_ms": 3.28,
+            "cache_hit_rate_real": null,
+            "cache_hit_rate_pred": null
+          },
+          {
+            "real_tps": 79.2,
+            "pred_tps": 73.0,
+            "tps_error_pct": 7.8,
+            "real_p50_ms": 0.46,
+            "pred_p50_ms": 3.25,
+            "real_p95_ms": 2.55,
+            "pred_p95_ms": 7.03,
+            "p95_error_pct": 176.1,
+            "mae_ms": 4.48,
+            "cache_hit_rate_real": null,
+            "cache_hit_rate_pred": null
+          },
+          {
+            "real_tps": 115.1,
+            "pred_tps": 106.0,
+            "tps_error_pct": 7.9,
+            "real_p50_ms": 0.58,
+            "pred_p50_ms": 3.27,
+            "real_p95_ms": 2.56,
+            "pred_p95_ms": 7.09,
+            "p95_error_pct": 176.4,
+            "mae_ms": 4.53,
+            "cache_hit_rate_real": null,
+            "cache_hit_rate_pred": null
+          },
+          {
+            "real_tps": 153.1,
+            "pred_tps": 142.0,
+            "tps_error_pct": 7.2,
+            "real_p50_ms": 0.44,
+            "pred_p50_ms": 3.28,
+            "real_p95_ms": 2.23,
+            "pred_p95_ms": 7.12,
+            "p95_error_pct": 219.0,
+            "mae_ms": 4.89,
+            "cache_hit_rate_real": null,
+            "cache_hit_rate_pred": null
+          }
+        ],
+        "real_tps": [
+          39.7,
+          79.2,
+          115.1,
+          153.1
+        ],
+        "pred_tps": [
+          32.0,
+          73.0,
+          106.0,
+          142.0
+        ],
+        "real_p95": [
+          3.66,
+          2.55,
+          2.56,
+          2.23
+        ],
+        "pred_p95": [
+          6.94,
+          7.03,
+          7.09,
+          7.12
+        ],
+        "tps_metrics": {
+          "mae": 8.525,
+          "rmse": 8.714,
+          "mape": 10.6,
+          "max_error": 11.1,
+          "mbe": -8.525,
+          "r2": 0.957,
+          "sample_size": 4
+        },
+        "p95_metrics": {
+          "mae": 4.295,
+          "rmse": 4.338,
+          "mape": 165.38,
+          "max_error": 4.89,
+          "mbe": 4.295,
+          "r2": -63.074,
+          "sample_size": 4
+        }
+      },
+      "arch_b_cached": {
+        "architecture_name": "Architecture B \u2014 Cached Reads",
+        "points": [
+          {
+            "real_tps": 39.7,
+            "pred_tps": 41.5,
+            "tps_error_pct": 4.6,
+            "real_p50_ms": 0.48,
+            "pred_p50_ms": 1.01,
+            "real_p95_ms": 3.75,
+            "pred_p95_ms": 7.06,
+            "p95_error_pct": 88.4,
+            "mae_ms": 3.31,
+            "cache_hit_rate_real": 0.851,
+            "cache_hit_rate_pred": 0.838
+          },
+          {
+            "real_tps": 78.8,
+            "pred_tps": 77.0,
+            "tps_error_pct": 2.2,
+            "real_p50_ms": 0.56,
+            "pred_p50_ms": 0.98,
+            "real_p95_ms": 3.19,
+            "pred_p95_ms": 6.68,
+            "p95_error_pct": 109.5,
+            "mae_ms": 3.49,
+            "cache_hit_rate_real": 0.859,
+            "cache_hit_rate_pred": 0.844
+          },
+          {
+            "real_tps": 116.4,
+            "pred_tps": 125.0,
+            "tps_error_pct": 7.4,
+            "real_p50_ms": 0.45,
+            "pred_p50_ms": 0.99,
+            "real_p95_ms": 3.36,
+            "pred_p95_ms": 6.85,
+            "p95_error_pct": 103.7,
+            "mae_ms": 3.49,
+            "cache_hit_rate_real": 0.848,
+            "cache_hit_rate_pred": 0.827
+          },
+          {
+            "real_tps": 151.4,
+            "pred_tps": 162.5,
+            "tps_error_pct": 7.3,
+            "real_p50_ms": 0.41,
+            "pred_p50_ms": 1.0,
+            "real_p95_ms": 2.53,
+            "pred_p95_ms": 6.75,
+            "p95_error_pct": 166.6,
+            "mae_ms": 4.22,
+            "cache_hit_rate_real": 0.862,
+            "cache_hit_rate_pred": 0.834
+          }
+        ],
+        "real_tps": [
+          39.7,
+          78.8,
+          116.4,
+          151.4
+        ],
+        "pred_tps": [
+          41.5,
+          77.0,
+          125.0,
+          162.5
+        ],
+        "real_p95": [
+          3.75,
+          3.19,
+          3.36,
+          2.53
+        ],
+        "pred_p95": [
+          7.06,
+          6.68,
+          6.85,
+          6.75
+        ],
+        "tps_metrics": {
+          "mae": 5.825,
+          "rmse": 7.135,
+          "mape": 5.38,
+          "max_error": 11.1,
+          "mbe": 4.925,
+          "r2": 0.971,
+          "sample_size": 4
+        },
+        "p95_metrics": {
+          "mae": 3.627,
+          "rmse": 3.644,
+          "mape": 117.08,
+          "max_error": 4.22,
+          "mbe": 3.627,
+          "r2": -67.383,
+          "sample_size": 4
+        }
+      }
+    }
+  },
+  "feasibility_and_ranking": {
+    "low_load": {
+      "status": "VALIDATED",
+      "workload": {
+        "target_rps": 40.0,
+        "p95_sla_target_ms": 50.0,
+        "budget_cap_usd": 250.0
+      },
+      "feasibility_agreement_pct": 50.0,
+      "agreements_count": 1,
+      "false_feasible_count": 0,
+      "false_infeasible_count": 1,
+      "feasibility_details": [
+        {
+          "architecture_id": "arch_a_simple",
+          "architecture_name": "Architecture A \u2014 Simple (API -> PostgreSQL)",
+          "simulated_feasibility": "INFEASIBLE",
+          "measured_feasibility": "FEASIBLE",
+          "agreement": false,
+          "simulated_p95_ms": 6.94,
+          "measured_p95_ms": 3.66,
+          "sla_target_ms": 50.0
+        },
+        {
+          "architecture_id": "arch_b_cached",
+          "architecture_name": "Architecture B \u2014 Cached Reads",
+          "simulated_feasibility": "FEASIBLE",
+          "measured_feasibility": "FEASIBLE",
+          "agreement": true,
+          "simulated_p95_ms": 7.06,
+          "measured_p95_ms": 3.75,
+          "sla_target_ms": 50.0
+        }
+      ],
+      "ranking_comparison": {
+        "simulated_winner": "arch_b_cached",
+        "measured_winner": "arch_a_simple",
+        "ranking_agreement": false,
+        "simulated_scores": {
+          "arch_b_cached": 0.368,
+          "arch_a_simple": 0.1
+        },
+        "measured_scores": {
+          "arch_a_simple": 1.0,
+          "arch_b_cached": 0.386
+        }
+      }
+    },
+    "high_load": {
+      "status": "VALIDATED",
+      "workload": {
+        "target_rps": 160.0,
+        "p95_sla_target_ms": 20.0,
+        "budget_cap_usd": 250.0
+      },
+      "feasibility_agreement_pct": 100.0,
+      "agreements_count": 2,
+      "false_feasible_count": 0,
+      "false_infeasible_count": 0,
+      "feasibility_details": [
+        {
+          "architecture_id": "arch_a_simple",
+          "architecture_name": "Architecture A \u2014 Simple (API -> PostgreSQL)",
+          "simulated_feasibility": "FEASIBLE",
+          "measured_feasibility": "FEASIBLE",
+          "agreement": true,
+          "simulated_p95_ms": 7.12,
+          "measured_p95_ms": 2.23,
+          "sla_target_ms": 20.0
+        },
+        {
+          "architecture_id": "arch_b_cached",
+          "architecture_name": "Architecture B \u2014 Cached Reads",
+          "simulated_feasibility": "FEASIBLE",
+          "measured_feasibility": "FEASIBLE",
+          "agreement": true,
+          "simulated_p95_ms": 6.75,
+          "measured_p95_ms": 2.53,
+          "sla_target_ms": 20.0
+        }
+      ],
+      "ranking_comparison": {
+        "simulated_winner": "arch_b_cached",
+        "measured_winner": "arch_a_simple",
+        "ranking_agreement": false,
+        "simulated_scores": {
+          "arch_b_cached": 0.74,
+          "arch_a_simple": 0.556
+        },
+        "measured_scores": {
+          "arch_a_simple": 1.0,
+          "arch_b_cached": 0.38
+        }
+      }
+    }
+  }
+}
