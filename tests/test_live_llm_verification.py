@@ -18,14 +18,15 @@ from aads.core.config import LLMConfig
 def test_missing_credentials(monkeypatch):
     """Test 1: Provider verification cleanly reports MISSING_CREDENTIALS when unset."""
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     monkeypatch.setenv("AADS_AGENT_MODE", "auto")
     cfg = LLMConfig(openai_api_key=None, force_fallback=False)
 
     res = verify_live_llm(config=cfg)
     assert res["success"] is False
     assert res["status"] == "MISSING_CREDENTIALS"
-    assert "OPENAI_API_KEY is not configured" in res["error_message"]
-    assert "export OPENAI_API_KEY=" in res["instructions"]
+    assert "API_KEY" in res["error_message"]
+    assert "API_KEY" in res["instructions"]
     assert res["source"] == "LIVE_LLM_VERIFICATION"
     assert res["extracted_fields"] is None
 

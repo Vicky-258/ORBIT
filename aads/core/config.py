@@ -7,6 +7,26 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+def _load_env_file():
+    env_file = BASE_DIR / ".env"
+    if env_file.is_file():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("'").strip('"')
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+_load_env_file()
 REGISTRY_DB_PATH = BASE_DIR / "data" / "registry.db"
 REGISTRY_FIXTURES_PATH = BASE_DIR / "aads" / "registry" / "fixtures"
 RAW_EXPERIMENTS_DIR = BASE_DIR / "data" / "experiments"
@@ -28,10 +48,18 @@ class BenchmarkConfig(BaseModel):
     warmup_duration_seconds: int = 3
 
 class LLMConfig(BaseModel):
-    """LLM provider configuration for Architecture Agent."""
-    openai_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY"))
-    openai_model_name: str = Field(default_factory=lambda: os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"))
-    openai_api_base: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_BASE"))
+    """LLM provider configuration for Architecture Agent (supports OpenAI and Groq)."""
+    openai_api_key: Optional[str] = Field(default_factory=lambda: os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY"))
+    openai_model_name: str = Field(default_factory=lambda: (
+        os.getenv("OPENAI_MODEL_NAME") or (
+            os.getenv("GROQ_MODEL_NAME") or os.getenv("OPENAI_MODEL_NAME") or ("openai/gpt-oss-120b" if (os.getenv("GROQ_API_KEY") or (os.getenv("OPENAI_API_KEY") or "").startswith("gsk_")) else "gpt-4o-mini")
+        )
+    ))
+    openai_api_base: Optional[str] = Field(default_factory=lambda: (
+        os.getenv("OPENAI_API_BASE") or (
+            "https://api.groq.com/openai/v1" if (os.getenv("GROQ_API_KEY") or (os.getenv("OPENAI_API_KEY") or "").startswith("gsk_")) else None
+        )
+    ))
     temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     timeout_seconds: float = Field(default=30.0, gt=0.0)
     max_retries: int = Field(default=2, ge=0)

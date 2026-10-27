@@ -28,6 +28,7 @@ from aads.api.app import app
 def test_fallback_mode_without_credentials(monkeypatch):
     """Test 10: Ensures provider cleanly defaults to labeled fallback when credentials are absent."""
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     monkeypatch.setenv("AADS_AGENT_MODE", "auto")
     
     mgr = LLMProviderManager()
@@ -40,8 +41,9 @@ def test_fallback_mode_without_credentials(monkeypatch):
     assert summary["execution_mode"] == "FALLBACK"
 
 
-def test_valid_natural_language_request_fallback():
+def test_valid_natural_language_request_fallback(monkeypatch):
     """Test 1: Valid natural language request extracted deterministically in fallback mode."""
+    monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
     orch = AADSOrchestrator()
     prompt = "I need a social feed architecture for 500 RPS with peak 1000 RPS, 90% reads / 10% writes, p95 under 50ms, and budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0, random_seed=42)
@@ -225,8 +227,9 @@ def test_provenance_preservation_and_evidence_labeling():
     assert w_prov["cache_assumed_hit_rate"].provenance.value == "agent_assumption"
 
 
-def test_recommendation_consistency_with_deterministic_eval():
+def test_recommendation_consistency_with_deterministic_eval(monkeypatch):
     """Test 12: Orchestrator recommendation strictly mirrors underlying deterministic evaluator."""
+    monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
     orch = AADSOrchestrator()
     prompt = "Social media feed handling 500 RPS with 90% reads, p95 latency under 50ms, budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=3.0, random_seed=42)

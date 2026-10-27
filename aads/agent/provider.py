@@ -26,8 +26,9 @@ def redact_secrets(text: str) -> str:
     """Redacts potential API keys or tokens from string to prevent credential leakage."""
     if not isinstance(text, str):
         return str(text)
-    # Mask OpenAI-style keys (sk-...)
+    # Mask OpenAI-style keys (sk-...) and Groq keys (gsk_...)
     text = re.sub(r'sk-[a-zA-Z0-9_\-]{15,}', '[REDACTED_API_KEY]', text)
+    text = re.sub(r'gsk_[a-zA-Z0-9_\-]{15,}', '[REDACTED_API_KEY]', text)
     # Mask Authorization headers / bearer tokens
     text = re.sub(r'(Bearer\s+)[a-zA-Z0-9_\-\.]{15,}', r'\1[REDACTED_TOKEN]', text, flags=re.IGNORECASE)
     # Mask any api_key query params or json values
@@ -38,7 +39,7 @@ class LLMProviderManager:
     """Manages LLM provider access with deterministic labeled fallback."""
 
     def __init__(self, config: Optional[LLMConfig] = None):
-        self.config = config or settings.llm
+        self.config = config or LLMConfig()
         self._cached_model: Optional[BaseChatModel] = None
         self._mode: Optional[ExecutionMode] = None
         self._reason: str = ""
@@ -46,37 +47,43 @@ class LLMProviderManager:
 
     def _detect_provider(self):
         # Check explicit force fallback switch or absence of API key
+        force_fallback_env = os.getenv("AADS_FORCE_FALLBACK", "").lower() in ("true", "1")
         agent_mode_env = os.getenv("AADS_AGENT_MODE", "").lower()
-        if self.config.force_fallback or agent_mode_env == "fallback":
+        if self.config.force_fallback or force_fallback_env or agent_mode_env == "fallback":
             self._mode = ExecutionMode.FALLBACK
             self._reason = "AADS_FORCE_FALLBACK or AADS_AGENT_MODE=fallback explicitly configured"
             logger.info(f"Operating in deterministic fallback mode ({self._reason}).")
             return
 
-        api_key = self.config.openai_api_key or os.getenv("OPENAI_API_KEY")
+        api_key = self.config.openai_api_key or os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
         if not api_key:
             self._mode = ExecutionMode.FALLBACK
-            self._reason = "OPENAI_API_KEY not configured in environment"
-            logger.info("OPENAI_API_KEY not configured: operating in deterministic labeled fallback mode.")
+            self._reason = "Neither OPENAI_API_KEY nor GROQ_API_KEY configured in environment"
+            logger.info("No API key configured: operating in deterministic labeled fallback mode.")
             return
+
+        is_groq = bool(os.getenv("GROQ_API_KEY") or (api_key and api_key.startswith("gsk_")) or ("groq.com" in (self.config.openai_api_base or "")))
+        provider_name = "Groq" if is_groq else "OpenAI"
+        base_url = self.config.openai_api_base or ("https://api.groq.com/openai/v1" if is_groq else None)
+        model_name = self.config.openai_model_name or (("openai/gpt-oss-120b" if is_groq else "gpt-4o-mini"))
 
         try:
             from langchain_openai import ChatOpenAI
 
             kwargs: dict = {
-                "model": self.config.openai_model_name,
+                "model": model_name,
                 "temperature": self.config.temperature,
                 "timeout": self.config.timeout_seconds,
                 "max_retries": self.config.max_retries,
                 "api_key": api_key,
             }
-            if self.config.openai_api_base:
-                kwargs["base_url"] = self.config.openai_api_base
+            if base_url:
+                kwargs["base_url"] = base_url
 
             self._cached_model = ChatOpenAI(**kwargs)
             self._mode = ExecutionMode.LLM
-            self._reason = f"Configured via {self.config.openai_model_name}"
-            logger.info(f"Initialized ChatOpenAI model: {self.config.openai_model_name}")
+            self._reason = f"Configured via {provider_name}:{model_name}"
+            logger.info(f"Initialized {provider_name} model: {model_name}")
         except Exception as e:
             self._mode = ExecutionMode.FALLBACK
             self._reason = f"Provider initialization failed: {str(e)}"
@@ -93,10 +100,13 @@ class LLMProviderManager:
 
     def get_status_summary(self) -> Dict[str, Any]:
         mode = self.get_execution_mode()
+        api_key = self.config.openai_api_key or os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
+        is_groq = bool(os.getenv("GROQ_API_KEY") or (api_key and api_key.startswith("gsk_")) or ("groq.com" in (self.config.openai_api_base or "")))
+        provider_name = "Groq" if is_groq else "OpenAI"
         return {
             "is_fallback": mode == ExecutionMode.FALLBACK,
             "execution_mode": mode.value,
-            "provider": "OpenAI" if mode == ExecutionMode.LLM else "Local Deterministic Heuristic",
+            "provider": provider_name if mode == ExecutionMode.LLM else "Local Deterministic Heuristic",
             "model_name": self.config.openai_model_name if mode == ExecutionMode.LLM else "rule_based_parser",
             "reason": self._reason,
         }
@@ -108,29 +118,40 @@ class LLMProviderManager:
         network reachability, and schema compliance without printing secrets.
         """
         # 1. Credentials presence check
-        api_key = self.config.openai_api_key or os.getenv("OPENAI_API_KEY")
+        api_key = self.config.openai_api_key or os.getenv("OPENAI_API_KEY") or os.getenv("GROQ_API_KEY")
+        is_groq = bool(os.getenv("GROQ_API_KEY") or (api_key and api_key.startswith("gsk_")) or ("groq.com" in (self.config.openai_api_base or "")))
+        provider_name = "Groq" if is_groq else "OpenAI"
+        base_url = self.config.openai_api_base or ("https://api.groq.com/openai/v1" if is_groq else None)
+        model_name = self.config.openai_model_name or (("openai/gpt-oss-120b" if is_groq else "gpt-4o-mini"))
+
         if not api_key or not api_key.strip():
             return {
                 "success": False,
                 "status": "MISSING_CREDENTIALS",
-                "provider": "OpenAI",
-                "model_name": self.config.openai_model_name,
+                "provider": provider_name,
+                "model_name": model_name,
                 "source": "LIVE_LLM_VERIFICATION",
-                "error_message": "OPENAI_API_KEY is not configured in environment or settings.",
-                "instructions": "Set OPENAI_API_KEY in your environment: export OPENAI_API_KEY='sk-...'",
+                "error_message": "Neither OPENAI_API_KEY nor GROQ_API_KEY is configured in environment or settings.",
+                "instructions": (
+                    "Set an API key in your environment:\n"
+                    "  export GROQ_API_KEY='gsk_...'\n"
+                    "  or\n"
+                    "  export OPENAI_API_KEY='sk-...'"
+                ),
                 "latency_seconds": 0.0,
                 "extracted_fields": None,
                 "is_fallback": False,
             }
 
         # 2. Check if explicitly forced into fallback
+        force_fallback_env = os.getenv("AADS_FORCE_FALLBACK", "").lower() in ("true", "1")
         agent_mode_env = os.getenv("AADS_AGENT_MODE", "").lower()
-        if self.config.force_fallback or agent_mode_env == "fallback":
+        if self.config.force_fallback or force_fallback_env or agent_mode_env == "fallback":
             return {
                 "success": False,
                 "status": "FORCED_FALLBACK",
-                "provider": "OpenAI",
-                "model_name": self.config.openai_model_name,
+                "provider": provider_name,
+                "model_name": model_name,
                 "source": "LIVE_LLM_VERIFICATION",
                 "error_message": "AADS_FORCE_FALLBACK or AADS_AGENT_MODE=fallback is explicitly enabled.",
                 "instructions": "Unset AADS_FORCE_FALLBACK and set AADS_AGENT_MODE=auto to enable live calls.",
@@ -156,14 +177,14 @@ class LLMProviderManager:
             if model is None:
                 from langchain_openai import ChatOpenAI
                 kwargs: dict = {
-                    "model": self.config.openai_model_name,
+                    "model": model_name,
                     "temperature": 0.0,
                     "timeout": min(self.config.timeout_seconds, 15.0),
                     "max_retries": 1,
                     "api_key": api_key,
                 }
-                if self.config.openai_api_base:
-                    kwargs["base_url"] = self.config.openai_api_base
+                if base_url:
+                    kwargs["base_url"] = base_url
                 model = ChatOpenAI(**kwargs)
 
             structured_model = model.with_structured_output(WorkloadExtractionResult)
@@ -174,8 +195,8 @@ class LLMProviderManager:
                 return {
                     "success": False,
                     "status": "VALIDATION_FAILED",
-                    "provider": "OpenAI",
-                    "model_name": self.config.openai_model_name,
+                    "provider": provider_name,
+                    "model_name": model_name,
                     "source": "LIVE_LLM_VERIFICATION",
                     "error_message": f"Returned object of unexpected type: {type(extracted).__name__}",
                     "latency_seconds": elapsed,
@@ -187,8 +208,8 @@ class LLMProviderManager:
                 return {
                     "success": False,
                     "status": "VALIDATION_FAILED",
-                    "provider": "OpenAI",
-                    "model_name": self.config.openai_model_name,
+                    "provider": provider_name,
+                    "model_name": model_name,
                     "source": "LIVE_LLM_VERIFICATION",
                     "error_message": "Structured output missing valid request_rate_rps",
                     "latency_seconds": elapsed,
@@ -199,8 +220,8 @@ class LLMProviderManager:
             return {
                 "success": True,
                 "status": "SUCCESS",
-                "provider": "OpenAI",
-                "model_name": self.config.openai_model_name,
+                "provider": provider_name,
+                "model_name": model_name,
                 "source": "LIVE_LLM_VERIFICATION",
                 "latency_seconds": elapsed,
                 "extracted_fields": {
@@ -235,8 +256,8 @@ class LLMProviderManager:
             return {
                 "success": False,
                 "status": status,
-                "provider": "OpenAI",
-                "model_name": self.config.openai_model_name,
+                "provider": provider_name,
+                "model_name": model_name,
                 "source": "LIVE_LLM_VERIFICATION",
                 "latency_seconds": elapsed,
                 "extracted_fields": None,

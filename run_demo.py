@@ -121,11 +121,17 @@ def main():
         status = state.get("workflow_status")
         print_banner(f"Workflow Status: {status}", "-")
 
-        if state.get("clarification_questions"):
+        if state.get("clarification_questions") and not state.get("workload_spec"):
             print("  ⚠️ Clarifying Questions Required:")
             for q in state["clarification_questions"]:
                 print(f"    • {q}")
             return
+
+        if state.get("clarification_questions"):
+            print("  ℹ️ Clarification Inquiries (Non-Blocking Assumptions Inferred):")
+            for q in state["clarification_questions"]:
+                print(f"    • {q}")
+            print()
 
         workload = state.get("workload_spec")
         if workload:

@@ -32,6 +32,26 @@ Guidelines:
 """
 
 
+class SoftPreferences(BaseModel):
+    cost: float = Field(default=0.35, description="Cost weight (0.0 - 1.0)")
+    latency: float = Field(default=0.45, description="Latency weight (0.0 - 1.0)")
+    simplicity: float = Field(default=0.20, description="Simplicity weight (0.0 - 1.0)")
+
+    def __getitem__(self, key: str) -> float:
+        return getattr(self, key)
+
+    def get(self, key: str, default: float = 0.0) -> float:
+        return getattr(self, key, default)
+
+    def items(self):
+        return [("cost", self.cost), ("latency", self.latency), ("simplicity", self.simplicity)]
+
+
+class UserFactItem(BaseModel):
+    key: str = Field(description="Parameter key e.g. request_rate_rps, p95_latency_target_ms, read_ratio")
+    value: str = Field(description="Stated value from user")
+
+
 class WorkloadExtractionResult(BaseModel):
     """Structured extraction of workload requirements from natural language."""
     app_type: str = Field(default="social_media_feed", description="Target application domain or workload type")
@@ -44,14 +64,39 @@ class WorkloadExtractionResult(BaseModel):
     min_throughput_rps: Optional[float] = Field(default=None, description="Minimum acceptable throughput in requests/sec")
     max_monthly_budget_usd: Optional[float] = Field(default=None, description="Maximum monthly infrastructure budget in USD")
     cache_assumed_hit_rate: Optional[float] = Field(default=None, description="Assumed cache hit rate (0.0 - 1.0)")
-    soft_preferences: Dict[str, float] = Field(
-        default_factory=lambda: {"cost": 0.35, "latency": 0.45, "simplicity": 0.20},
+    soft_preferences: SoftPreferences = Field(
+        default_factory=SoftPreferences,
         description="User preference weights across cost, latency, and simplicity (sum to 1.0)",
     )
-    user_facts: Dict[str, Any] = Field(default_factory=dict, description="Requirements explicitly stated by the user")
+    user_fact_items: List[UserFactItem] = Field(
+        default_factory=list,
+        description="Requirements explicitly stated by the user",
+    )
     agent_assumptions: List[str] = Field(default_factory=list, description="Defaults or assumptions inferred by the agent")
     clarification_questions: List[str] = Field(default_factory=list, description="Targeted questions to ask user if clarification is needed")
     ambiguities: List[str] = Field(default_factory=list, description="Ambiguities or conflicts detected in the request")
+
+    def __init__(self, **data: Any):
+        if "user_facts" in data and "user_fact_items" not in data:
+            uf = data.pop("user_facts")
+            if isinstance(uf, dict):
+                data["user_fact_items"] = [UserFactItem(key=str(k), value=str(v)) for k, v in uf.items()]
+        super().__init__(**data)
+
+    @property
+    def user_facts(self) -> Dict[str, Any]:
+        facts: Dict[str, Any] = {item.key: item.value for item in self.user_fact_items}
+        if self.request_rate_rps is not None and "request_rate_rps" not in facts:
+            facts["request_rate_rps"] = self.request_rate_rps
+        if self.p95_latency_target_ms is not None and "p95_latency_target_ms" not in facts:
+            facts["p95_latency_target_ms"] = self.p95_latency_target_ms
+        if self.max_monthly_budget_usd is not None and "max_monthly_budget_usd" not in facts:
+            facts["max_monthly_budget_usd"] = self.max_monthly_budget_usd
+        if self.read_ratio is not None and "read_ratio" not in facts:
+            facts["read_ratio"] = self.read_ratio
+        if self.write_ratio is not None and "write_ratio" not in facts:
+            facts["write_ratio"] = self.write_ratio
+        return facts
 
 
 class ArchitectureAgent:
@@ -268,7 +313,7 @@ class ArchitectureAgent:
             min_throughput_rps=min_tp,
             max_monthly_budget_usd=budget,
             cache_assumed_hit_rate=extracted.cache_assumed_hit_rate or 0.85,
-            soft_preferences=extracted.soft_preferences or {"cost": 0.35, "latency": 0.45, "simplicity": 0.20},
+            soft_preferences=extracted.soft_preferences.model_dump() if hasattr(extracted.soft_preferences, "model_dump") else (dict(extracted.soft_preferences) if isinstance(extracted.soft_preferences, dict) else {"cost": 0.35, "latency": 0.45, "simplicity": 0.20}),
             provenance_map=prov_map,
         )
         return workload, extracted.clarification_questions, extracted.agent_assumptions, mode
