@@ -47,6 +47,7 @@ class RecommendationSynthesizer:
         recommendation: RecommendationResult,
         provenance: Optional[Dict[str, str]] = None,
         raw_prompt: str = "",
+        investigation_trace: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """Prepares a bounded, structured evidence payload for LLM explanation."""
         prov = provenance or {}
@@ -114,8 +115,23 @@ class RecommendationSynthesizer:
             "environment_note": "Benchmarks executed under container isolation or synthetic mathematical calibration. Not production traffic.",
         }
 
+        # 5. Investigation Trace Summary
+        trace_summary = []
+        if investigation_trace:
+            for step in investigation_trace:
+                trace_summary.append({
+                    "round": step.get("round", 1),
+                    "action": step.get("action", ""),
+                    "target": step.get("target"),
+                    "verdict": step.get("policy_verdict", ""),
+                    "tool": step.get("tool_invoked"),
+                    "result_summary": step.get("tool_output", {}).get("summary", ""),
+                    "reason": step.get("reason", ""),
+                })
+
         return {
             "workload_requirements": reqs,
+            "investigation_history": trace_summary,
             "deterministic_selected_winner": {
                 "id": recommendation.selected_architecture_id,
                 "name": recommendation.selected_architecture_name,
@@ -162,6 +178,7 @@ class RecommendationSynthesizer:
         recommendation: RecommendationResult,
         provenance: Optional[Dict[str, str]] = None,
         raw_prompt: str = "",
+        investigation_trace: Optional[List[Dict[str, Any]]] = None,
     ) -> Tuple[RecommendationResult, ExecutionMode]:
         """
         Synthesizes an explainable recommendation using LLM if available,
@@ -188,6 +205,7 @@ class RecommendationSynthesizer:
             recommendation=recommendation,
             provenance=provenance,
             raw_prompt=raw_prompt,
+            investigation_trace=investigation_trace,
         )
 
         evidence_str = json.dumps(evidence, indent=2)

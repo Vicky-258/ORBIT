@@ -38,3 +38,11 @@ class AgentWorkflowState(TypedDict, total=False):
     executive_summary: str
     structured_explanation: Optional[Dict[str, Any]]
     explanation_source: Optional[str]
+    investigation_round: int
+    max_investigation_rounds: int
+    investigation_trace: List[Dict[str, Any]]
+    investigation_budget_seconds: float
+    investigation_budget_spent: float
+    benchmark_proposals: List[Dict[str, Any]]
+    active_decision: Optional[Dict[str, Any]]
+    investigation_status: str

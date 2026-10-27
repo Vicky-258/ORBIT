@@ -51,6 +51,8 @@ class WorkflowRequest(BaseModel):
     workload: WorkloadSpec
     include_async: bool = True
     include_unsupported: bool = False
+    max_investigation_rounds: int = 3
+    investigation_budget_seconds: float = 60.0
     simulation_duration_seconds: float = 8.0
     auto_benchmark_missing: bool = True
     force_synthetic: bool = False
@@ -189,6 +191,8 @@ def run_end_to_end_workflow(req: WorkflowRequest) -> Dict[str, Any]:
     candidates = generator.generate_candidates(
         include_async=req.include_async,
         include_unsupported=req.include_unsupported,
+        max_investigation_rounds=req.max_investigation_rounds,
+        investigation_budget_seconds=req.investigation_budget_seconds,
     )
 
     # 2. Check models & discover missing
@@ -262,6 +266,8 @@ class AgentPromptRequest(BaseModel):
     random_seed: int = 42
     include_async: bool = True
     include_unsupported: bool = False
+    max_investigation_rounds: int = 3
+    investigation_budget_seconds: float = 60.0
 
 
 @router.post("/agent/run")
@@ -280,6 +286,8 @@ def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
         random_seed=req.random_seed,
         include_async=req.include_async,
         include_unsupported=req.include_unsupported,
+        max_investigation_rounds=req.max_investigation_rounds,
+        investigation_budget_seconds=req.investigation_budget_seconds,
     )
     return {
         "workflow_status": state.get("workflow_status"),
@@ -298,4 +306,7 @@ def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
         "errors": state.get("errors", []),
         "explanation_source": state.get("explanation_source"),
         "structured_explanation": state.get("structured_explanation"),
+        "investigation_trace": state.get("investigation_trace", []),
+        "investigation_rounds": state.get("investigation_round", 0),
+        "benchmark_proposals": state.get("benchmark_proposals", []),
     }

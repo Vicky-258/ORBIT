@@ -41,6 +41,72 @@ class ExtractedWorkloadRequirements(BaseModel):
     ambiguities_identified: List[str] = Field(default_factory=list, description="Ambiguities or conflicts detected in the request")
 
 
+class InvestigationActionType(str, Enum):
+    INSPECT_MODEL_COVERAGE = "inspect_model_coverage"
+    SIMULATE_CANDIDATE = "simulate_candidate"
+    INSPECT_UNCERTAINTY = "inspect_uncertainty"
+    PROPOSE_BENCHMARK = "propose_benchmark"
+    STOP_AND_RECOMMEND = "stop_and_recommend"
+    STOP_INCONCLUSIVE = "stop_inconclusive"
+
+
+class BenchmarkProposalDetails(BaseModel):
+    """Details for a proposed benchmark campaign."""
+    component_name: str = Field(default="postgres_db", description="Target component name to benchmark (postgres_db, redis_cache, mongodb_cluster)")
+    version: str = Field(default="16", description="Component version")
+    target_concurrency: int = Field(default=50, description="Proposed concurrency level to measure")
+    workload_notes: Optional[str] = Field(default=None, description="Specific workload characteristics to test")
+    rationale: str = Field(default="", description="Why this benchmark would reduce decision uncertainty")
+
+
+class InvestigationDecision(BaseModel):
+    """Structured decision produced by the agent for the next investigation step."""
+    action: InvestigationActionType = Field(
+        description="The investigation action chosen by the agent."
+    )
+    target: Optional[str] = Field(
+        default=None,
+        description="Target candidate architecture ID (e.g. 'arch_b_cached'), component name, or workload parameter."
+    )
+    reason: str = Field(
+        description="Concise rationale grounded directly in current evidence for choosing this action."
+    )
+    expected_information_gain: Optional[str] = Field(
+        default=None,
+        description="Expected qualitative reduction in uncertainty or improvement in decision confidence."
+    )
+    evidence_reference: List[str] = Field(
+        default_factory=list,
+        description="References to candidate IDs, metrics, or SLA constraints supporting this decision."
+    )
+    stop_reason: Optional[str] = Field(
+        default=None,
+        description="Required when action is stop_and_recommend or stop_inconclusive."
+    )
+    benchmark_proposal: Optional[BenchmarkProposalDetails] = Field(
+        default=None,
+        description="Details when action is propose_benchmark."
+    )
+
+
+class InvestigationRecord(BaseModel):
+    """Immutable trace record of an executed or evaluated investigation round."""
+    round: int = Field(description="Decision round number (1-indexed)")
+    action: str = Field(description="Action identifier proposed by agent")
+    target: Optional[str] = Field(default=None, description="Target candidate or component")
+    reason: str = Field(description="Rationale provided by agent")
+    expected_information_gain: Optional[str] = Field(default=None, description="Expected information gain")
+    evidence_reference: List[str] = Field(default_factory=list, description="Evidence references supporting action")
+    policy_verdict: str = Field(description="Policy decision: APPROVED, REJECTED, MODIFIED, or STOPPED")
+    policy_reason: str = Field(description="Explanation for policy verdict")
+    tool_invoked: Optional[str] = Field(default=None, description="Tool executed if approved")
+    tool_input: Dict[str, Any] = Field(default_factory=dict, description="Bounded tool input parameters")
+    tool_output: Dict[str, Any] = Field(default_factory=dict, description="Bounded serializable tool execution output")
+    duration_seconds: float = Field(default=0.0, description="Execution time in seconds")
+    provenance: str = Field(default="agent_decision", description="Provenance tracking tag")
+    stop_reason: Optional[str] = Field(default=None, description="Reason if workflow stopped at this step")
+
+
 class AgentResponse(BaseModel):
     """Complete structured response from the AADS agentic workflow."""
     workflow_status: str = Field(description="Workflow outcome status: COMPLETED, CLARIFICATION_NEEDED, INSUFFICIENT_EVIDENCE, or FAILED")
@@ -55,6 +121,9 @@ class AgentResponse(BaseModel):
     evidence_provenance: Dict[str, str] = Field(default_factory=dict, description="Provenance tracking for all metrics and data sources")
     errors: List[str] = Field(default_factory=list, description="Errors or validation failures encountered during workflow")
     executive_summary: str = Field(default="", description="High-level executive explanation of findings")
+    investigation_trace: List[InvestigationRecord] = Field(default_factory=list, description="Ordered trace of investigation steps and policy verdicts")
+    investigation_rounds: int = Field(default=0, description="Number of investigation rounds executed")
+    benchmark_proposals: List[Dict[str, Any]] = Field(default_factory=list, description="Benchmark experiments proposed during investigation")
 
 class RecommendationExplanation(BaseModel):
     """Structured architectural explanation generated by LLM from deterministic evidence."""

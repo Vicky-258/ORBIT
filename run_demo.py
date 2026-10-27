@@ -153,6 +153,31 @@ def main():
                 print(f"     Bottleneck : {r.bottleneck_component.upper():5s} | Utilizations: {r.component_utilizations} | {hit_str}")
                 print(f"     Cost       : ${r.estimated_monthly_cost_usd:.2f} / month\n")
 
+        trace = state.get("investigation_trace", [])
+        if trace:
+            print_banner("Agentic Investigation Trace & Decision History", "-")
+            for t in trace:
+                r_num = t.get("round", 1)
+                action = t.get("action", "")
+                target = t.get("target") or "all"
+                verdict = t.get("policy_verdict", "APPROVED")
+                tool = t.get("tool_invoked") or "None"
+                elapsed = t.get("duration_seconds", 0.0)
+                reason = t.get("reason", "")
+                summary = t.get("tool_output", {}).get("summary", "")
+                stop_reason = t.get("stop_reason")
+
+                print(f"  Round {r_num}: Action={action} (Target: {target})")
+                print(f"    • Policy Verdict : {verdict}")
+                print(f"    • Agent Rationale: {reason}")
+                if tool != "None":
+                    print(f"    • Tool Executed  : {tool} ({elapsed:.3f}s)")
+                    if summary:
+                        print(f"    • Tool Outcome   : {summary}")
+                if stop_reason:
+                    print(f"    • Stop Reason    : {stop_reason}")
+                print()
+
         rec = state.get("recommendation")
         if rec:
             print_banner(f"🏆 Recommendation: {rec.selected_architecture_name}", "=")
@@ -185,6 +210,8 @@ def main():
                 "candidates": [c.model_dump() for c in state.get("candidate_architectures", [])],
                 "simulation_results": [s.model_dump() for s in sim_res],
                 "recommendation": rec.model_dump() if rec else None,
+                "investigation_trace": trace,
+                "benchmark_proposals": state.get("benchmark_proposals", []),
             }
             with open(args.json_output, "w") as f:
                 json.dump(export_data, f, indent=2)

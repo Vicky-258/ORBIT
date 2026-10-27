@@ -11,6 +11,18 @@ from aads.agent.state import AgentWorkflowState
 from aads.agent.provider import LLMProviderManager, ExecutionMode
 from aads.agent.architecture_agent import ArchitectureAgent
 from aads.agent.recommendation_synthesizer import RecommendationSynthesizer
+from aads.agent.schemas import (
+    InvestigationActionType,
+    InvestigationDecision,
+    InvestigationRecord,
+)
+from aads.agent.investigation_policy import (
+    InvestigationPolicy,
+    PolicyVerdict,
+    PolicyEvaluationResult,
+)
+from aads.agent.investigation_dispatcher import InvestigationDispatcher
+from aads.agent.investigation_planner import InvestigationPlanner
 from aads.core.schemas import (
     WorkloadSpec,
     ArchitectureGraph,
@@ -60,6 +72,8 @@ class AADSOrchestrator:
         builder.add_node("benchmark_and_train", self._benchmark_and_train_node)
         builder.add_node("simulate", self._simulate_node)
         builder.add_node("evaluate_and_recommend", self._evaluate_and_recommend_node)
+        builder.add_node("investigate_and_plan", self._investigate_and_plan_node)
+        builder.add_node("dispatch_investigation_tool", self._dispatch_investigation_tool_node)
         builder.add_node("synthesize_explanation", self._synthesize_explanation_node)
 
         # 2. Register Edges
@@ -104,7 +118,17 @@ class AADSOrchestrator:
         )
 
         builder.add_edge("simulate", "evaluate_and_recommend")
-        builder.add_edge("evaluate_and_recommend", "synthesize_explanation")
+        builder.add_edge("evaluate_and_recommend", "investigate_and_plan")
+
+        builder.add_conditional_edges(
+            "investigate_and_plan",
+            self._route_investigation_decision,
+            {
+                "execute_tool": "dispatch_investigation_tool",
+                "stop": "synthesize_explanation",
+            },
+        )
+        builder.add_edge("dispatch_investigation_tool", "investigate_and_plan")
         builder.add_edge("synthesize_explanation", END)
 
         return builder.compile()
@@ -303,6 +327,78 @@ class AADSOrchestrator:
             "workflow_status": status,
         }
 
+    def _investigate_and_plan_node(self, state: AgentWorkflowState) -> Dict[str, Any]:
+        """
+        Decision node: evaluates evidence, solicits structured action proposal from planner (LLM/fallback),
+        validates proposal against deterministic policy, and prepares for tool dispatch or stopping.
+        """
+        planner = InvestigationPlanner(provider_mgr=self.provider_mgr)
+        policy = InvestigationPolicy()
+
+        current_round = state.get("investigation_round", 0)
+
+        # 1. Propose action via planner (LLM or heuristic fallback)
+        proposal = planner.plan_next_action(state)
+
+        # 2. Authoritative policy validation
+        validation: PolicyEvaluationResult = policy.evaluate_action(proposal, state)
+        decision_to_use = validation.sanitized_decision
+
+        # 3. If policy stopped or rejected the action, record trace entry directly
+        trace = list(state.get("investigation_trace", []))
+        if validation.verdict in (PolicyVerdict.STOPPED, PolicyVerdict.REJECTED):
+            trace_entry = InvestigationRecord(
+                round=current_round + 1,
+                action=str(proposal.action.value if hasattr(proposal.action, "value") else proposal.action),
+                target=proposal.target,
+                reason=proposal.reason,
+                expected_information_gain=proposal.expected_information_gain,
+                evidence_reference=proposal.evidence_reference,
+                policy_verdict=validation.verdict.value,
+                policy_reason=validation.reason,
+                tool_invoked=None,
+                tool_input={},
+                tool_output={"allowed": False, "reason": validation.reason},
+                duration_seconds=0.0,
+                provenance="investigation_policy",
+                stop_reason=decision_to_use.stop_reason or validation.reason,
+            )
+            trace.append(trace_entry.model_dump())
+
+        return {
+            "active_decision": decision_to_use.model_dump(),
+            "investigation_trace": trace,
+            "investigation_status": validation.verdict.value,
+        }
+
+    def _dispatch_investigation_tool_node(self, state: AgentWorkflowState) -> Dict[str, Any]:
+        """
+        Executes approved investigation action through explicit dispatcher, updates state,
+        and appends execution record to investigation trace.
+        """
+        raw_decision = state.get("active_decision", {})
+        decision = InvestigationDecision.model_validate(raw_decision)
+        current_round = state.get("investigation_round", 0) + 1
+
+        dispatcher = InvestigationDispatcher(registry=self.registry)
+        updates, record = dispatcher.dispatch(decision, state, round_num=current_round)
+
+        trace = list(state.get("investigation_trace", []))
+        trace.append(record.model_dump())
+        updates["investigation_trace"] = trace
+        updates["investigation_round"] = current_round
+
+        return updates
+
+    def _route_investigation_decision(self, state: AgentWorkflowState) -> str:
+        decision = state.get("active_decision", {})
+        action = decision.get("action")
+        status = state.get("investigation_status")
+
+        if action in ("stop_and_recommend", "stop_inconclusive") or status in ("STOPPED", "REJECTED"):
+            return "stop"
+        return "execute_tool"
+
     def _synthesize_explanation_node(self, state: AgentWorkflowState) -> Dict[str, Any]:
         """
         Synthesizes an explainable architectural rationale and trade-off assessment
@@ -324,6 +420,7 @@ class AADSOrchestrator:
             recommendation=rec,
             provenance=state.get("provenance", {}),
             raw_prompt=state.get("request_text", ""),
+            investigation_trace=state.get("investigation_trace", []),
         )
 
         provenance = dict(state.get("provenance", {}))
@@ -375,6 +472,8 @@ class AADSOrchestrator:
         random_seed: int = 42,
         include_async: bool = True,
         include_unsupported: bool = False,
+        max_investigation_rounds: int = 3,
+        investigation_budget_seconds: float = 60.0,
     ) -> AgentWorkflowState:
         """
         Executes the compiled LangGraph workflow from start to finish.
@@ -405,6 +504,14 @@ class AADSOrchestrator:
             "explanation_source": "deterministic",
             "workflow_status": "INITIALIZED",
             "execution_mode": self.provider_mgr.get_execution_mode().value,
+            "investigation_round": 0,
+            "max_investigation_rounds": max_investigation_rounds,
+            "investigation_trace": [],
+            "investigation_budget_seconds": investigation_budget_seconds,
+            "investigation_budget_spent": 0.0,
+            "benchmark_proposals": [],
+            "active_decision": None,
+            "investigation_status": "PENDING",
         }
 
         final_state = self.graph.invoke(initial_state)
