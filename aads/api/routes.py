@@ -296,4 +296,6 @@ def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
         "recommendation": state.get("recommendation"),
         "provenance": state.get("provenance", {}),
         "errors": state.get("errors", []),
+        "explanation_source": state.get("explanation_source"),
+        "structured_explanation": state.get("structured_explanation"),
     }

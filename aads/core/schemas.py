@@ -221,3 +221,5 @@ class RecommendationResult(BaseModel):
     assumptions_cited: List[str]
     validation_gaps: List[str]
     recommended_next_experiment: Optional[str] = None
+    explanation_source: Optional[str] = "deterministic"
+    structured_explanation: Optional[Dict[str, Any]] = None

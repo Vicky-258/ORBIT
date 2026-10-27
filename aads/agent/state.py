@@ -36,3 +36,5 @@ class AgentWorkflowState(TypedDict, total=False):
     errors: List[str]
     workflow_status: str
     executive_summary: str
+    structured_explanation: Optional[Dict[str, Any]]
+    explanation_source: Optional[str]

@@ -105,22 +105,14 @@ AADS features an agentic reasoning and orchestration layer built with **LangChai
    - Generates candidate architecture graphs and validates their DAG topology.
 
 2. **LangGraph Orchestrator (`aads.agent.orchestrator`)**:
-   - Manages workflow state (`AgentWorkflowState`) with explicit conditional routing across 6 stages:
-     - `parse_workload` $
-ightarrow$ (if ambiguous) $
-ightarrow$ `END` (`NEEDS_CLARIFICATION`)
-     - `generate_candidates` $
-ightarrow$ `check_models`
-     - `check_models` $
-ightarrow$ (if missing models & authorized) $
-ightarrow$ `benchmark_and_train` $
-ightarrow$ `simulate`
-     - `check_models` $
-ightarrow$ (if missing models & unauthorized) $
-ightarrow$ `END` (`UNRESOLVED / INSUFFICIENT_EVIDENCE`)
-     - `simulate` $
-ightarrow$ `evaluate_and_recommend` $
-ightarrow$ `END` (`RECOMMENDED`)
+   - Manages workflow state (`AgentWorkflowState`) with explicit conditional routing across 7 stages:
+     - `parse_workload` ➔ (if ambiguous/invalid) ➔ `END` (`NEEDS_CLARIFICATION` / `FAILED`)
+     - `generate_candidates` ➔ `check_models`
+     - `check_models` ➔ (if missing models & authorized) ➔ `benchmark_and_train` ➔ `simulate`
+     - `check_models` ➔ (if missing models & unauthorized) ➔ `END` (`UNRESOLVED`)
+     - `check_models` ➔ (if all models present) ➔ `simulate`
+     - `simulate` ➔ `evaluate_and_recommend`
+     - `evaluate_and_recommend` ➔ `synthesize_explanation` ➔ `END` (`RECOMMENDED`)
 
 3. **Safe Typed Tool Layer (`aads.agent.tools`)**:
    - Exposes narrowly scoped `@tool` wrappers: `validate_workload`, `generate_architecture_candidates`, `check_component_models`, `run_benchmark`, `fit_and_validate_model`, `simulate_architecture`, `evaluate_candidates`.
@@ -157,6 +149,73 @@ Launch the Streamlit app and navigate to the **🤖 AI Architecture Agent** tab:
 ```bash
 .venv/bin/python -m streamlit run aads/ui/streamlit_app.py --server.port 8501
 ```
+
+---
+
+## Phase 4A: Live LLM Verification & Recommendation Synthesis
+
+Phase 4A introduces verifiable LLM connectivity and agentic architectural explanation while maintaining strict deterministic authority over quantitative results:
+
+### 1. Opt-In Live LLM Connectivity Verification
+AADS provides an explicit, bounded utility to test configured LLM credentials (`OPENAI_API_KEY`) without running expensive workloads or altering normal test behavior:
+
+```bash
+# Standalone explicit verification script:
+.venv/bin/python scripts/verify_llm.py
+
+# Or via CLI flag:
+.venv/bin/python run_demo.py --verify-llm
+```
+
+#### Diagnostic Status Codes:
+- `SUCCESS`: Valid credentials, network connection confirmed, structured extraction verified.
+- `MISSING_CREDENTIALS`: `OPENAI_API_KEY` is not set. Exits with remediation instructions.
+- `FORCED_FALLBACK`: `AADS_FORCE_FALLBACK=true` or `AADS_AGENT_MODE=fallback` is active.
+- `AUTHENTICATION_ERROR`: Invalid or expired API key (HTTP 401).
+- `RATE_LIMIT_ERROR`: Quota exhausted or rate limited (HTTP 429).
+- `TIMEOUT_ERROR`: Outbound network timeout.
+- `VALIDATION_FAILED`: Output did not adhere to required Pydantic extraction schema.
+
+*Security Guarantee:* All API keys, tokens, and authorization headers are automatically redacted from error logs and console outputs (`[REDACTED_API_KEY]`, `[REDACTED_TOKEN]`).
+
+### 2. LLM Recommendation Synthesis Node
+A dedicated reasoning node (`_synthesize_explanation_node`) is integrated into the active LangGraph workflow immediately following deterministic evaluation:
+
+- **Authoritative Deterministic Engine:** Simulation metrics, SLA feasibility checks, Pareto dominance, and winner selection are computed by deterministic algorithms (`SimPyEngine`, `FeasibilityFilter`, `TradeoffAnalyzer`, `ArchitectureRecommender`).
+- **Grounded Evidence Object:** The LLM is provided a bounded, structured evidence payload containing:
+  - Extracted workload requirements and SLA thresholds.
+  - Candidate simulation metrics (throughput, p50/p95 latency, 95% CI, cost, utilizations, bottlenecks).
+  - SLA feasibility check details and Pareto ranking outcomes.
+  - Component model and benchmark provenance (e.g., `synthetic` vs `measured`).
+  - Stated engineering assumptions and limitations.
+- **Strict Anti-Hallucination Guardrails:**
+  1. **Winner Invariance:** The LLM cannot overturn the selected architecture or alter ranking order.
+  2. **Numerical Fidelity:** All quantitative metrics in the response are bound to deterministic outputs.
+  3. **Inconclusive Preservation:** If evaluation is `INFEASIBLE` or `UNCERTAIN`, the LLM must explain the violated constraints or uncertainty rather than falsely claiming feasibility.
+  4. **Provenance Honesty:** The prompt strictly forbids describing synthetic fixtures or SimPy simulations as live physical measurements.
+  5. **Data Isolation:** User input text is treated strictly as data, not system instructions.
+
+### 3. Execution Modes & Observability
+| Execution Mode | Explanation Source | Description |
+|---|---|---|
+| `LLM` | `llm` | Contextual architectural rationale synthesized by LLM from structured evidence. |
+| `FALLBACK` | `deterministic` | Rule-based template explanations generated when `OPENAI_API_KEY` is absent. |
+| `FALLBACK` | `deterministic_fallback` | Graceful automatic fallback triggered if LLM call times out, errors, or fails validation. |
+
+Execution mode and provenance are fully observable in state:
+- `recommendation.explanation_source`: `"llm"`, `"deterministic"`, or `"deterministic_fallback"`
+- `state["provenance"]["recommendation_explanation"]`: `"llm_synthesized"` vs `"deterministic_template"`
+- `recommendation.structured_explanation`: Bounded schema (`summary`, `why_this_option`, `trade_offs`, `constraint_status`, `uncertainties`, `evidence_limitations`).
+
+### 4. Configuration & Environment Variables
+Configure LLM settings via environment variables (no secrets are stored in code):
+- `OPENAI_API_KEY`: API authentication key.
+- `OPENAI_MODEL_NAME`: Target chat model (default: `gpt-4o-mini`).
+- `OPENAI_API_BASE`: Optional custom OpenAI-compatible endpoint URL.
+- `AADS_FORCE_FALLBACK`: Set to `true` or `1` to force deterministic fallback without making network calls.
+- `AADS_AGENT_MODE`: Set to `auto` (default) or `fallback`.
+
+*API Usage Notice:* Live verification and recommendation synthesis make minimal bounded requests using `gpt-4o-mini` with low token footprints (~300–600 tokens per synthesis). The normal automated test suite uses mocks and never makes outbound network calls.
 
 ## 5. Getting Started & Installation
 

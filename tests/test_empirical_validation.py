@@ -5,6 +5,7 @@ feasibility comparisons, ranking analysis, and resource cleanup.
 """
 import pytest
 import numpy as np
+from datetime import datetime, timezone, timedelta
 
 from aads.core.schemas import (
     WorkloadSpec,
@@ -290,7 +291,7 @@ def test_model_versioning_and_registry_compatibility(tmp_path):
         is_synthetic_fixture=False,
         provenance="Empirical pgbench calibration on Docker host",
         known_limitations="Select-only workload",
-        created_at="2026-10-26T12:00:00Z",
+        created_at=(datetime.now(timezone.utc) + timedelta(minutes=1)).isoformat(),
     )
     reg.register_model(model_v2)
 

@@ -62,11 +62,32 @@ def parse_args():
     parser.add_argument("--duration", type=float, default=5.0, help="SimPy simulation duration per candidate (seconds)")
     parser.add_argument("--json-output", type=str, default=None, help="Optional file path to export structured JSON results")
     parser.add_argument("--prompt", type=str, default=None, help="Natural-language architecture request to run through LangGraph agent")
+    parser.add_argument("--verify-llm", action="store_true", help="Run explicit opt-in live LLM provider verification and exit")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+
+    if getattr(args, "verify_llm", False):
+        from aads.agent.provider import verify_live_llm
+        print_banner("🔍 AADS: Opt-In Live LLM Connectivity Verification", "=")
+        print("  Notice: Initiating external provider API request. May incur minor token charges.\n")
+        res = verify_live_llm()
+        print(f"  • Status   : {res.get('status')}")
+        print(f"  • Provider : {res.get('provider')} ({res.get('model_name')})")
+        print(f"  • Latency  : {res.get('latency_seconds', 0.0):.3f}s")
+        if res.get("success"):
+            print("\n  ✅ SUCCESS: Live LLM connectivity verified successfully!")
+            for k, v in res.get("extracted_fields", {}).items():
+                print(f"    - {k:22s}: {v}")
+            sys.exit(0)
+        else:
+            print("\n  ❌ VERIFICATION FAILED:")
+            print(f"    • Error Details : {res.get('error_message')}")
+            if res.get("instructions"):
+                print(f"    • Tip           : {res.get('instructions')}")
+            sys.exit(1 if res.get("status") == "MISSING_CREDENTIALS" else 2)
 
     # 0. Global Seed Initialization
     random.seed(args.seed)
@@ -129,7 +150,10 @@ def main():
         rec = state.get("recommendation")
         if rec:
             print_banner(f"🏆 Recommendation: {rec.selected_architecture_name}", "=")
-            print(f"  Status: {rec.status.value}\n")
+            exp_src = getattr(rec, "explanation_source", "deterministic") or "deterministic"
+            print(f"  Status             : {rec.status.value}")
+            label = 'LLM-Backed Reasoning' if exp_src == 'llm' else 'Deterministic Baseline'
+            print(f"  Explanation Source : {exp_src.upper()} ({label})\n")
             print(f"  Executive Summary:\n    {rec.executive_summary}\n")
             print("  Decision Rationale:")
             for r in rec.rationale:

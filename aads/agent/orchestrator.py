@@ -10,6 +10,7 @@ from langgraph.graph import StateGraph, START, END
 from aads.agent.state import AgentWorkflowState
 from aads.agent.provider import LLMProviderManager, ExecutionMode
 from aads.agent.architecture_agent import ArchitectureAgent
+from aads.agent.recommendation_synthesizer import RecommendationSynthesizer
 from aads.core.schemas import (
     WorkloadSpec,
     ArchitectureGraph,
@@ -59,6 +60,7 @@ class AADSOrchestrator:
         builder.add_node("benchmark_and_train", self._benchmark_and_train_node)
         builder.add_node("simulate", self._simulate_node)
         builder.add_node("evaluate_and_recommend", self._evaluate_and_recommend_node)
+        builder.add_node("synthesize_explanation", self._synthesize_explanation_node)
 
         # 2. Register Edges
         builder.add_edge(START, "parse_workload")
@@ -102,7 +104,8 @@ class AADSOrchestrator:
         )
 
         builder.add_edge("simulate", "evaluate_and_recommend")
-        builder.add_edge("evaluate_and_recommend", END)
+        builder.add_edge("evaluate_and_recommend", "synthesize_explanation")
+        builder.add_edge("synthesize_explanation", END)
 
         return builder.compile()
 
@@ -300,6 +303,40 @@ class AADSOrchestrator:
             "workflow_status": status,
         }
 
+    def _synthesize_explanation_node(self, state: AgentWorkflowState) -> Dict[str, Any]:
+        """
+        Synthesizes an explainable architectural rationale and trade-off assessment
+        using the configured LLM, strictly grounded in deterministic simulation evidence.
+        Falls back seamlessly to deterministic template rationale when offline.
+        """
+        rec = state.get("recommendation")
+        workload = state.get("workload_spec")
+        sim_results = state.get("simulation_results", [])
+        status = state.get("workflow_status")
+
+        if rec is None or status in ("FAILED", "UNRESOLVED") or workload is None:
+            return {}
+
+        synthesizer = RecommendationSynthesizer(provider_mgr=self.provider_mgr)
+        updated_rec, exp_mode = synthesizer.synthesize(
+            workload=workload,
+            sim_results=sim_results,
+            recommendation=rec,
+            provenance=state.get("provenance", {}),
+            raw_prompt=state.get("request_text", ""),
+        )
+
+        provenance = dict(state.get("provenance", {}))
+        provenance["recommendation_explanation"] = "llm_synthesized" if exp_mode == ExecutionMode.LLM else "deterministic_template"
+
+        return {
+            "recommendation": updated_rec,
+            "executive_summary": updated_rec.executive_summary,
+            "structured_explanation": updated_rec.structured_explanation,
+            "explanation_source": updated_rec.explanation_source,
+            "provenance": provenance,
+        }
+
     # --- Routing Conditions ---
 
     def _route_after_parse(self, state: AgentWorkflowState) -> str:
@@ -363,6 +400,9 @@ class AADSOrchestrator:
             "recommendation": None,
             "provenance": {},
             "errors": [],
+            "executive_summary": "",
+            "structured_explanation": None,
+            "explanation_source": "deterministic",
             "workflow_status": "INITIALIZED",
             "execution_mode": self.provider_mgr.get_execution_mode().value,
         }
