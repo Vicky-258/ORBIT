@@ -191,8 +191,6 @@ def run_end_to_end_workflow(req: WorkflowRequest) -> Dict[str, Any]:
     candidates = generator.generate_candidates(
         include_async=req.include_async,
         include_unsupported=req.include_unsupported,
-        max_investigation_rounds=req.max_investigation_rounds,
-        investigation_budget_seconds=req.investigation_budget_seconds,
     )
 
     # 2. Check models & discover missing
