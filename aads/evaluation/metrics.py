@@ -32,6 +32,8 @@ class DecisionQualityMetrics(BaseModel):
     feasible_set_jaccard: float
     ranking_agreement: Optional[float] = None
     regret_vs_reference: float = 0.0
+    raw_unrounded_regret: float = 0.0
+    score_margin_selected_vs_ref: Optional[float] = None
 
     # 3. Investigation Usefulness
     investigation_rounds: int
@@ -109,10 +111,11 @@ def compute_metrics(
     c_score = max(0.0, c_score)
 
     # 2. Recommendation Quality
-    if ref.expected_winner_id is None:
+    winner_set = list(ref.expected_winner_set) if ref.expected_winner_set else ([ref.expected_winner_id] if ref.expected_winner_id else [])
+    if not winner_set:
         top_agreement = (result.selected_architecture_id is None or result.status == FeasibilityStatus.INFEASIBLE)
     else:
-        top_agreement = (result.selected_architecture_id == ref.expected_winner_id and result.status == FeasibilityStatus.FEASIBLE)
+        top_agreement = (result.selected_architecture_id in winner_set and result.status == FeasibilityStatus.FEASIBLE)
 
     # Feasible set Jaccard similarity
     pred_feas = set(result.feasible_candidate_ids)
@@ -146,12 +149,22 @@ def compute_metrics(
 
     # Regret vs reference
     regret = 0.0
+    raw_regret = 0.0
+    score_margin = None
     if ref.expected_winner_id and result.selected_architecture_id:
+        ref_score = result.candidate_scores.get(ref.expected_winner_id, 0.0)
+        sel_score = result.candidate_scores.get(result.selected_architecture_id, 0.0)
+        score_margin = round(sel_score - ref_score, 6)
         if ref.expected_winner_id != result.selected_architecture_id:
-            ref_score = result.candidate_scores.get(ref.expected_winner_id, 0.0)
-            sel_score = result.candidate_scores.get(result.selected_architecture_id, 0.0)
-            if ref_score > sel_score:
-                regret = round(ref_score - sel_score, 3)
+            if ref.reference_objective_value is not None:
+                diff = ref.reference_objective_value - sel_score
+                if diff > 0:
+                    raw_regret = diff
+                    regret = round(diff, 3)
+            else:
+                if ref_score > sel_score:
+                    raw_regret = ref_score - sel_score
+                    regret = round(raw_regret, 3)
 
     # 3. Investigation Usefulness
     trace = result.investigation_trace
@@ -197,6 +210,8 @@ def compute_metrics(
         feasible_set_jaccard=jaccard,
         ranking_agreement=ranking_corr,
         regret_vs_reference=regret,
+        raw_unrounded_regret=raw_regret,
+        score_margin_selected_vs_ref=score_margin,
         investigation_rounds=result.investigation_rounds,
         tools_proposed=result.tools_proposed,
         tools_accepted=result.tools_accepted,

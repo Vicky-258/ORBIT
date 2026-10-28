@@ -133,7 +133,7 @@ class ArchitectureRecommender:
         exec_summary = (
             f"Recommend {top_choice.architecture_name}. Under the specified {workload.request_rate_rps:.0f} RPS workload, "
             f"it satisfies all mandatory constraints with a predicted p95 latency of {winner_res.p95_latency_ms:.1f}ms "
-            f"(confidence interval [{winner_res.latency_uncertainty_p95_ms[0]:.1f}, {winner_res.latency_uncertainty_p95_ms[1]:.1f}] ms) "
+            f"(heuristic uncertainty bounds [{winner_res.latency_uncertainty_p95_ms[0]:.1f}, {winner_res.latency_uncertainty_p95_ms[1]:.1f}] ms) "
             f"at an estimated monthly cost of ${winner_res.estimated_monthly_cost_usd:.2f}."
         )
 

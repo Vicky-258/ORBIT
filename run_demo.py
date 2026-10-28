@@ -369,7 +369,7 @@ def main():
         print(f"\n  📊 {c.name}")
         print(f"     Throughput : {res.throughput_achieved_rps:.1f} req/s (Target: >= {workload.min_throughput_rps:.1f} req/s)")
         print(f"     Latencies  : p50: {res.p50_latency_ms:5.2f} ms | p90: {res.p90_latency_ms:5.2f} ms | p95: {res.p95_latency_ms:5.2f} ms | p99: {res.p99_latency_ms:5.2f} ms")
-        print(f"     Uncertainty: p95 95% Confidence Interval: {ci_str}")
+        print(f"     Uncertainty: p95 Heuristic Uncertainty Bounds: {ci_str}")
         print(f"     Bottleneck : {res.bottleneck_component.upper():5s} | Utilizations: {res.component_utilizations} | {hit_str}")
         print(f"     Est. Cost  : ${res.estimated_monthly_cost_usd:.2f} / month (Cap: ${workload.max_monthly_budget_usd:.2f})")
 

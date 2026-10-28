@@ -1,0 +1,1326 @@
+{
+  "metadata": {
+    "suite_name": "full_suite",
+    "mode": "offline",
+    "git_commit": "5eb6763",
+    "scenarios_count": 24,
+    "run1_timestamp": "2026-10-28T08:15:02.405592+00:00",
+    "run2_timestamp": "2026-10-28T08:15:14.746716+00:00",
+    "evaluator_environment": "Linux Python 3.12, SimPy, frozen seeds (seed=42)"
+  },
+  "reproducibility_summary": {
+    "is_semantically_deterministic": true,
+    "total_executions_compared": 72,
+    "bitwise_semantic_matches": 72,
+    "semantic_mismatches_count": 0,
+    "timing_jitter_detected": true,
+    "timing_jitter_fields": [
+      "decision_latency_ms",
+      "investigation_budget_spent",
+      "duration_seconds"
+    ],
+    "aggregate_metrics_identical": true
+  },
+  "aggregate_comparison": {
+    "strategy_a_fixed": {
+      "run1": {
+        "strategy_name": "strategy_a_fixed",
+        "sample_size": 24,
+        "mean_constraint_correctness": 1.0,
+        "hard_constraint_satisfaction_rate": 1.0,
+        "infeasible_detection_rate": 1.0,
+        "top_choice_agreement_rate": 0.708,
+        "mean_feasible_jaccard": 0.771,
+        "mean_regret": 0.0,
+        "total_investigation_rounds": 0,
+        "mean_investigation_rounds": 0.0,
+        "total_tools_proposed": 0,
+        "total_tools_executed": 0,
+        "policy_rejection_rate": 0.0,
+        "mean_decision_latency_ms": 144.4,
+        "fallback_rate": 0.0,
+        "uncertainty_audit_rate": 0.0,
+        "coverage_audit_rate": 0.0
+      },
+      "run2": {
+        "strategy_name": "strategy_a_fixed",
+        "sample_size": 24,
+        "mean_constraint_correctness": 1.0,
+        "hard_constraint_satisfaction_rate": 1.0,
+        "infeasible_detection_rate": 1.0,
+        "top_choice_agreement_rate": 0.708,
+        "mean_feasible_jaccard": 0.771,
+        "mean_regret": 0.0,
+        "total_investigation_rounds": 0,
+        "mean_investigation_rounds": 0.0,
+        "total_tools_proposed": 0,
+        "total_tools_executed": 0,
+        "policy_rejection_rate": 0.0,
+        "mean_decision_latency_ms": 147.6,
+        "fallback_rate": 0.0,
+        "uncertainty_audit_rate": 0.0,
+        "coverage_audit_rate": 0.0
+      },
+      "exact_match_except_latency": true,
+      "mean_latency_delta_ms": 3.2
+    },
+    "strategy_b_deterministic": {
+      "run1": {
+        "strategy_name": "strategy_b_deterministic",
+        "sample_size": 24,
+        "mean_constraint_correctness": 1.0,
+        "hard_constraint_satisfaction_rate": 1.0,
+        "infeasible_detection_rate": 1.0,
+        "top_choice_agreement_rate": 0.708,
+        "mean_feasible_jaccard": 0.771,
+        "mean_regret": 0.0,
+        "total_investigation_rounds": 72,
+        "mean_investigation_rounds": 3.0,
+        "total_tools_proposed": 72,
+        "total_tools_executed": 72,
+        "policy_rejection_rate": 0.0,
+        "mean_decision_latency_ms": 165.8,
+        "fallback_rate": 0.0,
+        "uncertainty_audit_rate": 1.0,
+        "coverage_audit_rate": 1.0
+      },
+      "run2": {
+        "strategy_name": "strategy_b_deterministic",
+        "sample_size": 24,
+        "mean_constraint_correctness": 1.0,
+        "hard_constraint_satisfaction_rate": 1.0,
+        "infeasible_detection_rate": 1.0,
+        "top_choice_agreement_rate": 0.708,
+        "mean_feasible_jaccard": 0.771,
+        "mean_regret": 0.0,
+        "total_investigation_rounds": 72,
+        "mean_investigation_rounds": 3.0,
+        "total_tools_proposed": 72,
+        "total_tools_executed": 72,
+        "policy_rejection_rate": 0.0,
+        "mean_decision_latency_ms": 169.5,
+        "fallback_rate": 0.0,
+        "uncertainty_audit_rate": 1.0,
+        "coverage_audit_rate": 1.0
+      },
+      "exact_match_except_latency": true,
+      "mean_latency_delta_ms": 3.7
+    },
+    "strategy_c_llm": {
+      "run1": {
+        "strategy_name": "strategy_c_llm",
+        "sample_size": 24,
+        "mean_constraint_correctness": 1.0,
+        "hard_constraint_satisfaction_rate": 1.0,
+        "infeasible_detection_rate": 1.0,
+        "top_choice_agreement_rate": 0.708,
+        "mean_feasible_jaccard": 0.771,
+        "mean_regret": 0.0,
+        "total_investigation_rounds": 72,
+        "mean_investigation_rounds": 3.0,
+        "total_tools_proposed": 72,
+        "total_tools_executed": 72,
+        "policy_rejection_rate": 0.0,
+        "mean_decision_latency_ms": 153.2,
+        "fallback_rate": 0.083,
+        "uncertainty_audit_rate": 1.0,
+        "coverage_audit_rate": 1.0
+      },
+      "run2": {
+        "strategy_name": "strategy_c_llm",
+        "sample_size": 24,
+        "mean_constraint_correctness": 1.0,
+        "hard_constraint_satisfaction_rate": 1.0,
+        "infeasible_detection_rate": 1.0,
+        "top_choice_agreement_rate": 0.708,
+        "mean_feasible_jaccard": 0.771,
+        "mean_regret": 0.0,
+        "total_investigation_rounds": 72,
+        "mean_investigation_rounds": 3.0,
+        "total_tools_proposed": 72,
+        "total_tools_executed": 72,
+        "policy_rejection_rate": 0.0,
+        "mean_decision_latency_ms": 156.6,
+        "fallback_rate": 0.083,
+        "uncertainty_audit_rate": 1.0,
+        "coverage_audit_rate": 1.0
+      },
+      "exact_match_except_latency": true,
+      "mean_latency_delta_ms": 3.4
+    }
+  },
+  "execution_level_comparison": [
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_01_straightforward",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 69.0,
+          "run2": 66.96
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_01_straightforward",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 483.72,
+          "run2": 488.89
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_01_straightforward",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 77.55,
+          "run2": 84.1
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_02_near_tie",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 112.86,
+          "run2": 103.38
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_02_near_tie",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 110.32,
+          "run2": 104.85
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_02_near_tie",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 105.51,
+          "run2": 108.22
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_03_boundary",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 162.72,
+          "run2": 164.86
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_03_boundary",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 111.06,
+          "run2": 113.91
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_03_boundary",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 115.85,
+          "run2": 117.5
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_04_infeasible",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 450.67,
+          "run2": 456.27
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_04_infeasible",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 533.24,
+          "run2": 546.79
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_04_infeasible",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 492.46,
+          "run2": 502.97
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_05_incomplete_coverage",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 112.68,
+          "run2": 115.5
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_05_incomplete_coverage",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 116.63,
+          "run2": 116.26
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_05_incomplete_coverage",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 176.43,
+          "run2": 176.42
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_06_high_uncertainty",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 92.59,
+          "run2": 88.8
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_06_high_uncertainty",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 96.77,
+          "run2": 99.27
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.006
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_06_high_uncertainty",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 93.0,
+          "run2": 101.51
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_07_evidence_conflict",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 149.55,
+          "run2": 167.68
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_07_evidence_conflict",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 102.67,
+          "run2": 106.23
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_07_evidence_conflict",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 101.96,
+          "run2": 107.92
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_08_unnecessary_investigation",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 20.53,
+          "run2": 20.43
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_08_unnecessary_investigation",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 23.43,
+          "run2": 23.22
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_08_unnecessary_investigation",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 24.59,
+          "run2": 23.11
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_09_decision_changing",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 155.57,
+          "run2": 162.11
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_09_decision_changing",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 108.42,
+          "run2": 117.7
+        },
+        "investigation_budget_spent": {
+          "run1": 0.006,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_09_decision_changing",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 116.82,
+          "run2": 137.77
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_10_provider_failure",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 97.95,
+          "run2": 102.66
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_10_provider_failure",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 150.61,
+          "run2": 164.88
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_10_provider_failure",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 102.7,
+          "run2": 104.33
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_11_conflicting_objectives",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 99.68,
+          "run2": 102.07
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_11_conflicting_objectives",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 104.09,
+          "run2": 107.83
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_11_conflicting_objectives",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 156.75,
+          "run2": 154.81
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "dev_12_insufficient_evidence",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 202.78,
+          "run2": 209.35
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "dev_12_insufficient_evidence",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 220.71,
+          "run2": 220.93
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "dev_12_insufficient_evidence",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 214.11,
+          "run2": 213.48
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_01_straightforward",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 40.8,
+          "run2": 47.12
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_01_straightforward",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 43.88,
+          "run2": 42.12
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_01_straightforward",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 44.16,
+          "run2": 41.55
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_02_near_tie",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 151.45,
+          "run2": 157.22
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_02_near_tie",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 90.31,
+          "run2": 88.48
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_02_near_tie",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 87.06,
+          "run2": 88.66
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_03_boundary",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 95.58,
+          "run2": 99.77
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_03_boundary",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 166.65,
+          "run2": 172.62
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_03_boundary",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 98.61,
+          "run2": 109.8
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_04_infeasible",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 530.5,
+          "run2": 550.48
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_04_infeasible",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 620.3,
+          "run2": 641.29
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_04_infeasible",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 642.83,
+          "run2": 664.57
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_05_incomplete_coverage",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 96.69,
+          "run2": 98.12
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_05_incomplete_coverage",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 97.85,
+          "run2": 107.45
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_05_incomplete_coverage",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 159.14,
+          "run2": 164.39
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_06_high_uncertainty",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 77.06,
+          "run2": 80.48
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_06_high_uncertainty",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 81.01,
+          "run2": 85.79
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_06_high_uncertainty",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 83.04,
+          "run2": 79.51
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_07_evidence_conflict",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 107.15,
+          "run2": 104.08
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_07_evidence_conflict",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 165.05,
+          "run2": 160.31
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_07_evidence_conflict",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 112.89,
+          "run2": 107.62
+        },
+        "investigation_budget_spent": {
+          "run1": 0.01,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_08_unnecessary_investigation",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 20.68,
+          "run2": 16.33
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_08_unnecessary_investigation",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 18.78,
+          "run2": 17.47
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_08_unnecessary_investigation",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 19.14,
+          "run2": 18.61
+        },
+        "investigation_budget_spent": {
+          "run1": 0.006,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_09_decision_changing",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 101.66,
+          "run2": 100.36
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_09_decision_changing",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 105.62,
+          "run2": 104.6
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_09_decision_changing",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 160.5,
+          "run2": 157.68
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_10_provider_failure",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 96.52,
+          "run2": 96.3
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_10_provider_failure",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 101.07,
+          "run2": 98.88
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_10_provider_failure",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 94.12,
+          "run2": 96.39
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_11_conflicting_objectives",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 143.98,
+          "run2": 145.32
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_11_conflicting_objectives",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 94.76,
+          "run2": 96.5
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_11_conflicting_objectives",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 97.46,
+          "run2": 96.2
+        }
+      }
+    },
+    {
+      "strategy": "strategy_a_fixed",
+      "scenario_id": "heldout_12_insufficient_evidence",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 277.07,
+          "run2": 287.75
+        }
+      }
+    },
+    {
+      "strategy": "strategy_b_deterministic",
+      "scenario_id": "heldout_12_insufficient_evidence",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 232.8,
+          "run2": 241.53
+        },
+        "investigation_budget_spent": {
+          "run1": 0.002,
+          "run2": 0.004
+        }
+      }
+    },
+    {
+      "strategy": "strategy_c_llm",
+      "scenario_id": "heldout_12_insufficient_evidence",
+      "selected_architecture_match": true,
+      "scores_match": true,
+      "rankings_match": true,
+      "feasible_set_match": true,
+      "investigation_trace_length_match": true,
+      "timing_jitter": {
+        "decision_latency_ms": {
+          "run1": 301.32,
+          "run2": 301.37
+        },
+        "investigation_budget_spent": {
+          "run1": 0.004,
+          "run2": 0.002
+        }
+      }
+    }
+  ]
+}

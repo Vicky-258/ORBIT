@@ -36,12 +36,14 @@ class DatasetSplit(str, Enum):
 class ExpectedReferenceOutcome(BaseModel):
     """Defines the expected reference verdict for evaluating planning quality."""
     expected_winner_id: Optional[str] = None
+    expected_winner_set: List[str] = Field(default_factory=list)
     expected_status: FeasibilityStatus = FeasibilityStatus.FEASIBLE
     expected_feasible_ids: List[str] = Field(default_factory=list)
     expected_ranking: List[str] = Field(default_factory=list)
     is_abstention_expected: bool = False
     should_stop_early: bool = False
     reference_provenance: str = "synthetic_fixture"  # 'synthetic_fixture' or 'empirical_measurement'
+    reference_objective_value: Optional[float] = None
     rationale: str = ""
 
 

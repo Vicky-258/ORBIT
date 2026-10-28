@@ -26,7 +26,7 @@ and decide the next most valuable investigation step from a finite set of approv
 Approved actions:
 1. inspect_model_coverage: Check whether component models in registry are available, validated, and cover the workload.
 2. simulate_candidate: Re-simulate a specific candidate architecture under deeper conditions (target must be a valid candidate ID).
-3. inspect_uncertainty: Audit latency confidence intervals and calculate safety headroom against SLA constraints.
+3. inspect_uncertainty: Audit latency heuristic uncertainty bounds and calculate safety headroom against SLA constraints.
 4. propose_benchmark: Recommend a targeted container benchmark to reduce empirical model uncertainty (proposal-only; will not execute without authorization).
 5. stop_and_recommend: Conclude that current evidence is sufficient to recommend an architectural winner.
 6. stop_inconclusive: Conclude that available evidence is contradictory, insufficient, or hard constraints cannot be resolved.
@@ -173,7 +173,7 @@ class InvestigationPlanner:
             return InvestigationDecision(
                 action=InvestigationActionType.INSPECT_UNCERTAINTY,
                 target="all",
-                reason="Audit 95% latency confidence intervals against hard SLA targets across all candidates.",
+                reason="Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
                 expected_information_gain="Detect candidate SLA boundary risks and confidence margins.",
                 evidence_reference=["simulation_results"],
             )

@@ -176,7 +176,7 @@ class SimulationResult(BaseModel):
     estimated_monthly_cost_usd: float
     simulation_duration_seconds: float
     random_seed: int
-    latency_uncertainty_p95_ms: Tuple[float, float] = (0.0, 0.0)
+    latency_uncertainty_p95_ms: Tuple[float, float] = Field(default=(0.0, 0.0), description="Heuristic uncertainty bounds around p95 latency. Engineering proxy, not a validated statistical confidence interval.")
     warnings: List[str] = Field(default_factory=list)
 
 

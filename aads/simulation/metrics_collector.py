@@ -106,8 +106,9 @@ class SimulationMetricsCollector:
         # Bottleneck component: resource with highest utilization
         bottleneck = max(utilizations.items(), key=lambda kv: kv[1])[0] if utilizations else "none"
 
-        # Statistical uncertainty bound around p95 using standard error of percentile
-        # SE(p) ~ sqrt(p*(1-p)/n) / f(p); for normal approx: +- 1.96 * std / sqrt(n)
+        # Heuristic uncertainty bound around p95 using scaled standard error of sample mean.
+        # NOTE: This is an engineering heuristic proxy, NOT a statistically valid 95% confidence interval
+        # for p95 (which requires independent replications or batch means under autocorrelated queueing delays).
         se_margin = 1.96 * (std_lat / math.sqrt(max(1, len(latencies)))) * 1.5 if latencies else 0.5
         p95_bounds = (round(max(0.1, p95 - se_margin), 2), round(p95 + se_margin, 2))
 

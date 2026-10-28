@@ -388,7 +388,7 @@ def _offline_llm_adaptive_decision(state: Dict[str, Any], round_num: int, scenar
         return InvestigationDecision(
             action=InvestigationActionType.INSPECT_UNCERTAINTY,
             target="all",
-            reason="SLA boundary risk detected; audit p95 latency confidence intervals.",
+            reason="SLA boundary risk detected; audit p95 latency heuristic uncertainty bounds.",
             expected_information_gain="Verify whether p95 uncertainty breaches SLA limits.",
             evidence_reference=["simulation_results"],
         )
@@ -408,7 +408,7 @@ def _offline_llm_adaptive_decision(state: Dict[str, Any], round_num: int, scenar
         return InvestigationDecision(
             action=InvestigationActionType.INSPECT_UNCERTAINTY,
             target="all",
-            reason="Inspect latency confidence bounds against hard constraints.",
+            reason="Inspect latency heuristic uncertainty bounds against hard constraints.",
             expected_information_gain="Quantify SLA confidence margins.",
             evidence_reference=["simulation_results"],
         )
@@ -608,5 +608,8 @@ def run_strategy_c_llm_adaptive(
         llm_token_count=None,
         llm_cost_usd=None,
         errors=state.get("errors", []),
-        provenance_map={"pipeline": "llm_adaptive", "simulation": "simulated"},
+        provenance_map={
+            "pipeline": "llm_adaptive_live" if (mode == "live" and not fallback_used) else ("llm_adaptive_fallback" if fallback_used else "llm_adaptive_mocked_offline"),
+            "simulation": "simulated",
+        },
     )
