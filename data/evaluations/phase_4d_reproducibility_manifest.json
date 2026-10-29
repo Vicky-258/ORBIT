@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "evaluation_phase": "Phase 4D",
+    "description": "Evidence-Driven Active Experimentation Reproducibility Manifest",
+    "timestamp_utc": "2026-10-29T10:04:24.709963+00:00",
+    "git_commit": "9468706",
+    "git_branch": "feat/phase-4d-active-experimentation",
+    "python_version": "3.12.12"
+  },
+  "scenarios_evaluated": [
+    "exp_01_boundary_shift",
+    "exp_02_confirmed_margin",
+    "exp_03_near_tie_discrimination",
+    "exp_04_infeasible_triage"
+  ],
+  "strategies_evaluated": [
+    "strategy_1_baseline_no_exp",
+    "strategy_2_fixed_experiments",
+    "strategy_3_deterministic_active",
+    "strategy_4_agent_active"
+  ],
+  "aggregate_accuracy": {
+    "strategy_1_baseline_no_exp": 0.25,
+    "strategy_2_fixed_experiments": 0.75,
+    "strategy_3_deterministic_active": 0.75,
+    "strategy_4_agent_active": 0.75
+  },
+  "total_experiments_by_strategy": {
+    "strategy_1_baseline_no_exp": 0,
+    "strategy_2_fixed_experiments": 4,
+    "strategy_3_deterministic_active": 3,
+    "strategy_4_agent_active": 4
+  },
+  "redundant_experiments_by_strategy": {
+    "strategy_1_baseline_no_exp": 0,
+    "strategy_2_fixed_experiments": 2,
+    "strategy_3_deterministic_active": 1,
+    "strategy_4_agent_active": 2
+  },
+  "reproduction_commands": [
+    ".venv/bin/python3 scripts/run_phase_4d_evaluation.py",
+    ".venv/bin/pytest -v tests/test_phase_4d_active_experimentation.py"
+  ]
+}

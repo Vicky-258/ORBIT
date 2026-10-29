@@ -79,6 +79,18 @@ class ComponentRegistry:
                     raw_json TEXT
                 )
             """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS authorizations (
+                    authorization_id TEXT PRIMARY KEY,
+                    proposal_id TEXT NOT NULL,
+                    authorized_by TEXT NOT NULL,
+                    timestamp_utc TEXT NOT NULL,
+                    execution_mode TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    max_runtime_seconds REAL NOT NULL,
+                    token TEXT
+                )
+            """)
             conn.commit()
 
     def register_model(self, model: ModelRecord) -> None:
@@ -329,3 +341,45 @@ class ComponentRegistry:
             created_at=now,
         )
         self.register_model(redis_model)
+
+    def save_authorization(self, auth: Any) -> None:
+        """Persist an authorization record for benchmark execution."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT OR REPLACE INTO authorizations (
+                    authorization_id, proposal_id, authorized_by, timestamp_utc,
+                    execution_mode, status, max_runtime_seconds, token
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                auth.authorization_id,
+                auth.proposal_id,
+                auth.authorized_by,
+                auth.timestamp_utc,
+                auth.execution_mode,
+                auth.status.value if hasattr(auth.status, "value") else str(auth.status),
+                auth.max_runtime_seconds,
+                auth.token,
+            ))
+            conn.commit()
+
+    def get_authorization(self, authorization_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve authorization record by ID."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM authorizations WHERE authorization_id = ?", (authorization_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return dict(row)
+
+    def get_model_history(self, component_name: str) -> List[ModelRecord]:
+        """Retrieve version history of models for a component ordered by creation time."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM models
+                WHERE component_name = ?
+                ORDER BY created_at ASC
+            """, (component_name,))
+            return [self._row_to_model(row) for row in cursor.fetchall()]

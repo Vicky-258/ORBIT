@@ -1,0 +1,1596 @@
+{
+  "evaluation_phase": "Phase 4D",
+  "description": "Evidence-Driven Active Experimentation Comparative Evaluation",
+  "timestamp_utc": "2026-10-29T10:04:19.212101+00:00",
+  "scenarios": [
+    {
+      "scenario_id": "exp_01_boundary_shift",
+      "scenario_name": "SLA Boundary Latency Shift (PostgreSQL Saturation)",
+      "sla_p95_target_ms": 20.0,
+      "ground_truth_winner": "arch_b_cached",
+      "requires_experiment": true,
+      "strategy_results": {
+        "strategy_1_baseline_no_exp": {
+          "strategy_name": "strategy_1_baseline_no_exp",
+          "scenario_id": "exp_01_boundary_shift",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": false,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 0,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 0,
+          "model_promoted": false,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": null,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.074,
+          "investigation_rounds": 0,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_2_fixed_experiments": {
+          "strategy_name": "strategy_2_fixed_experiments",
+          "scenario_id": "exp_01_boundary_shift",
+          "selected_architecture_id": "arch_b_cached",
+          "selected_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": true,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": true,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 1,
+          "redundant_experiments_count": 0,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.62,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 1.063,
+          "investigation_rounds": 1,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_3_deterministic_active": {
+          "strategy_name": "strategy_3_deterministic_active",
+          "scenario_id": "exp_01_boundary_shift",
+          "selected_architecture_id": "arch_b_cached",
+          "selected_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": true,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": true,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 1,
+          "redundant_experiments_count": 0,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.658,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.092,
+          "investigation_rounds": 1,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_4_agent_active": {
+          "strategy_name": "strategy_4_agent_active",
+          "scenario_id": "exp_01_boundary_shift",
+          "selected_architecture_id": "arch_b_cached",
+          "selected_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": true,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": true,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 1,
+          "redundant_experiments_count": 0,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 1.027,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.566,
+          "investigation_rounds": 3,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": [
+            {
+              "round": 1,
+              "action": "inspect_model_coverage",
+              "target": "all_candidates",
+              "reason": "Audit registry model coverage and calibration status for all candidate architectures.",
+              "expected_information_gain": "Identify uncalibrated or missing component performance models.",
+              "evidence_reference": [
+                "candidate_architectures"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "check_component_models",
+              "tool_input": {
+                "target": "all_candidates"
+              },
+              "tool_output": {
+                "success": true,
+                "coverage_by_architecture": {
+                  "arch_a_simple": {
+                    "name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "required_models": [
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_b_cached": {
+                    "name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_c_async": {
+                    "name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  }
+                },
+                "missing_models": [],
+                "total_candidates_audited": 3,
+                "summary": "Audited 3 candidates; 0 missing models identified."
+              },
+              "duration_seconds": 0.001,
+              "provenance": "model_derived",
+              "stop_reason": null
+            },
+            {
+              "round": 2,
+              "action": "inspect_uncertainty",
+              "target": "all",
+              "reason": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+              "expected_information_gain": "Detect candidate SLA boundary risks and confidence margins.",
+              "evidence_reference": [
+                "simulation_results"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "inspect_uncertainty",
+              "tool_input": {
+                "target": "all"
+              },
+              "tool_output": {
+                "success": true,
+                "uncertainty_audit": [
+                  {
+                    "architecture_id": "arch_a_simple",
+                    "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "p95_measured": 5.36,
+                    "latency_uncertainty_ci_95": [
+                      5.26,
+                      5.47
+                    ],
+                    "ci_width_ms": 0.21,
+                    "sla_target_ms": 20.0,
+                    "sla_headroom_ms": 14.53,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 250.0,
+                    "cost_monthly_usd": 133.0,
+                    "cost_headroom_usd": 117.0,
+                    "throughput_achieved_rps": 379.3,
+                    "throughput_headroom_rps": 29.3
+                  },
+                  {
+                    "architecture_id": "arch_b_cached",
+                    "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "p95_measured": 5.26,
+                    "latency_uncertainty_ci_95": [
+                      5.13,
+                      5.38
+                    ],
+                    "ci_width_ms": 0.25,
+                    "sla_target_ms": 20.0,
+                    "sla_headroom_ms": 14.62,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 250.0,
+                    "cost_monthly_usd": 176.0,
+                    "cost_headroom_usd": 74.0,
+                    "throughput_achieved_rps": 374.0,
+                    "throughput_headroom_rps": 24.0
+                  },
+                  {
+                    "architecture_id": "arch_c_async",
+                    "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "p95_measured": 2.18,
+                    "latency_uncertainty_ci_95": [
+                      2.14,
+                      2.21
+                    ],
+                    "ci_width_ms": 0.07,
+                    "sla_target_ms": 20.0,
+                    "sla_headroom_ms": 17.79,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 250.0,
+                    "cost_monthly_usd": 216.0,
+                    "cost_headroom_usd": 34.0,
+                    "throughput_achieved_rps": 367.7,
+                    "throughput_headroom_rps": 17.7
+                  }
+                ],
+                "total_candidates_analyzed": 3,
+                "summary": "Uncertainty analysis completed across 3 candidates."
+              },
+              "duration_seconds": 0.0,
+              "provenance": "uncertainty_analysis",
+              "stop_reason": null
+            },
+            {
+              "round": 3,
+              "action": "execute_experiment",
+              "target": "postgres_db",
+              "reason": "Execute authorized benchmark on postgres_db to acquire empirical measurements and resolve model uncertainty.",
+              "expected_information_gain": "Calibrate empirical service demand model with group-based held-out validation.",
+              "evidence_reference": [
+                "simulation_results",
+                "postgres_db"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "execute_experiment",
+              "tool_input": {
+                "proposal": {
+                  "target": "postgres_db"
+                }
+              },
+              "tool_output": {
+                "success": true,
+                "execution": {
+                  "execution_id": "exec_4cf47157a1",
+                  "proposal_id": "prop_7a8be77b81",
+                  "authorization_id": "auth_51f9ea91",
+                  "status": "SUCCESS",
+                  "raw_records_count": 6,
+                  "experiment_ids": [
+                    "exp_syn_3cb3c91f99",
+                    "exp_syn_c73bc76b61",
+                    "exp_syn_43a3537135",
+                    "exp_syn_5d300bd8b9",
+                    "exp_syn_c4a582584f",
+                    "exp_syn_c388db3f4b"
+                  ],
+                  "error_message": null,
+                  "execution_duration_seconds": 0.0,
+                  "timestamp_utc": "2026-10-29T10:04:20.934290+00:00",
+                  "provenance": "synthetic_fixture",
+                  "model_update_status": "PROMOTED",
+                  "promoted_model_id": "model_postgres_db_dfc668ed"
+                },
+                "calibration": {
+                  "component_name": "postgres_db",
+                  "version": "postgres:16-alpine",
+                  "status": "PROMOTED",
+                  "old_model_id": "model_pg16_optimistic_prior",
+                  "new_model_id": "model_postgres_db_dfc668ed",
+                  "validation_rmse_ms": 1.027,
+                  "validation_mae_ms": 0.88,
+                  "validation_mape_pct": 12.83,
+                  "r2_score": 0.811,
+                  "is_empirical_upgrade": false,
+                  "details": {
+                    "chosen_model_type": "piecewise_ridge",
+                    "train_samples": 4,
+                    "test_samples": 2,
+                    "held_out_concurrencies": [
+                      4,
+                      16
+                    ],
+                    "regression_eval": {
+                      "rmse": 1.027,
+                      "mae": 0.88,
+                      "mape": 12.83,
+                      "max_error": 1.41,
+                      "r2": 0.811
+                    },
+                    "lookup_eval": {
+                      "rmse": 1.863,
+                      "mae": 1.515,
+                      "mape": 36.55,
+                      "max_error": 2.6,
+                      "r2": 0.379
+                    },
+                    "chosen_eval": {
+                      "rmse": 1.027,
+                      "mae": 0.88,
+                      "mape": 12.83,
+                      "max_error": 1.41,
+                      "r2": 0.811
+                    },
+                    "is_validated": true,
+                    "group_based_leakage_free": true
+                  },
+                  "summary": "Successfully calibrated and promoted model 'model_postgres_db_dfc668ed' for postgres_db:postgres:16-alpine. Held-out validation: RMSE=1.027ms, MAE=0.88ms, MAPE=12.83%, R2=0.811."
+                },
+                "closed_loop_delta": {
+                  "model_promoted": true,
+                  "promoted_model_id": "model_postgres_db_dfc668ed",
+                  "is_empirical_upgrade": false,
+                  "previous_winner": "arch_a_simple",
+                  "new_winner": "arch_b_cached",
+                  "recommendation_changed": true,
+                  "feasibility_status_before": "FEASIBLE",
+                  "feasibility_status_after": "FEASIBLE",
+                  "affected_candidates_resimulated": 3
+                },
+                "provenance": "synthetic_fixture",
+                "summary": "Experiment executed (6 trials). Calibration: PROMOTED. Recommendation changed from arch_a_simple to arch_b_cached."
+              },
+              "duration_seconds": 0.073,
+              "provenance": "synthetic_fixture",
+              "stop_reason": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario_id": "exp_02_confirmed_margin",
+      "scenario_name": "SLA Headroom Confirmation (Low Load)",
+      "sla_p95_target_ms": 60.0,
+      "ground_truth_winner": "arch_a_simple",
+      "requires_experiment": false,
+      "strategy_results": {
+        "strategy_1_baseline_no_exp": {
+          "strategy_name": "strategy_1_baseline_no_exp",
+          "scenario_id": "exp_02_confirmed_margin",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 0,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 0,
+          "model_promoted": false,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": null,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.017,
+          "investigation_rounds": 0,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_2_fixed_experiments": {
+          "strategy_name": "strategy_2_fixed_experiments",
+          "scenario_id": "exp_02_confirmed_margin",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 1,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.58,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.033,
+          "investigation_rounds": 1,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_3_deterministic_active": {
+          "strategy_name": "strategy_3_deterministic_active",
+          "scenario_id": "exp_02_confirmed_margin",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 0,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 0,
+          "model_promoted": false,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": null,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.015,
+          "investigation_rounds": 0,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_4_agent_active": {
+          "strategy_name": "strategy_4_agent_active",
+          "scenario_id": "exp_02_confirmed_margin",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 1,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.969,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.042,
+          "investigation_rounds": 3,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": [
+            {
+              "round": 1,
+              "action": "inspect_model_coverage",
+              "target": "all_candidates",
+              "reason": "Audit registry model coverage and calibration status for all candidate architectures.",
+              "expected_information_gain": "Identify uncalibrated or missing component performance models.",
+              "evidence_reference": [
+                "candidate_architectures"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "check_component_models",
+              "tool_input": {
+                "target": "all_candidates"
+              },
+              "tool_output": {
+                "success": true,
+                "coverage_by_architecture": {
+                  "arch_a_simple": {
+                    "name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "required_models": [
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_b_cached": {
+                    "name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_c_async": {
+                    "name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  }
+                },
+                "missing_models": [],
+                "total_candidates_audited": 3,
+                "summary": "Audited 3 candidates; 0 missing models identified."
+              },
+              "duration_seconds": 0.0,
+              "provenance": "model_derived",
+              "stop_reason": null
+            },
+            {
+              "round": 2,
+              "action": "inspect_uncertainty",
+              "target": "all",
+              "reason": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+              "expected_information_gain": "Detect candidate SLA boundary risks and confidence margins.",
+              "evidence_reference": [
+                "simulation_results"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "inspect_uncertainty",
+              "tool_input": {
+                "target": "all"
+              },
+              "tool_output": {
+                "success": true,
+                "uncertainty_audit": [
+                  {
+                    "architecture_id": "arch_a_simple",
+                    "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "p95_measured": 7.61,
+                    "latency_uncertainty_ci_95": [
+                      7.4,
+                      7.82
+                    ],
+                    "ci_width_ms": 0.42,
+                    "sla_target_ms": 60.0,
+                    "sla_headroom_ms": 52.18,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 200.0,
+                    "cost_monthly_usd": 133.0,
+                    "cost_headroom_usd": 67.0,
+                    "throughput_achieved_rps": 113.3,
+                    "throughput_headroom_rps": 13.3
+                  },
+                  {
+                    "architecture_id": "arch_b_cached",
+                    "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "p95_measured": 7.51,
+                    "latency_uncertainty_ci_95": [
+                      7.19,
+                      7.82
+                    ],
+                    "ci_width_ms": 0.63,
+                    "sla_target_ms": 60.0,
+                    "sla_headroom_ms": 52.18,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 200.0,
+                    "cost_monthly_usd": 176.0,
+                    "cost_headroom_usd": 24.0,
+                    "throughput_achieved_rps": 125.0,
+                    "throughput_headroom_rps": 25.0
+                  },
+                  {
+                    "architecture_id": "arch_c_async",
+                    "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "p95_measured": 3.63,
+                    "latency_uncertainty_ci_95": [
+                      3.49,
+                      3.78
+                    ],
+                    "ci_width_ms": 0.29,
+                    "sla_target_ms": 60.0,
+                    "sla_headroom_ms": 56.22,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 200.0,
+                    "cost_monthly_usd": 216.0,
+                    "cost_headroom_usd": -16.0,
+                    "throughput_achieved_rps": 115.7,
+                    "throughput_headroom_rps": 15.7
+                  }
+                ],
+                "total_candidates_analyzed": 3,
+                "summary": "Uncertainty analysis completed across 3 candidates."
+              },
+              "duration_seconds": 0.0,
+              "provenance": "uncertainty_analysis",
+              "stop_reason": null
+            },
+            {
+              "round": 3,
+              "action": "execute_experiment",
+              "target": "postgres_db",
+              "reason": "Execute authorized benchmark on postgres_db to acquire empirical measurements and resolve model uncertainty.",
+              "expected_information_gain": "Calibrate empirical service demand model with group-based held-out validation.",
+              "evidence_reference": [
+                "simulation_results",
+                "postgres_db"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "execute_experiment",
+              "tool_input": {
+                "proposal": {
+                  "target": "postgres_db"
+                }
+              },
+              "tool_output": {
+                "success": true,
+                "execution": {
+                  "execution_id": "exec_5ee8202ef6",
+                  "proposal_id": "prop_2a249d90ca",
+                  "authorization_id": "auth_b3b51d10",
+                  "status": "SUCCESS",
+                  "raw_records_count": 6,
+                  "experiment_ids": [
+                    "exp_syn_b0399c85e8",
+                    "exp_syn_ccd519f569",
+                    "exp_syn_4a152d0f87",
+                    "exp_syn_0e9460f6c1",
+                    "exp_syn_1f4c76e418",
+                    "exp_syn_9e4be2cc7f"
+                  ],
+                  "error_message": null,
+                  "execution_duration_seconds": 0.0,
+                  "timestamp_utc": "2026-10-29T10:04:21.088002+00:00",
+                  "provenance": "synthetic_fixture",
+                  "model_update_status": "PROMOTED",
+                  "promoted_model_id": "model_postgres_db_8974107e"
+                },
+                "calibration": {
+                  "component_name": "postgres_db",
+                  "version": "postgres:16-alpine",
+                  "status": "PROMOTED",
+                  "old_model_id": "model_pg16_calibrated_baseline",
+                  "new_model_id": "model_postgres_db_8974107e",
+                  "validation_rmse_ms": 0.969,
+                  "validation_mae_ms": 0.83,
+                  "validation_mape_pct": 12.83,
+                  "r2_score": 0.811,
+                  "is_empirical_upgrade": false,
+                  "details": {
+                    "chosen_model_type": "piecewise_ridge",
+                    "train_samples": 4,
+                    "test_samples": 2,
+                    "held_out_concurrencies": [
+                      4,
+                      16
+                    ],
+                    "regression_eval": {
+                      "rmse": 0.969,
+                      "mae": 0.83,
+                      "mape": 12.83,
+                      "max_error": 1.33,
+                      "r2": 0.811
+                    },
+                    "lookup_eval": {
+                      "rmse": 1.748,
+                      "mae": 1.42,
+                      "mape": 36.37,
+                      "max_error": 2.44,
+                      "r2": 0.385
+                    },
+                    "chosen_eval": {
+                      "rmse": 0.969,
+                      "mae": 0.83,
+                      "mape": 12.83,
+                      "max_error": 1.33,
+                      "r2": 0.811
+                    },
+                    "is_validated": true,
+                    "group_based_leakage_free": true
+                  },
+                  "summary": "Successfully calibrated and promoted model 'model_postgres_db_8974107e' for postgres_db:postgres:16-alpine. Held-out validation: RMSE=0.969ms, MAE=0.83ms, MAPE=12.83%, R2=0.811."
+                },
+                "closed_loop_delta": {
+                  "model_promoted": true,
+                  "promoted_model_id": "model_postgres_db_8974107e",
+                  "is_empirical_upgrade": false,
+                  "previous_winner": "arch_a_simple",
+                  "new_winner": "arch_a_simple",
+                  "recommendation_changed": false,
+                  "feasibility_status_before": "FEASIBLE",
+                  "feasibility_status_after": "FEASIBLE",
+                  "affected_candidates_resimulated": 3
+                },
+                "provenance": "synthetic_fixture",
+                "summary": "Experiment executed (6 trials). Calibration: PROMOTED. Recommendation retained at arch_a_simple."
+              },
+              "duration_seconds": 0.026,
+              "provenance": "synthetic_fixture",
+              "stop_reason": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario_id": "exp_03_near_tie_discrimination",
+      "scenario_name": "Near-Tie Architecture Discrimination",
+      "sla_p95_target_ms": 40.0,
+      "ground_truth_winner": "arch_b_cached",
+      "requires_experiment": true,
+      "strategy_results": {
+        "strategy_1_baseline_no_exp": {
+          "strategy_name": "strategy_1_baseline_no_exp",
+          "scenario_id": "exp_03_near_tie_discrimination",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": false,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 0,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 0,
+          "model_promoted": false,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": null,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.053,
+          "investigation_rounds": 0,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_2_fixed_experiments": {
+          "strategy_name": "strategy_2_fixed_experiments",
+          "scenario_id": "exp_03_near_tie_discrimination",
+          "selected_architecture_id": "arch_b_cached",
+          "selected_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": true,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": true,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 1,
+          "redundant_experiments_count": 0,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.62,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.103,
+          "investigation_rounds": 1,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_3_deterministic_active": {
+          "strategy_name": "strategy_3_deterministic_active",
+          "scenario_id": "exp_03_near_tie_discrimination",
+          "selected_architecture_id": "arch_b_cached",
+          "selected_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": true,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": true,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 1,
+          "redundant_experiments_count": 0,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.658,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.106,
+          "investigation_rounds": 1,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_4_agent_active": {
+          "strategy_name": "strategy_4_agent_active",
+          "scenario_id": "exp_03_near_tie_discrimination",
+          "selected_architecture_id": "arch_b_cached",
+          "selected_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "status": "FEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": true,
+          "correct_under_ground_truth": true,
+          "sla_violation_prevented": true,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 1,
+          "redundant_experiments_count": 0,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 1.027,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.206,
+          "investigation_rounds": 3,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": [
+            {
+              "round": 1,
+              "action": "inspect_model_coverage",
+              "target": "all_candidates",
+              "reason": "Audit registry model coverage and calibration status for all candidate architectures.",
+              "expected_information_gain": "Identify uncalibrated or missing component performance models.",
+              "evidence_reference": [
+                "candidate_architectures"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "check_component_models",
+              "tool_input": {
+                "target": "all_candidates"
+              },
+              "tool_output": {
+                "success": true,
+                "coverage_by_architecture": {
+                  "arch_a_simple": {
+                    "name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "required_models": [
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_b_cached": {
+                    "name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_c_async": {
+                    "name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  }
+                },
+                "missing_models": [],
+                "total_candidates_audited": 3,
+                "summary": "Audited 3 candidates; 0 missing models identified."
+              },
+              "duration_seconds": 0.0,
+              "provenance": "model_derived",
+              "stop_reason": null
+            },
+            {
+              "round": 2,
+              "action": "inspect_uncertainty",
+              "target": "all",
+              "reason": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+              "expected_information_gain": "Detect candidate SLA boundary risks and confidence margins.",
+              "evidence_reference": [
+                "simulation_results"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "inspect_uncertainty",
+              "tool_input": {
+                "target": "all"
+              },
+              "tool_output": {
+                "success": true,
+                "uncertainty_audit": [
+                  {
+                    "architecture_id": "arch_a_simple",
+                    "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "p95_measured": 5.8,
+                    "latency_uncertainty_ci_95": [
+                      5.69,
+                      5.91
+                    ],
+                    "ci_width_ms": 0.22,
+                    "sla_target_ms": 40.0,
+                    "sla_headroom_ms": 34.09,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 260.0,
+                    "cost_monthly_usd": 133.0,
+                    "cost_headroom_usd": 127.0,
+                    "throughput_achieved_rps": 447.7,
+                    "throughput_headroom_rps": 47.7
+                  },
+                  {
+                    "architecture_id": "arch_b_cached",
+                    "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "p95_measured": 5.25,
+                    "latency_uncertainty_ci_95": [
+                      5.14,
+                      5.37
+                    ],
+                    "ci_width_ms": 0.23,
+                    "sla_target_ms": 40.0,
+                    "sla_headroom_ms": 34.63,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 260.0,
+                    "cost_monthly_usd": 176.0,
+                    "cost_headroom_usd": 84.0,
+                    "throughput_achieved_rps": 456.0,
+                    "throughput_headroom_rps": 56.0
+                  },
+                  {
+                    "architecture_id": "arch_c_async",
+                    "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "p95_measured": 2.16,
+                    "latency_uncertainty_ci_95": [
+                      2.13,
+                      2.2
+                    ],
+                    "ci_width_ms": 0.07,
+                    "sla_target_ms": 40.0,
+                    "sla_headroom_ms": 37.8,
+                    "crosses_sla_threshold": false,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 260.0,
+                    "cost_monthly_usd": 216.0,
+                    "cost_headroom_usd": 44.0,
+                    "throughput_achieved_rps": 430.7,
+                    "throughput_headroom_rps": 30.7
+                  }
+                ],
+                "total_candidates_analyzed": 3,
+                "summary": "Uncertainty analysis completed across 3 candidates."
+              },
+              "duration_seconds": 0.0,
+              "provenance": "uncertainty_analysis",
+              "stop_reason": null
+            },
+            {
+              "round": 3,
+              "action": "execute_experiment",
+              "target": "postgres_db",
+              "reason": "Execute authorized benchmark on postgres_db to acquire empirical measurements and resolve model uncertainty.",
+              "expected_information_gain": "Calibrate empirical service demand model with group-based held-out validation.",
+              "evidence_reference": [
+                "simulation_results",
+                "postgres_db"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "execute_experiment",
+              "tool_input": {
+                "proposal": {
+                  "target": "postgres_db"
+                }
+              },
+              "tool_output": {
+                "success": true,
+                "execution": {
+                  "execution_id": "exec_cd0e5d9f72",
+                  "proposal_id": "prop_5860b4143a",
+                  "authorization_id": "auth_06ef5b63",
+                  "status": "SUCCESS",
+                  "raw_records_count": 6,
+                  "experiment_ids": [
+                    "exp_syn_3cb3c91f99",
+                    "exp_syn_c73bc76b61",
+                    "exp_syn_43a3537135",
+                    "exp_syn_5d300bd8b9",
+                    "exp_syn_c4a582584f",
+                    "exp_syn_c388db3f4b"
+                  ],
+                  "error_message": null,
+                  "execution_duration_seconds": 0.0,
+                  "timestamp_utc": "2026-10-29T10:04:21.428876+00:00",
+                  "provenance": "synthetic_fixture",
+                  "model_update_status": "PROMOTED",
+                  "promoted_model_id": "model_postgres_db_dfc668ed"
+                },
+                "calibration": {
+                  "component_name": "postgres_db",
+                  "version": "postgres:16-alpine",
+                  "status": "PROMOTED",
+                  "old_model_id": "model_pg16_optimistic_prior",
+                  "new_model_id": "model_postgres_db_dfc668ed",
+                  "validation_rmse_ms": 1.027,
+                  "validation_mae_ms": 0.88,
+                  "validation_mape_pct": 12.83,
+                  "r2_score": 0.811,
+                  "is_empirical_upgrade": false,
+                  "details": {
+                    "chosen_model_type": "piecewise_ridge",
+                    "train_samples": 4,
+                    "test_samples": 2,
+                    "held_out_concurrencies": [
+                      4,
+                      16
+                    ],
+                    "regression_eval": {
+                      "rmse": 1.027,
+                      "mae": 0.88,
+                      "mape": 12.83,
+                      "max_error": 1.41,
+                      "r2": 0.811
+                    },
+                    "lookup_eval": {
+                      "rmse": 1.863,
+                      "mae": 1.515,
+                      "mape": 36.55,
+                      "max_error": 2.6,
+                      "r2": 0.379
+                    },
+                    "chosen_eval": {
+                      "rmse": 1.027,
+                      "mae": 0.88,
+                      "mape": 12.83,
+                      "max_error": 1.41,
+                      "r2": 0.811
+                    },
+                    "is_validated": true,
+                    "group_based_leakage_free": true
+                  },
+                  "summary": "Successfully calibrated and promoted model 'model_postgres_db_dfc668ed' for postgres_db:postgres:16-alpine. Held-out validation: RMSE=1.027ms, MAE=0.88ms, MAPE=12.83%, R2=0.811."
+                },
+                "closed_loop_delta": {
+                  "model_promoted": true,
+                  "promoted_model_id": "model_postgres_db_dfc668ed",
+                  "is_empirical_upgrade": false,
+                  "previous_winner": "arch_a_simple",
+                  "new_winner": "arch_b_cached",
+                  "recommendation_changed": true,
+                  "feasibility_status_before": "FEASIBLE",
+                  "feasibility_status_after": "FEASIBLE",
+                  "affected_candidates_resimulated": 3
+                },
+                "provenance": "synthetic_fixture",
+                "summary": "Experiment executed (6 trials). Calibration: PROMOTED. Recommendation changed from arch_a_simple to arch_b_cached."
+              },
+              "duration_seconds": 0.153,
+              "provenance": "synthetic_fixture",
+              "stop_reason": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario_id": "exp_04_infeasible_triage",
+      "scenario_name": "Extreme Infeasible Workload Triage",
+      "sla_p95_target_ms": 8.0,
+      "ground_truth_winner": "inconclusive",
+      "requires_experiment": false,
+      "strategy_results": {
+        "strategy_1_baseline_no_exp": {
+          "strategy_name": "strategy_1_baseline_no_exp",
+          "scenario_id": "exp_04_infeasible_triage",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "INFEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": false,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 0,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 0,
+          "model_promoted": false,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": null,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.348,
+          "investigation_rounds": 0,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_2_fixed_experiments": {
+          "strategy_name": "strategy_2_fixed_experiments",
+          "scenario_id": "exp_04_infeasible_triage",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "INFEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": false,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 1,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.66,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.817,
+          "investigation_rounds": 1,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_3_deterministic_active": {
+          "strategy_name": "strategy_3_deterministic_active",
+          "scenario_id": "exp_04_infeasible_triage",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "INFEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": false,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 1,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 0.7,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 0.819,
+          "investigation_rounds": 1,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": []
+        },
+        "strategy_4_agent_active": {
+          "strategy_name": "strategy_4_agent_active",
+          "scenario_id": "exp_04_infeasible_triage",
+          "selected_architecture_id": "arch_a_simple",
+          "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "status": "INFEASIBLE",
+          "pre_experiment_winner": "arch_a_simple",
+          "recommendation_changed": false,
+          "correct_under_ground_truth": false,
+          "sla_violation_prevented": false,
+          "experiments_executed_count": 1,
+          "useful_experiments_count": 0,
+          "redundant_experiments_count": 1,
+          "model_promoted": true,
+          "calibration_rmse_before": null,
+          "calibration_rmse_after": 1.086,
+          "calibration_rmse_improvement": null,
+          "execution_duration_seconds": 1.139,
+          "investigation_rounds": 3,
+          "llm_call_count": 0,
+          "llm_tokens": 0,
+          "llm_cost_usd": 0.0,
+          "investigation_trace": [
+            {
+              "round": 1,
+              "action": "inspect_model_coverage",
+              "target": "all_candidates",
+              "reason": "Audit registry model coverage and calibration status for all candidate architectures.",
+              "expected_information_gain": "Identify uncalibrated or missing component performance models.",
+              "evidence_reference": [
+                "candidate_architectures"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "check_component_models",
+              "tool_input": {
+                "target": "all_candidates"
+              },
+              "tool_output": {
+                "success": true,
+                "coverage_by_architecture": {
+                  "arch_a_simple": {
+                    "name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "required_models": [
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "OUT_OF_RANGE",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_b_cached": {
+                    "name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "OUT_OF_RANGE",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  },
+                  "arch_c_async": {
+                    "name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "required_models": [
+                      "redis_cache:redis:7.2-alpine",
+                      "postgres_db:postgres:16-alpine"
+                    ],
+                    "missing_models": [],
+                    "fully_covered": true,
+                    "statuses": {
+                      "redis_cache:redis:7.2-alpine": {
+                        "status": "VALIDATED",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "lookup_table"
+                      },
+                      "postgres_db:postgres:16-alpine": {
+                        "status": "OUT_OF_RANGE",
+                        "is_validated": true,
+                        "is_synthetic": true,
+                        "model_type": "piecewise_ridge"
+                      }
+                    }
+                  }
+                },
+                "missing_models": [],
+                "total_candidates_audited": 3,
+                "summary": "Audited 3 candidates; 0 missing models identified."
+              },
+              "duration_seconds": 0.0,
+              "provenance": "model_derived",
+              "stop_reason": null
+            },
+            {
+              "round": 2,
+              "action": "inspect_uncertainty",
+              "target": "all",
+              "reason": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+              "expected_information_gain": "Detect candidate SLA boundary risks and confidence margins.",
+              "evidence_reference": [
+                "simulation_results"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "inspect_uncertainty",
+              "tool_input": {
+                "target": "all"
+              },
+              "tool_output": {
+                "success": true,
+                "uncertainty_audit": [
+                  {
+                    "architecture_id": "arch_a_simple",
+                    "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+                    "p95_measured": 1434.71,
+                    "latency_uncertainty_ci_95": [
+                      1403.03,
+                      1466.39
+                    ],
+                    "ci_width_ms": 63.36,
+                    "sla_target_ms": 8.0,
+                    "sla_headroom_ms": -1458.39,
+                    "crosses_sla_threshold": true,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 120.0,
+                    "cost_monthly_usd": 133.0,
+                    "cost_headroom_usd": -13.0,
+                    "throughput_achieved_rps": 545.7,
+                    "throughput_headroom_rps": -2454.3
+                  },
+                  {
+                    "architecture_id": "arch_b_cached",
+                    "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+                    "p95_measured": 1367.61,
+                    "latency_uncertainty_ci_95": [
+                      1349.96,
+                      1385.26
+                    ],
+                    "ci_width_ms": 35.3,
+                    "sla_target_ms": 8.0,
+                    "sla_headroom_ms": -1377.26,
+                    "crosses_sla_threshold": true,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 120.0,
+                    "cost_monthly_usd": 176.0,
+                    "cost_headroom_usd": -56.0,
+                    "throughput_achieved_rps": 1769.0,
+                    "throughput_headroom_rps": -1231.0
+                  },
+                  {
+                    "architecture_id": "arch_c_async",
+                    "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+                    "p95_measured": 241.72,
+                    "latency_uncertainty_ci_95": [
+                      239.57,
+                      243.87
+                    ],
+                    "ci_width_ms": 4.3,
+                    "sla_target_ms": 8.0,
+                    "sla_headroom_ms": -235.87,
+                    "crosses_sla_threshold": true,
+                    "is_near_sla_boundary": false,
+                    "budget_cap_usd": 120.0,
+                    "cost_monthly_usd": 216.0,
+                    "cost_headroom_usd": -96.0,
+                    "throughput_achieved_rps": 3107.7,
+                    "throughput_headroom_rps": 107.7
+                  }
+                ],
+                "total_candidates_analyzed": 3,
+                "summary": "Uncertainty analysis completed across 3 candidates."
+              },
+              "duration_seconds": 0.0,
+              "provenance": "uncertainty_analysis",
+              "stop_reason": null
+            },
+            {
+              "round": 3,
+              "action": "execute_experiment",
+              "target": "postgres_db",
+              "reason": "Execute authorized benchmark on postgres_db to acquire empirical measurements and resolve model uncertainty.",
+              "expected_information_gain": "Calibrate empirical service demand model with group-based held-out validation.",
+              "evidence_reference": [
+                "simulation_results",
+                "postgres_db"
+              ],
+              "policy_verdict": "APPROVED",
+              "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+              "tool_invoked": "execute_experiment",
+              "tool_input": {
+                "proposal": {
+                  "target": "postgres_db"
+                }
+              },
+              "tool_output": {
+                "success": true,
+                "execution": {
+                  "execution_id": "exec_21ceefed68",
+                  "proposal_id": "prop_ca86b477f4",
+                  "authorization_id": "auth_cd4bf9a9",
+                  "status": "SUCCESS",
+                  "raw_records_count": 6,
+                  "experiment_ids": [
+                    "exp_syn_e586a92dbb",
+                    "exp_syn_01427ba917",
+                    "exp_syn_f89e26a72d",
+                    "exp_syn_03c0042d68",
+                    "exp_syn_2d66596f74",
+                    "exp_syn_b32a43ee65"
+                  ],
+                  "error_message": null,
+                  "execution_duration_seconds": 0.0,
+                  "timestamp_utc": "2026-10-29T10:04:24.021659+00:00",
+                  "provenance": "synthetic_fixture",
+                  "model_update_status": "PROMOTED",
+                  "promoted_model_id": "model_postgres_db_b60b2023"
+                },
+                "calibration": {
+                  "component_name": "postgres_db",
+                  "version": "postgres:16-alpine",
+                  "status": "PROMOTED",
+                  "old_model_id": "model_pg16_optimistic_prior",
+                  "new_model_id": "model_postgres_db_b60b2023",
+                  "validation_rmse_ms": 1.086,
+                  "validation_mae_ms": 0.93,
+                  "validation_mape_pct": 12.83,
+                  "r2_score": 0.812,
+                  "is_empirical_upgrade": false,
+                  "details": {
+                    "chosen_model_type": "piecewise_ridge",
+                    "train_samples": 4,
+                    "test_samples": 2,
+                    "held_out_concurrencies": [
+                      4,
+                      16
+                    ],
+                    "regression_eval": {
+                      "rmse": 1.086,
+                      "mae": 0.93,
+                      "mape": 12.83,
+                      "max_error": 1.49,
+                      "r2": 0.812
+                    },
+                    "lookup_eval": {
+                      "rmse": 1.97,
+                      "mae": 1.6,
+                      "mape": 36.61,
+                      "max_error": 2.75,
+                      "r2": 0.381
+                    },
+                    "chosen_eval": {
+                      "rmse": 1.086,
+                      "mae": 0.93,
+                      "mape": 12.83,
+                      "max_error": 1.49,
+                      "r2": 0.812
+                    },
+                    "is_validated": true,
+                    "group_based_leakage_free": true
+                  },
+                  "summary": "Successfully calibrated and promoted model 'model_postgres_db_b60b2023' for postgres_db:postgres:16-alpine. Held-out validation: RMSE=1.086ms, MAE=0.93ms, MAPE=12.83%, R2=0.812."
+                },
+                "closed_loop_delta": {
+                  "model_promoted": true,
+                  "promoted_model_id": "model_postgres_db_b60b2023",
+                  "is_empirical_upgrade": false,
+                  "previous_winner": "arch_a_simple",
+                  "new_winner": "arch_a_simple",
+                  "recommendation_changed": false,
+                  "feasibility_status_before": "INFEASIBLE",
+                  "feasibility_status_after": "INFEASIBLE",
+                  "affected_candidates_resimulated": 3
+                },
+                "provenance": "synthetic_fixture",
+                "summary": "Experiment executed (6 trials). Calibration: PROMOTED. Recommendation retained at arch_a_simple."
+              },
+              "duration_seconds": 0.683,
+              "provenance": "synthetic_fixture",
+              "stop_reason": null
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "aggregate_summary": {
+    "strategy_1_baseline_no_exp": {
+      "correct": 1,
+      "total": 4,
+      "changes": 0,
+      "exps": 0,
+      "useful": 0,
+      "redundant": 0,
+      "duration": 0.492,
+      "accuracy_rate": 0.25,
+      "mean_duration_seconds": 0.123,
+      "total_experiments": 0,
+      "useful_experiments": 0,
+      "redundant_experiments": 0
+    },
+    "strategy_2_fixed_experiments": {
+      "correct": 3,
+      "total": 4,
+      "changes": 2,
+      "exps": 4,
+      "useful": 2,
+      "redundant": 2,
+      "duration": 2.016,
+      "accuracy_rate": 0.75,
+      "mean_duration_seconds": 0.504,
+      "total_experiments": 4,
+      "useful_experiments": 2,
+      "redundant_experiments": 2
+    },
+    "strategy_3_deterministic_active": {
+      "correct": 3,
+      "total": 4,
+      "changes": 2,
+      "exps": 3,
+      "useful": 2,
+      "redundant": 1,
+      "duration": 1.032,
+      "accuracy_rate": 0.75,
+      "mean_duration_seconds": 0.258,
+      "total_experiments": 3,
+      "useful_experiments": 2,
+      "redundant_experiments": 1
+    },
+    "strategy_4_agent_active": {
+      "correct": 3,
+      "total": 4,
+      "changes": 2,
+      "exps": 4,
+      "useful": 2,
+      "redundant": 2,
+      "duration": 1.9529999999999998,
+      "llm_calls": 0,
+      "tokens": 0,
+      "cost": 0.0,
+      "accuracy_rate": 0.75,
+      "mean_duration_seconds": 0.488,
+      "total_experiments": 4,
+      "useful_experiments": 2,
+      "redundant_experiments": 2
+    }
+  }
+}

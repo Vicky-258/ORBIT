@@ -257,9 +257,9 @@ def test_detection_of_inconsistent_reference_outcomes():
 # ---------------------------------------------------------------------------
 # 7. Architecture A Workload Provenance & Reproduction (13.58 ms vs 19.8 ms)
 # ---------------------------------------------------------------------------
-def test_arch_a_simulation_reproduction_13_58_ms():
-    reg = ComponentRegistry()
-    reg.seed_baseline_data()
+def test_arch_a_simulation_reproduction_13_58_ms(tmp_path):
+    reg = ComponentRegistry(db_path=tmp_path / "audit_arch_a.db")
+    reg.seed_baseline_data(force=True)
     generator = ArchitectureGenerator()
     candidates = generator.generate_candidates()
     arch_a = next(c for c in candidates if c.id == "arch_a_simple")

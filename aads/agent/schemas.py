@@ -46,17 +46,89 @@ class InvestigationActionType(str, Enum):
     SIMULATE_CANDIDATE = "simulate_candidate"
     INSPECT_UNCERTAINTY = "inspect_uncertainty"
     PROPOSE_BENCHMARK = "propose_benchmark"
+    EXECUTE_EXPERIMENT = "execute_experiment"
     STOP_AND_RECOMMEND = "stop_and_recommend"
     STOP_INCONCLUSIVE = "stop_inconclusive"
 
 
+class AuthorizationStatus(str, Enum):
+    PENDING = "PENDING"
+    AUTHORIZED = "AUTHORIZED"
+    DENIED = "DENIED"
+    REVOKED = "REVOKED"
+
+
+class AuthorizationLevel(str, Enum):
+    AUTOMATIC_MOCK = "automatic_mock"
+    OPERATOR_APPROVAL_REQUIRED = "operator_approval_required"
+
+
 class BenchmarkProposalDetails(BaseModel):
-    """Details for a proposed benchmark campaign."""
+    """Details for a proposed benchmark campaign (Phase 4B/4C backwards compatibility)."""
     component_name: str = Field(default="postgres_db", description="Target component name to benchmark (postgres_db, redis_cache, mongodb_cluster)")
     version: str = Field(default="16", description="Component version")
     target_concurrency: int = Field(default=50, description="Proposed concurrency level to measure")
     workload_notes: Optional[str] = Field(default=None, description="Specific workload characteristics to test")
     rationale: str = Field(default="", description="Why this benchmark would reduce decision uncertainty")
+
+
+class ExperimentProposal(BaseModel):
+    """
+    Phase 4D typed experiment proposal specification.
+    Includes hypotheses, workload profile, estimated information gain, risk, and authorization requirements.
+    """
+    proposal_id: str = Field(description="Unique identifier for experiment proposal")
+    target_component: str = Field(default="postgres_db", description="Target component name (postgres_db, redis_cache)")
+    version: str = Field(default="16-alpine", description="Target component version")
+    hypothesis: str = Field(description="Specific architectural or performance hypothesis being investigated")
+    unknown_being_investigated: str = Field(description="Decision-relevant parameter or uncertainty being resolved")
+    competing_hypotheses: List[str] = Field(default_factory=list, description="Alternative hypotheses or parameter bounds")
+    concurrency_levels: List[int] = Field(default_factory=lambda: [1, 4, 8, 16], description="Concurrency levels to benchmark")
+    read_ratio: float = Field(default=1.0, description="Read traffic ratio (0.0 - 1.0)")
+    target_rps: Optional[float] = Field(default=None, description="Target throughput to test")
+    replications: int = Field(default=3, description="Repeated measurement trials per concurrency point")
+    benchmark_framework: str = Field(default="pgbench:16-select-only", description="Validated benchmark harness type")
+    expected_information_gain: Optional[str] = Field(default=None, description="Qualitative estimate of uncertainty reduction")
+    decision_change_probability: str = Field(default="MEDIUM", description="Estimated probability of decision shift: LOW, MEDIUM, HIGH")
+    expected_runtime_seconds: float = Field(default=15.0, description="Estimated benchmark execution wall-clock time")
+    estimated_cost_usd: float = Field(default=0.0, description="Estimated infrastructure cost in USD")
+    operational_risk: str = Field(default="LOW", description="Risk level: LOW, MEDIUM, HIGH")
+    authorization_level: AuthorizationLevel = Field(default=AuthorizationLevel.OPERATOR_APPROVAL_REQUIRED, description="Required approval level")
+    success_criteria: str = Field(default="Clean exit code with valid throughput and latency parsing", description="Conditions for valid trial")
+    timeout_seconds: int = Field(default=60, description="Hard timeout for execution")
+    target_model_id: Optional[str] = Field(default=None, description="Existing model ID to update or recalibrate")
+
+
+class AuthorizationRecord(BaseModel):
+    """
+    Immutable cryptographic authorization record approving a benchmark experiment.
+    """
+    authorization_id: str = Field(description="Unique authorization transaction ID")
+    proposal_id: str = Field(description="Proposal ID being authorized")
+    authorized_by: str = Field(description="Authorizing entity (e.g. operator, test_suite, policy_gate)")
+    timestamp_utc: str = Field(description="ISO-8601 UTC timestamp of authorization")
+    execution_mode: str = Field(default="synthetic", description="Execution mode: 'docker' (real container) or 'synthetic'")
+    status: AuthorizationStatus = Field(default=AuthorizationStatus.AUTHORIZED, description="Current authorization status")
+    max_runtime_seconds: float = Field(default=60.0, description="Hard cap on execution duration")
+    token: Optional[str] = Field(default=None, description="Verification token for authorized execution")
+
+
+class ExperimentExecutionResult(BaseModel):
+    """
+    Structured outcome of executing an authorized benchmark experiment.
+    """
+    execution_id: str = Field(description="Execution identifier")
+    proposal_id: str = Field(description="Proposal ID executed")
+    authorization_id: Optional[str] = Field(default=None, description="Authorization ID used")
+    status: str = Field(default="SUCCESS", description="Outcome status: SUCCESS, FAILED, TIMED_OUT, UNAUTHORIZED")
+    raw_records_count: int = Field(default=0, description="Number of ExperimentRecord items produced")
+    experiment_ids: List[str] = Field(default_factory=list, description="IDs of generated ExperimentRecord items")
+    error_message: Optional[str] = Field(default=None, description="Error message if failed")
+    execution_duration_seconds: float = Field(default=0.0, description="Duration of benchmark execution")
+    timestamp_utc: str = Field(description="Execution completion timestamp")
+    provenance: str = Field(default="synthetic_fixture", description="Provenance tag: measured_docker or synthetic_fixture")
+    model_update_status: Optional[str] = Field(default=None, description="Calibration result: PROMOTED, INSUFFICIENT_EVIDENCE, REJECTED")
+    promoted_model_id: Optional[str] = Field(default=None, description="New ModelRecord ID if promoted")
 
 
 class InvestigationDecision(BaseModel):
@@ -85,7 +157,11 @@ class InvestigationDecision(BaseModel):
     )
     benchmark_proposal: Optional[BenchmarkProposalDetails] = Field(
         default=None,
-        description="Details when action is propose_benchmark."
+        description="Details when action is propose_benchmark (Phase 4B/4C backwards compatibility)."
+    )
+    experiment_proposal: Optional[ExperimentProposal] = Field(
+        default=None,
+        description="Phase 4D typed experiment proposal when action is propose_benchmark or execute_experiment."
     )
 
 

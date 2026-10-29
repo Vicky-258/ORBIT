@@ -206,24 +206,26 @@ class InvestigationPolicy:
                     details={"original_target": decision.target},
                 )
 
-        if action_type == InvestigationActionType.PROPOSE_BENCHMARK:
-            comp_name = (
-                decision.benchmark_proposal.component_name.strip().lower()
-                if decision.benchmark_proposal and decision.benchmark_proposal.component_name
-                else (decision.target or "").strip().lower()
-            )
+        if action_type in (InvestigationActionType.PROPOSE_BENCHMARK, InvestigationActionType.EXECUTE_EXPERIMENT):
+            if decision.experiment_proposal and decision.experiment_proposal.target_component:
+                comp_name = decision.experiment_proposal.target_component.strip().lower()
+            elif decision.benchmark_proposal and decision.benchmark_proposal.component_name:
+                comp_name = decision.benchmark_proposal.component_name.strip().lower()
+            else:
+                comp_name = (decision.target or "").strip().lower()
+
             if comp_name not in ALLOWED_BENCHMARK_COMPONENTS:
                 sanitized = InvestigationDecision(
                     action=InvestigationActionType.STOP_AND_RECOMMEND if sim_results else InvestigationActionType.STOP_INCONCLUSIVE,
                     reason=f"Component '{comp_name}' not in allowed benchmark catalog ({list(ALLOWED_BENCHMARK_COMPONENTS)}).",
-                    stop_reason="Benchmark proposed for unapproved component.",
+                    stop_reason="Benchmark/experiment proposed for unapproved component.",
                     evidence_reference=decision.evidence_reference,
                 )
                 return PolicyEvaluationResult(
                     verdict=PolicyVerdict.REJECTED,
                     allowed=False,
                     sanitized_decision=sanitized,
-                    reason=f"Benchmark proposal rejected: component '{comp_name}' not in allowed catalog {list(ALLOWED_BENCHMARK_COMPONENTS)}.",
+                    reason=f"Experiment proposal rejected: component '{comp_name}' not in allowed catalog {list(ALLOWED_BENCHMARK_COMPONENTS)}.",
                     details={"disallowed_component": comp_name},
                 )
 

@@ -10,6 +10,11 @@ from aads.agent.schemas import (
     InvestigationDecision,
     InvestigationRecord,
     BenchmarkProposalDetails,
+    AuthorizationStatus,
+    AuthorizationLevel,
+    ExperimentProposal,
+    AuthorizationRecord,
+    ExperimentExecutionResult,
 )
 from aads.agent.investigation_policy import (
     InvestigationPolicy,
@@ -53,6 +58,11 @@ __all__ = [
     "InvestigationDecision",
     "InvestigationRecord",
     "BenchmarkProposalDetails",
+    "AuthorizationStatus",
+    "AuthorizationLevel",
+    "ExperimentProposal",
+    "AuthorizationRecord",
+    "ExperimentExecutionResult",
     "InvestigationPolicy",
     "PolicyVerdict",
     "PolicyEvaluationResult",

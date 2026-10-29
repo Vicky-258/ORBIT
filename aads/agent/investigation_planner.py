@@ -31,12 +31,14 @@ Approved actions:
 2. simulate_candidate: Re-simulate a specific candidate architecture under deeper conditions (target MUST be exactly ONE candidate architecture ID, e.g. 'arch_a_simple', NOT comma-separated).
 3. inspect_uncertainty: Audit latency heuristic uncertainty bounds and calculate safety headroom against SLA constraints (target should be 'all' or a single candidate ID).
 4. propose_benchmark: Recommend a targeted container benchmark to reduce empirical model uncertainty (proposal-only; will not execute without authorization).
-5. stop_and_recommend: Conclude that current evidence is sufficient to recommend an architectural winner.
-6. stop_inconclusive: Conclude that available evidence is contradictory, insufficient, or hard constraints cannot be resolved.
+5. execute_experiment: Run an authorized benchmark trial to calibrate a component model, re-simulate affected candidates, and update recommendations.
+6. stop_and_recommend: Conclude that current evidence is sufficient to recommend an architectural winner.
+7. stop_inconclusive: Conclude that available evidence is contradictory, insufficient, or hard constraints cannot be resolved.
 
 Decision Rules:
-- If all candidates are simulated, feasibility is verified, and a clear winner exists without threshold boundary risks, choose 'stop_and_recommend'.
-- If target is specified, it MUST be exactly one single candidate ID (e.g. 'arch_a_simple') or 'all' for coverage/uncertainty checks.
+- If component model status indicates an uncalibrated synthetic prior or high uncertainty, and Experiment Authorization is GRANTED, prioritize "execute_experiment" to measure real performance and recalibrate the model.
+- If all candidates are simulated, feasibility is verified, and component models are calibrated without threshold boundary risks, choose "stop_and_recommend".
+- If target is specified, it MUST be exactly one single candidate ID (e.g. "arch_a_simple") or component name (e.g. "postgres_db").
 - Do NOT repeat an action/target combination that was already executed in a previous round.
 - Ground your rationale directly in numerical metrics from the evidence summary.
 - You must produce a structured InvestigationDecision.
@@ -100,6 +102,21 @@ class InvestigationPlanner:
             lines.append(f"  - Selected: {rec.selected_architecture_name} ({rec.selected_architecture_id})")
             lines.append(f"  - Status: {rec.status.value}")
             lines.append(f"  - Feasible Candidates: {[e.architecture_id for e in rec.evaluations if e.feasibility_status.value == 'FEASIBLE']}")
+
+        # 4b. Component Model Status & Authorization
+        reg = state.get("component_registry")
+        active_exp = state.get("enable_active_experimentation", False)
+        auth = state.get("experiment_authorization")
+        if reg and workload:
+            lines.append("Component Model Status:")
+            for comp_name in ["postgres_db", "redis_cache"]:
+                ver = "postgres:16-alpine" if "postgres" in comp_name else "redis:7.2-alpine"
+                status, model, warns = reg.check_compatibility(comp_name, ver, workload)
+                calib_tag = "synthetic prior (uncalibrated)" if (model and model.is_synthetic_fixture) else ("empirically calibrated" if model else "missing")
+                rmse_str = f"RMSE={model.validation_rmse_ms:.2f}ms" if (model and model.validation_rmse_ms) else "unvalidated"
+                lines.append(f"  - {comp_name}: status={status} | type={calib_tag} | {rmse_str}")
+        if active_exp and auth:
+            lines.append(f"Experiment Authorization: GRANTED (Mode: {auth.execution_mode}, AuthID: {auth.authorization_id}). Authorized benchmark action: execute_experiment.")
 
         # 5. Prior Investigation Trace
         if trace:
@@ -260,7 +277,21 @@ class InvestigationPlanner:
                 evidence_reference=["simulation_results"],
             )
 
-        # Step 3: If an uncalibrated component or missing model exists, propose a benchmark
+        # Step 3: Active Experimentation if enabled and authorized
+        has_auth = bool(state.get("experiment_authorization") or state.get("auto_authorize_synthetic"))
+        active_exp_enabled = state.get("enable_active_experimentation", False)
+
+        if (active_exp_enabled or has_auth) and "execute_experiment" not in executed_actions:
+            target_comp = "postgres_db"
+            return InvestigationDecision(
+                action=InvestigationActionType.EXECUTE_EXPERIMENT,
+                target=target_comp,
+                reason=f"Execute authorized benchmark on {target_comp} to acquire empirical measurements and resolve model uncertainty.",
+                expected_information_gain="Calibrate empirical service demand model with group-based held-out validation.",
+                evidence_reference=["simulation_results", target_comp],
+            )
+
+        # Step 3b: If an uncalibrated component or missing model exists, propose a benchmark
         missing = state.get("missing_models", [])
         if missing and "propose_benchmark" not in executed_actions:
             first_missing = missing[0]

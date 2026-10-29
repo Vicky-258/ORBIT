@@ -11,7 +11,13 @@ from aads.agent.schemas import (
     InvestigationActionType,
     InvestigationDecision,
     InvestigationRecord,
+    ExperimentProposal,
+    AuthorizationRecord,
+    AuthorizationStatus,
 )
+from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from aads.benchmark.experiment_ranker import ExperimentRanker
+from aads.modeling.calibration_pipeline import CalibrationPipeline
 from aads.core.schemas import (
     WorkloadSpec,
     ArchitectureGraph,
@@ -32,9 +38,18 @@ class InvestigationDispatcher:
     Guarantees deterministic execution and strict isolation from LLM hallucinations.
     """
 
-    def __init__(self, registry: Optional[ComponentRegistry] = None):
+    def __init__(
+        self,
+        registry: Optional[ComponentRegistry] = None,
+        executor: Optional[BoundedBenchmarkExecutor] = None,
+        calibration_pipeline: Optional[CalibrationPipeline] = None,
+        ranker: Optional[ExperimentRanker] = None,
+    ):
         self.registry = registry or ComponentRegistry()
         self.registry.seed_baseline_data()
+        self.executor = executor or BoundedBenchmarkExecutor(registry=self.registry)
+        self.calibration_pipeline = calibration_pipeline or CalibrationPipeline(registry=self.registry)
+        self.ranker = ranker or ExperimentRanker(registry=self.registry)
 
     def dispatch(
         self,
@@ -90,11 +105,22 @@ class InvestigationDispatcher:
             elif action == InvestigationActionType.PROPOSE_BENCHMARK:
                 tool_invoked = "propose_benchmark"
                 tool_input = {
-                    "proposal": decision.benchmark_proposal.model_dump() if decision.benchmark_proposal else {"target": target}
+                    "proposal": decision.benchmark_proposal.model_dump() if decision.benchmark_proposal else (
+                        decision.experiment_proposal.model_dump() if decision.experiment_proposal else {"target": target}
+                    )
                 }
                 tool_output, updates = self._handle_propose_benchmark(decision, state)
                 state_updates.update(updates)
                 provenance = "benchmark_proposal"
+
+            elif action == InvestigationActionType.EXECUTE_EXPERIMENT:
+                tool_invoked = "execute_experiment"
+                tool_input = {
+                    "proposal": decision.experiment_proposal.model_dump() if decision.experiment_proposal else {"target": target}
+                }
+                tool_output, updates = self._handle_execute_experiment(decision, candidates, sim_results, workload, state)
+                state_updates.update(updates)
+                provenance = tool_output.get("provenance", "measured_experiment")
 
             elif action == InvestigationActionType.STOP_AND_RECOMMEND:
                 tool_invoked = "stop_and_recommend"
@@ -369,5 +395,164 @@ class InvestigationDispatcher:
         updates = {
             "workflow_status": "INSUFFICIENT_EVIDENCE",
             "investigation_status": "CONCLUDED_INCONCLUSIVE",
+        }
+        return output, updates
+
+    def _handle_execute_experiment(
+        self,
+        decision: InvestigationDecision,
+        candidates: List[ArchitectureGraph],
+        sim_results: List[SimulationResult],
+        workload: Optional[WorkloadSpec],
+        state: Dict[str, Any],
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """
+        Executes an authorized benchmark experiment, records measured evidence immutably,
+        recalibrates component model through held-out validation, and re-evaluates architecture recommendation.
+        """
+        import uuid
+        from datetime import datetime, timezone
+
+        # 1. Resolve experiment proposal
+        proposal: Optional[ExperimentProposal] = decision.experiment_proposal
+        if proposal is None:
+            if decision.benchmark_proposal:
+                proposal = ExperimentRanker.proposal_from_details(decision.benchmark_proposal, workload)
+            else:
+                comp = (decision.target or "postgres_db").strip().lower()
+                ver = "redis:7.2-alpine" if "redis" in comp else "postgres:16-alpine"
+                proposal = ExperimentProposal(
+                    proposal_id=f"prop_{uuid.uuid4().hex[:10]}",
+                    target_component=comp,
+                    version=ver,
+                    hypothesis=f"Measure {comp} service demand scaling under load",
+                    unknown_being_investigated=f"{comp} latency and capacity inflection point",
+                    concurrency_levels=[1, 4, 8, 16, 24, 32],
+                    read_ratio=workload.read_ratio if workload else 1.0,
+                    target_rps=workload.request_rate_rps if workload else 200.0,
+                )
+        else:
+            # Ensure proper version tag and concurrency range if LLM provided generic proposal
+            if "postgres" in proposal.target_component and proposal.version in ("16", "latest", "postgres_db"):
+                proposal.version = "postgres:16-alpine"
+            elif "redis" in proposal.target_component and proposal.version in ("7", "latest", "redis_cache"):
+                proposal.version = "redis:7.2-alpine"
+            if max(proposal.concurrency_levels or [1]) < 24 and "postgres" in proposal.target_component:
+                proposal.concurrency_levels = sorted(list(set(proposal.concurrency_levels + [24, 32])))
+
+        # 2. Resolve authorization record
+        auth: Optional[AuthorizationRecord] = state.get("experiment_authorization")
+        if auth is None and state.get("auto_authorize_synthetic"):
+            auth = AuthorizationRecord(
+                authorization_id=f"auth_{uuid.uuid4().hex[:8]}",
+                proposal_id=proposal.proposal_id,
+                authorized_by="state_auto_authorize_synthetic",
+                timestamp_utc=datetime.now(timezone.utc).isoformat(),
+                execution_mode="synthetic",
+                status=AuthorizationStatus.AUTHORIZED,
+                max_runtime_seconds=60.0,
+            )
+
+        # 3. Execute experiment via bounded interface
+        exec_res = self.executor.execute_experiment(proposal, auth)
+        if exec_res.status != "SUCCESS":
+            return {
+                "success": False,
+                "error": exec_res.error_message or "Experiment execution failed.",
+                "execution_result": exec_res.model_dump(),
+                "provenance": exec_res.provenance,
+            }, {}
+
+        # 4. Validated Model Calibration Pipeline
+        calib_outcome = self.calibration_pipeline.calibrate_component(
+            component_name=proposal.target_component,
+            version=proposal.version,
+        )
+
+        exec_res.model_update_status = calib_outcome.status
+        exec_res.promoted_model_id = calib_outcome.new_model_id
+
+        # 5. Closed-loop re-simulation & recommendation re-evaluation
+        prev_rec = state.get("recommendation")
+        prev_winner = prev_rec.selected_architecture_id if prev_rec else None
+        prev_status = prev_rec.status.value if prev_rec and hasattr(prev_rec.status, "value") else str(prev_rec.status if prev_rec else "UNKNOWN")
+
+        new_sim_results = list(sim_results)
+        recommendation_changed = False
+        new_winner = prev_winner
+        new_status = prev_status
+        new_rec = prev_rec
+
+        if calib_outcome.status == "PROMOTED" and workload and candidates:
+            # Re-simulate candidates that use this component
+            target_comp = proposal.target_component.lower()
+            resimulated_count = 0
+            updated_results = []
+
+            for cand in candidates:
+                # Check if architecture utilizes calibrated component
+                comps = getattr(cand, "components", {})
+                uses_comp = False
+                if isinstance(comps, dict):
+                    for k, comp in comps.items():
+                        c_name = getattr(comp, "name", str(comp)).lower()
+                        if target_comp in c_name or target_comp in k.lower():
+                            uses_comp = True
+                            break
+
+                if uses_comp:
+                    engine = SimPyEngine(self.registry)
+                    sim_run = engine.simulate_architecture(
+                        architecture=cand,
+                        workload=workload,
+                        duration_seconds=state.get("simulation_duration_seconds", 5.0),
+                        random_seed=state.get("random_seed", 42),
+                    )
+                    updated_results.append(sim_run)
+                    resimulated_count += 1
+                else:
+                    # Retain prior simulation
+                    cand_id = cand.id if hasattr(cand, "id") else cand.get("id")
+                    prior = next((s for s in sim_results if s.architecture_id == cand_id), None)
+                    if prior:
+                        updated_results.append(prior)
+
+            new_sim_results = updated_results
+
+            # Reapply hard constraints and ranking logic
+            new_rec = ArchitectureRecommender.evaluate_and_recommend(
+                workload=workload,
+                sim_results=new_sim_results,
+            )
+            new_winner = new_rec.selected_architecture_id
+            new_status = new_rec.status.value if hasattr(new_rec.status, "value") else str(new_rec.status)
+            recommendation_changed = (prev_winner != new_winner)
+
+        output = {
+            "success": True,
+            "execution": exec_res.model_dump(),
+            "calibration": calib_outcome.model_dump(),
+            "closed_loop_delta": {
+                "model_promoted": (calib_outcome.status == "PROMOTED"),
+                "promoted_model_id": calib_outcome.new_model_id,
+                "is_empirical_upgrade": calib_outcome.is_empirical_upgrade,
+                "previous_winner": prev_winner,
+                "new_winner": new_winner,
+                "recommendation_changed": recommendation_changed,
+                "feasibility_status_before": prev_status,
+                "feasibility_status_after": new_status,
+                "affected_candidates_resimulated": len(new_sim_results),
+            },
+            "provenance": exec_res.provenance,
+            "summary": (
+                f"Experiment executed ({exec_res.raw_records_count} trials). Calibration: {calib_outcome.status}. "
+                + (f"Recommendation changed from {prev_winner} to {new_winner}." if recommendation_changed else f"Recommendation retained at {prev_winner}.")
+            ),
+        }
+
+        updates = {
+            "simulation_results": new_sim_results,
+            "recommendation": new_rec,
+            "last_experiment_delta": output["closed_loop_delta"],
         }
         return output, updates
