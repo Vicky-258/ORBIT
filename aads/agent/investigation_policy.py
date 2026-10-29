@@ -165,6 +165,17 @@ class InvestigationPolicy:
                     reason="Action 'simulate_candidate' proposed without target candidate ID.",
                 )
             if decision.target not in valid_candidate_ids:
+                if "," in str(decision.target):
+                    first_target = str(decision.target).split(",")[0].strip()
+                    if first_target in valid_candidate_ids:
+                        sanitized = decision.model_copy(update={"target": first_target})
+                        return PolicyEvaluationResult(
+                            verdict=PolicyVerdict.MODIFIED,
+                            allowed=True,
+                            sanitized_decision=sanitized,
+                            reason=f"Multiple candidates specified in target '{decision.target}'; sanitized to single candidate '{first_target}'.",
+                            details={"original_target": decision.target, "sanitized_target": first_target},
+                        )
                 sanitized = InvestigationDecision(
                     action=InvestigationActionType.STOP_AND_RECOMMEND if sim_results else InvestigationActionType.STOP_INCONCLUSIVE,
                     reason=f"Target '{decision.target}' is not in valid candidates: {sorted(list(valid_candidate_ids))}.",

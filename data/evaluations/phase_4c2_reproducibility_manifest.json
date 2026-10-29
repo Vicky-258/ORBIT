@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "evaluation_phase": "Phase 4C.2",
+    "description": "Live LLM Decision Quality Evaluation Reproducibility Manifest",
+    "timestamp_utc": "2026-10-28T10:25:44.657889+00:00",
+    "git_commit": "84ba70cf6139e086e9645bcace09829298d2e597",
+    "git_branch": "feat/phase-4c2-live-evaluation",
+    "python_version": "3.12.12",
+    "platform": "linux-x86_64"
+  },
+  "configuration": {
+    "execution_mode": "live",
+    "cli_flag": "--live-llm",
+    "provider": "groq",
+    "model_name": "openai/gpt-oss-120b",
+    "api_base": "https://api.groq.com/openai/v1",
+    "temperature": 0.0,
+    "timeout_seconds": 30.0,
+    "max_retries": 2,
+    "fail_closed_enforced": true,
+    "random_seed": 42
+  },
+  "scenarios_evaluated": {
+    "pilot_suite": {
+      "count": 3,
+      "scenario_ids": [
+        "dev_01_straightforward",
+        "dev_03_boundary",
+        "dev_05_incomplete_coverage"
+      ],
+      "results_artifact": "data/evaluations/phase_4c2_pilot_results.json",
+      "calls_log_artifact": "data/evaluations/phase_4c2_pilot_calls.jsonl"
+    },
+    "heldout_suite": {
+      "count": 12,
+      "scenario_ids": [
+        "heldout_01_straightforward",
+        "heldout_02_near_tie",
+        "heldout_03_boundary",
+        "heldout_04_infeasible",
+        "heldout_05_incomplete_coverage",
+        "heldout_06_high_uncertainty",
+        "heldout_07_evidence_conflict",
+        "heldout_08_unnecessary_investigation",
+        "heldout_09_decision_changing",
+        "heldout_10_provider_failure",
+        "heldout_11_conflicting_objectives",
+        "heldout_12_insufficient_evidence"
+      ],
+      "results_artifact": "data/evaluations/phase_4c2_results.json",
+      "calls_log_artifact": "data/evaluations/phase_4c2_live_calls.jsonl"
+    }
+  },
+  "live_call_telemetry_summary": {
+    "pilot_calls": 3,
+    "heldout_calls": 14,
+    "total_verified_live_calls": 17,
+    "total_tokens_consumed": 27683,
+    "total_estimated_cost_usd": 0.00914,
+    "provider_failure_injected_scenarios": [
+      "heldout_10_provider_failure"
+    ],
+    "unexpected_provider_failures": 0,
+    "fallback_rate_on_normal_scenarios": 0.0
+  },
+  "reproduction_commands": [
+    ".venv/bin/python3 -m aads.evaluation.run --suite pilot --live-llm --output data/evaluations/phase_4c2_pilot_results.json --calls-output data/evaluations/phase_4c2_pilot_calls.jsonl",
+    ".venv/bin/python3 -m aads.evaluation.run --suite heldout --live-llm --output data/evaluations/phase_4c2_results.json --calls-output data/evaluations/phase_4c2_live_calls.jsonl"
+  ]
+}

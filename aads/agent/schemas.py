@@ -151,3 +151,25 @@ class RecommendationExplanation(BaseModel):
         description="Model limitations, synthetic vs measured provenance distinctions, or missing real-world factors."
     )
 
+class LiveLLMCallRecord(BaseModel):
+    """Machine-readable record of an individual live LLM decision call."""
+    call_id: str = Field(description="Unique identifier for the invocation")
+    timestamp: str = Field(description="ISO-8601 UTC timestamp of call initiation")
+    scenario_id: Optional[str] = Field(default=None, description="External scenario identifier for evaluation grouping")
+    strategy_name: str = Field(default="strategy_c_llm_live", description="Strategy executing the invocation")
+    round_number: int = Field(description="Investigation round number (1-indexed)")
+    provider: str = Field(description="LLM provider name (e.g. groq, openai)")
+    model_name: str = Field(description="Specific model version invoked")
+    request_id: Optional[str] = Field(default=None, description="Provider transaction or request ID")
+    latency_ms: float = Field(description="Roundtrip API latency in milliseconds")
+    prompt_tokens: int = Field(default=0, description="Input tokens counted")
+    completion_tokens: int = Field(default=0, description="Completion tokens generated")
+    total_tokens: int = Field(default=0, description="Sum of prompt and completion tokens")
+    estimated_cost_usd: float = Field(default=0.0, description="Estimated monetary cost in USD")
+    decision: Optional[Dict[str, Any]] = Field(default=None, description="Structured investigation decision returned")
+    policy_verdict: Optional[str] = Field(default=None, description="Policy outcome: APPROVED, REJECTED, MODIFIED, STOPPED")
+    policy_reason: Optional[str] = Field(default=None, description="Policy evaluation explanation")
+    is_live: bool = Field(default=True, description="Whether this call went to a genuine live model endpoint")
+    fallback_used: bool = Field(default=False, description="Whether a fallback was triggered")
+    error: Optional[str] = Field(default=None, description="Error message if call failed")
+

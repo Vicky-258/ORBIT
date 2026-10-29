@@ -750,6 +750,11 @@ HELDOUT_SCENARIOS: List[EvaluationScenario] = [
 ]
 
 
+PILOT_SCENARIOS: List[EvaluationScenario] = [
+    s for s in DEV_SCENARIOS if s.scenario_id in ("dev_01_straightforward", "dev_03_boundary", "dev_05_incomplete_coverage")
+]
+
+
 def get_scenario_by_id(scenario_id: str) -> Optional[EvaluationScenario]:
     all_scenarios = DEV_SCENARIOS + HELDOUT_SCENARIOS
     for s in all_scenarios:
@@ -759,8 +764,10 @@ def get_scenario_by_id(scenario_id: str) -> Optional[EvaluationScenario]:
 
 
 def get_scenarios(split: Optional[str] = None) -> List[EvaluationScenario]:
-    if split == "development" or split == "dev":
+    if split in ("pilot", "dev_pilot"):
+        return list(PILOT_SCENARIOS)
+    elif split in ("development", "dev"):
         return list(DEV_SCENARIOS)
-    elif split == "held_out" or split == "heldout":
+    elif split in ("held_out", "heldout"):
         return list(HELDOUT_SCENARIOS)
     return list(DEV_SCENARIOS + HELDOUT_SCENARIOS)

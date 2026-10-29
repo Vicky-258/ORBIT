@@ -1,0 +1,1862 @@
+{
+  "suite_name": "pilot",
+  "mode": "live",
+  "timestamp": "2026-10-28T09:55:54.792570+00:00",
+  "git_commit": "84ba70c",
+  "scenarios_evaluated_count": 3,
+  "aggregate_summaries": {
+    "strategy_a_fixed": {
+      "strategy_name": "strategy_a_fixed",
+      "sample_size": 3,
+      "mean_constraint_correctness": 1.0,
+      "hard_constraint_satisfaction_rate": 1.0,
+      "infeasible_detection_rate": 1.0,
+      "top_choice_agreement_rate": 0.333,
+      "mean_feasible_jaccard": 0.667,
+      "mean_regret": 0.0,
+      "total_investigation_rounds": 0,
+      "mean_investigation_rounds": 0.0,
+      "total_tools_proposed": 0,
+      "total_tools_executed": 0,
+      "policy_rejection_rate": 0.0,
+      "mean_decision_latency_ms": 132.1,
+      "fallback_rate": 0.0,
+      "uncertainty_audit_rate": 0.0,
+      "coverage_audit_rate": 0.0
+    },
+    "strategy_b_deterministic": {
+      "strategy_name": "strategy_b_deterministic",
+      "sample_size": 3,
+      "mean_constraint_correctness": 1.0,
+      "hard_constraint_satisfaction_rate": 1.0,
+      "infeasible_detection_rate": 1.0,
+      "top_choice_agreement_rate": 0.333,
+      "mean_feasible_jaccard": 0.667,
+      "mean_regret": 0.0,
+      "total_investigation_rounds": 9,
+      "mean_investigation_rounds": 3.0,
+      "total_tools_proposed": 9,
+      "total_tools_executed": 9,
+      "policy_rejection_rate": 0.0,
+      "mean_decision_latency_ms": 241.7,
+      "fallback_rate": 0.0,
+      "uncertainty_audit_rate": 1.0,
+      "coverage_audit_rate": 1.0
+    },
+    "strategy_c_llm": {
+      "strategy_name": "strategy_c_llm",
+      "sample_size": 3,
+      "mean_constraint_correctness": 1.0,
+      "hard_constraint_satisfaction_rate": 1.0,
+      "infeasible_detection_rate": 1.0,
+      "top_choice_agreement_rate": 0.333,
+      "mean_feasible_jaccard": 0.667,
+      "mean_regret": 0.0,
+      "total_investigation_rounds": 3,
+      "mean_investigation_rounds": 1.0,
+      "total_tools_proposed": 3,
+      "total_tools_executed": 3,
+      "policy_rejection_rate": 0.0,
+      "mean_decision_latency_ms": 2613.8,
+      "fallback_rate": 0.0,
+      "uncertainty_audit_rate": 0.0,
+      "coverage_audit_rate": 0.0
+    }
+  },
+  "detailed_metrics": [
+    {
+      "scenario_id": "dev_01_straightforward",
+      "strategy_name": "strategy_a_fixed",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": true,
+      "feasible_set_jaccard": 1.0,
+      "ranking_agreement": 1.0,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.0,
+      "investigation_rounds": 0,
+      "tools_proposed": 0,
+      "tools_accepted": 0,
+      "tools_rejected": 0,
+      "tools_executed": 0,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.0,
+      "uncertainty_reduced": false,
+      "coverage_gap_resolved": false,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 0.5,
+      "decision_latency_ms": 68.8,
+      "simulation_runs_count": 3,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0
+    },
+    {
+      "scenario_id": "dev_01_straightforward",
+      "strategy_name": "strategy_b_deterministic",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": true,
+      "feasible_set_jaccard": 1.0,
+      "ranking_agreement": 1.0,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.0,
+      "investigation_rounds": 3,
+      "tools_proposed": 3,
+      "tools_accepted": 3,
+      "tools_rejected": 0,
+      "tools_executed": 3,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.004,
+      "uncertainty_reduced": true,
+      "coverage_gap_resolved": true,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 1.0,
+      "decision_latency_ms": 494.49,
+      "simulation_runs_count": 3,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0
+    },
+    {
+      "scenario_id": "dev_01_straightforward",
+      "strategy_name": "strategy_c_llm",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": true,
+      "feasible_set_jaccard": 1.0,
+      "ranking_agreement": 1.0,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.0,
+      "investigation_rounds": 1,
+      "tools_proposed": 1,
+      "tools_accepted": 1,
+      "tools_rejected": 0,
+      "tools_executed": 1,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.0,
+      "uncertainty_reduced": false,
+      "coverage_gap_resolved": false,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 0.5,
+      "decision_latency_ms": 3663.36,
+      "simulation_runs_count": 3,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 1,
+      "llm_token_count": 1872,
+      "llm_cost_usd": 0.000587
+    },
+    {
+      "scenario_id": "dev_03_boundary",
+      "strategy_name": "strategy_a_fixed",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": false,
+      "feasible_set_jaccard": 0.5,
+      "ranking_agreement": 1.0,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.063,
+      "investigation_rounds": 0,
+      "tools_proposed": 0,
+      "tools_accepted": 0,
+      "tools_rejected": 0,
+      "tools_executed": 0,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.0,
+      "uncertainty_reduced": false,
+      "coverage_gap_resolved": false,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 0.5,
+      "decision_latency_ms": 117.44,
+      "simulation_runs_count": 3,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0
+    },
+    {
+      "scenario_id": "dev_03_boundary",
+      "strategy_name": "strategy_b_deterministic",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": false,
+      "feasible_set_jaccard": 0.5,
+      "ranking_agreement": 1.0,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.063,
+      "investigation_rounds": 3,
+      "tools_proposed": 3,
+      "tools_accepted": 3,
+      "tools_rejected": 0,
+      "tools_executed": 3,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.004,
+      "uncertainty_reduced": true,
+      "coverage_gap_resolved": true,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 1.0,
+      "decision_latency_ms": 117.29,
+      "simulation_runs_count": 3,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0
+    },
+    {
+      "scenario_id": "dev_03_boundary",
+      "strategy_name": "strategy_c_llm",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": false,
+      "feasible_set_jaccard": 0.5,
+      "ranking_agreement": 1.0,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.063,
+      "investigation_rounds": 1,
+      "tools_proposed": 1,
+      "tools_accepted": 1,
+      "tools_rejected": 0,
+      "tools_executed": 1,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.0,
+      "uncertainty_reduced": false,
+      "coverage_gap_resolved": false,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 0.5,
+      "decision_latency_ms": 2044.35,
+      "simulation_runs_count": 3,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 1,
+      "llm_token_count": 2021,
+      "llm_cost_usd": 0.000693
+    },
+    {
+      "scenario_id": "dev_05_incomplete_coverage",
+      "strategy_name": "strategy_a_fixed",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": false,
+      "feasible_set_jaccard": 0.5,
+      "ranking_agreement": null,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.127,
+      "investigation_rounds": 0,
+      "tools_proposed": 0,
+      "tools_accepted": 0,
+      "tools_rejected": 0,
+      "tools_executed": 0,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.0,
+      "uncertainty_reduced": false,
+      "coverage_gap_resolved": false,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 0.5,
+      "decision_latency_ms": 210.12,
+      "simulation_runs_count": 4,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0
+    },
+    {
+      "scenario_id": "dev_05_incomplete_coverage",
+      "strategy_name": "strategy_b_deterministic",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": false,
+      "feasible_set_jaccard": 0.5,
+      "ranking_agreement": null,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.127,
+      "investigation_rounds": 3,
+      "tools_proposed": 3,
+      "tools_accepted": 3,
+      "tools_rejected": 0,
+      "tools_executed": 3,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.004,
+      "uncertainty_reduced": true,
+      "coverage_gap_resolved": true,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 1.0,
+      "decision_latency_ms": 113.19,
+      "simulation_runs_count": 4,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0
+    },
+    {
+      "scenario_id": "dev_05_incomplete_coverage",
+      "strategy_name": "strategy_c_llm",
+      "hard_constraints_satisfied": true,
+      "infeasible_candidate_recommended": false,
+      "infeasible_workload_detected": true,
+      "inconclusive_correctly_reported": true,
+      "constraint_correctness_score": 1.0,
+      "top_choice_agreement": false,
+      "feasible_set_jaccard": 0.5,
+      "ranking_agreement": null,
+      "regret_vs_reference": 0.0,
+      "raw_unrounded_regret": 0.0,
+      "score_margin_selected_vs_ref": 0.127,
+      "investigation_rounds": 1,
+      "tools_proposed": 1,
+      "tools_accepted": 1,
+      "tools_rejected": 0,
+      "tools_executed": 1,
+      "redundant_actions": 0,
+      "investigation_budget_spent": 0.0,
+      "uncertainty_reduced": false,
+      "coverage_gap_resolved": false,
+      "recommendation_changed_defensibly": false,
+      "investigation_usefulness_score": 0.5,
+      "decision_latency_ms": 2133.72,
+      "simulation_runs_count": 4,
+      "policy_rejection_rate": 0.0,
+      "fallback_used": false,
+      "llm_request_count": 1,
+      "llm_token_count": 2156,
+      "llm_cost_usd": 0.000743
+    }
+  ],
+  "execution_results": [
+    {
+      "strategy_name": "strategy_a_fixed",
+      "scenario_id": "dev_01_straightforward",
+      "selected_architecture_id": "arch_a_simple",
+      "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_a_simple"
+      ],
+      "candidate_rankings": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async"
+      ],
+      "candidate_scores": {
+        "arch_a_simple": 0.7,
+        "arch_b_cached": 0.059,
+        "arch_c_async": 0.042
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 144.4,
+        "p50_latency_ms": 3.21,
+        "p95_latency_ms": 6.18,
+        "p99_latency_ms": 7.64,
+        "max_latency_ms": 8.71,
+        "estimated_monthly_cost_usd": 133.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": null,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          },
+          "best_performance": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          },
+          "recommended": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          }
+        }
+      },
+      "investigation_rounds": 0,
+      "tools_proposed": 0,
+      "tools_accepted": 0,
+      "tools_rejected": 0,
+      "tools_executed": 0,
+      "redundant_actions": 0,
+      "investigation_trace": [],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.0,
+      "decision_latency_ms": 68.8,
+      "simulation_runs_count": 3,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "deterministic_fixed",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_b_deterministic",
+      "scenario_id": "dev_01_straightforward",
+      "selected_architecture_id": "arch_a_simple",
+      "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_a_simple"
+      ],
+      "candidate_rankings": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async"
+      ],
+      "candidate_scores": {
+        "arch_a_simple": 0.7,
+        "arch_b_cached": 0.059,
+        "arch_c_async": 0.042
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 144.4,
+        "p50_latency_ms": 3.21,
+        "p95_latency_ms": 6.18,
+        "p99_latency_ms": 7.64,
+        "max_latency_ms": 8.71,
+        "estimated_monthly_cost_usd": 133.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": null,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          },
+          "best_performance": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          },
+          "recommended": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          }
+        }
+      },
+      "investigation_rounds": 3,
+      "tools_proposed": 3,
+      "tools_accepted": 3,
+      "tools_rejected": 0,
+      "tools_executed": 3,
+      "redundant_actions": 0,
+      "investigation_trace": [
+        {
+          "round": 1,
+          "action": "inspect_model_coverage",
+          "target": "all_candidates",
+          "reason": "Audit registry model coverage and calibration status for all candidate architectures.",
+          "expected_information_gain": "Identify uncalibrated or missing component performance models.",
+          "evidence_reference": [
+            "candidate_architectures"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "check_component_models",
+          "tool_input": {
+            "target": "all_candidates"
+          },
+          "tool_output": {
+            "success": true,
+            "coverage_by_architecture": {
+              "arch_a_simple": {
+                "name": "Architecture A — Simple (API → PostgreSQL)",
+                "required_models": [
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              },
+              "arch_b_cached": {
+                "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+                "required_models": [
+                  "redis_cache:redis:7.2-alpine",
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "redis_cache:redis:7.2-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "lookup_table"
+                  },
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              },
+              "arch_c_async": {
+                "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+                "required_models": [
+                  "redis_cache:redis:7.2-alpine",
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "redis_cache:redis:7.2-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "lookup_table"
+                  },
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              }
+            },
+            "missing_models": [],
+            "total_candidates_audited": 3,
+            "summary": "Audited 3 candidates; 0 missing models identified."
+          },
+          "duration_seconds": 0.002,
+          "provenance": "model_derived",
+          "stop_reason": null
+        },
+        {
+          "round": 2,
+          "action": "inspect_uncertainty",
+          "target": "all",
+          "reason": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+          "expected_information_gain": "Detect candidate SLA boundary risks and confidence margins.",
+          "evidence_reference": [
+            "simulation_results"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "inspect_uncertainty",
+          "tool_input": {
+            "target": "all"
+          },
+          "tool_output": {
+            "success": true,
+            "uncertainty_audit": [
+              {
+                "architecture_id": "arch_a_simple",
+                "architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+                "p95_measured": 6.18,
+                "latency_uncertainty_ci_95": [
+                  6.08,
+                  6.29
+                ],
+                "ci_width_ms": 0.21,
+                "sla_target_ms": 50.0,
+                "sla_headroom_ms": 43.71,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 160.0,
+                "cost_monthly_usd": 133.0,
+                "cost_headroom_usd": 27.0,
+                "throughput_achieved_rps": 144.4,
+                "throughput_headroom_rps": 4.4
+              },
+              {
+                "architecture_id": "arch_b_cached",
+                "architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+                "p95_measured": 4.37,
+                "latency_uncertainty_ci_95": [
+                  4.2,
+                  4.53
+                ],
+                "ci_width_ms": 0.33,
+                "sla_target_ms": 50.0,
+                "sla_headroom_ms": 45.47,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 160.0,
+                "cost_monthly_usd": 176.0,
+                "cost_headroom_usd": -16.0,
+                "throughput_achieved_rps": 146.4,
+                "throughput_headroom_rps": 6.4
+              },
+              {
+                "architecture_id": "arch_c_async",
+                "architecture_name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+                "p95_measured": 3.34,
+                "latency_uncertainty_ci_95": [
+                  3.25,
+                  3.44
+                ],
+                "ci_width_ms": 0.19,
+                "sla_target_ms": 50.0,
+                "sla_headroom_ms": 46.56,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 160.0,
+                "cost_monthly_usd": 216.0,
+                "cost_headroom_usd": -56.0,
+                "throughput_achieved_rps": 146.6,
+                "throughput_headroom_rps": 6.6
+              }
+            ],
+            "total_candidates_analyzed": 3,
+            "summary": "Uncertainty analysis completed across 3 candidates."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "uncertainty_analysis",
+          "stop_reason": null
+        },
+        {
+          "round": 3,
+          "action": "stop_and_recommend",
+          "target": "arch_a_simple",
+          "reason": "Sufficient simulation and uncertainty evidence established. Architecture A — Simple (API → PostgreSQL) identified.",
+          "expected_information_gain": "Final architectural recommendation backed by evidence.",
+          "evidence_reference": [
+            "simulation_results",
+            "evaluator"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "stop_and_recommend",
+          "tool_input": {
+            "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete."
+          },
+          "tool_output": {
+            "success": true,
+            "selected_architecture_id": "arch_a_simple",
+            "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+            "feasibility_status": "FEASIBLE",
+            "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete.",
+            "summary": "Investigation concluded: Recommended Architecture A — Simple (API → PostgreSQL) (FEASIBLE)."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "decision_policy",
+          "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete."
+        }
+      ],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.004,
+      "decision_latency_ms": 494.49,
+      "simulation_runs_count": 3,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "deterministic_adaptive",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_c_llm",
+      "scenario_id": "dev_01_straightforward",
+      "selected_architecture_id": "arch_a_simple",
+      "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_a_simple"
+      ],
+      "candidate_rankings": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async"
+      ],
+      "candidate_scores": {
+        "arch_a_simple": 0.7,
+        "arch_b_cached": 0.059,
+        "arch_c_async": 0.042
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 144.4,
+        "p50_latency_ms": 3.21,
+        "p95_latency_ms": 6.18,
+        "p99_latency_ms": 7.64,
+        "max_latency_ms": 8.71,
+        "estimated_monthly_cost_usd": 133.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": null,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          },
+          "best_performance": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          },
+          "recommended": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 6.18
+          }
+        }
+      },
+      "investigation_rounds": 1,
+      "tools_proposed": 1,
+      "tools_accepted": 1,
+      "tools_rejected": 0,
+      "tools_executed": 1,
+      "redundant_actions": 0,
+      "investigation_trace": [
+        {
+          "round": 1,
+          "action": "stop_and_recommend",
+          "target": "arch_a_simple",
+          "reason": "Architecture A meets all SLA targets (p95 6.18 ms ≤ 50 ms, throughput 144.4 RPS ≥ 140 RPS) and stays within the $160 budget ($133/mo). All candidates have been simulated, feasibility is verified, and no other candidate satisfies the cost constraint, making arch_a_simple the clear winner.",
+          "expected_information_gain": null,
+          "evidence_reference": [
+            "arch_a_simple throughput 144.4 RPS >= 140 RPS",
+            "arch_a_simple p95 6.18 ms <= 50 ms",
+            "arch_a_simple cost $133 <= $160 budget"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "stop_and_recommend",
+          "tool_input": {
+            "stop_reason": "Sufficient evidence confirms arch_a_simple as the only feasible architecture; no further investigation needed."
+          },
+          "tool_output": {
+            "success": true,
+            "selected_architecture_id": "arch_a_simple",
+            "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+            "feasibility_status": "FEASIBLE",
+            "stop_reason": "Sufficient evidence confirms arch_a_simple as the only feasible architecture; no further investigation needed.",
+            "summary": "Investigation concluded: Recommended Architecture A — Simple (API → PostgreSQL) (FEASIBLE)."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "decision_policy",
+          "stop_reason": "Sufficient evidence confirms arch_a_simple as the only feasible architecture; no further investigation needed."
+        }
+      ],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.0,
+      "decision_latency_ms": 3663.36,
+      "simulation_runs_count": 3,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 1,
+      "llm_token_count": 1872,
+      "llm_cost_usd": 0.000587,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "llm_adaptive_live",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_a_fixed",
+      "scenario_id": "dev_03_boundary",
+      "selected_architecture_id": "arch_b_cached",
+      "selected_architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_b_cached",
+        "arch_c_async"
+      ],
+      "candidate_rankings": [
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_a_simple"
+      ],
+      "candidate_scores": {
+        "arch_b_cached": 0.743,
+        "arch_c_async": 0.68,
+        "arch_a_simple": 0.04
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 553.2,
+        "p50_latency_ms": 0.99,
+        "p95_latency_ms": 7.76,
+        "p99_latency_ms": 9.33,
+        "max_latency_ms": 13.93,
+        "estimated_monthly_cost_usd": 176.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": 0.856,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_b_cached",
+            "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "cost": 176.0,
+            "p95_ms": 7.76
+          },
+          "best_performance": {
+            "id": "arch_c_async",
+            "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+            "cost": 216.0,
+            "p95_ms": 3.34
+          },
+          "recommended": {
+            "id": "arch_b_cached",
+            "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "cost": 176.0,
+            "p95_ms": 7.76
+          }
+        }
+      },
+      "investigation_rounds": 0,
+      "tools_proposed": 0,
+      "tools_accepted": 0,
+      "tools_rejected": 0,
+      "tools_executed": 0,
+      "redundant_actions": 0,
+      "investigation_trace": [],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.0,
+      "decision_latency_ms": 117.44,
+      "simulation_runs_count": 3,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "deterministic_fixed",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_b_deterministic",
+      "scenario_id": "dev_03_boundary",
+      "selected_architecture_id": "arch_b_cached",
+      "selected_architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_b_cached",
+        "arch_c_async"
+      ],
+      "candidate_rankings": [
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_a_simple"
+      ],
+      "candidate_scores": {
+        "arch_b_cached": 0.743,
+        "arch_c_async": 0.68,
+        "arch_a_simple": 0.04
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 553.2,
+        "p50_latency_ms": 0.99,
+        "p95_latency_ms": 7.76,
+        "p99_latency_ms": 9.33,
+        "max_latency_ms": 13.93,
+        "estimated_monthly_cost_usd": 176.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": 0.856,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_b_cached",
+            "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "cost": 176.0,
+            "p95_ms": 7.76
+          },
+          "best_performance": {
+            "id": "arch_c_async",
+            "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+            "cost": 216.0,
+            "p95_ms": 3.34
+          },
+          "recommended": {
+            "id": "arch_b_cached",
+            "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "cost": 176.0,
+            "p95_ms": 7.76
+          }
+        }
+      },
+      "investigation_rounds": 3,
+      "tools_proposed": 3,
+      "tools_accepted": 3,
+      "tools_rejected": 0,
+      "tools_executed": 3,
+      "redundant_actions": 0,
+      "investigation_trace": [
+        {
+          "round": 1,
+          "action": "inspect_model_coverage",
+          "target": "all_candidates",
+          "reason": "Audit registry model coverage and calibration status for all candidate architectures.",
+          "expected_information_gain": "Identify uncalibrated or missing component performance models.",
+          "evidence_reference": [
+            "candidate_architectures"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "check_component_models",
+          "tool_input": {
+            "target": "all_candidates"
+          },
+          "tool_output": {
+            "success": true,
+            "coverage_by_architecture": {
+              "arch_a_simple": {
+                "name": "Architecture A — Simple (API → PostgreSQL)",
+                "required_models": [
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              },
+              "arch_b_cached": {
+                "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+                "required_models": [
+                  "redis_cache:redis:7.2-alpine",
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "redis_cache:redis:7.2-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "lookup_table"
+                  },
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              },
+              "arch_c_async": {
+                "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+                "required_models": [
+                  "redis_cache:redis:7.2-alpine",
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "redis_cache:redis:7.2-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "lookup_table"
+                  },
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              }
+            },
+            "missing_models": [],
+            "total_candidates_audited": 3,
+            "summary": "Audited 3 candidates; 0 missing models identified."
+          },
+          "duration_seconds": 0.002,
+          "provenance": "model_derived",
+          "stop_reason": null
+        },
+        {
+          "round": 2,
+          "action": "inspect_uncertainty",
+          "target": "all",
+          "reason": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+          "expected_information_gain": "Detect candidate SLA boundary risks and confidence margins.",
+          "evidence_reference": [
+            "simulation_results"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "inspect_uncertainty",
+          "tool_input": {
+            "target": "all"
+          },
+          "tool_output": {
+            "success": true,
+            "uncertainty_audit": [
+              {
+                "architecture_id": "arch_a_simple",
+                "architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+                "p95_measured": 31.85,
+                "latency_uncertainty_ci_95": [
+                  31.32,
+                  32.37
+                ],
+                "ci_width_ms": 1.05,
+                "sla_target_ms": 8.0,
+                "sla_headroom_ms": -24.37,
+                "crosses_sla_threshold": true,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 250.0,
+                "cost_monthly_usd": 133.0,
+                "cost_headroom_usd": 117.0,
+                "throughput_achieved_rps": 535.8,
+                "throughput_headroom_rps": 35.8
+              },
+              {
+                "architecture_id": "arch_b_cached",
+                "architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+                "p95_measured": 7.76,
+                "latency_uncertainty_ci_95": [
+                  7.63,
+                  7.9
+                ],
+                "ci_width_ms": 0.27,
+                "sla_target_ms": 8.0,
+                "sla_headroom_ms": 0.1,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": true,
+                "budget_cap_usd": 250.0,
+                "cost_monthly_usd": 176.0,
+                "cost_headroom_usd": 74.0,
+                "throughput_achieved_rps": 553.2,
+                "throughput_headroom_rps": 53.2
+              },
+              {
+                "architecture_id": "arch_c_async",
+                "architecture_name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+                "p95_measured": 3.34,
+                "latency_uncertainty_ci_95": [
+                  3.28,
+                  3.4
+                ],
+                "ci_width_ms": 0.12,
+                "sla_target_ms": 8.0,
+                "sla_headroom_ms": 4.6,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": true,
+                "budget_cap_usd": 250.0,
+                "cost_monthly_usd": 216.0,
+                "cost_headroom_usd": 34.0,
+                "throughput_achieved_rps": 541.4,
+                "throughput_headroom_rps": 41.4
+              }
+            ],
+            "total_candidates_analyzed": 3,
+            "summary": "Uncertainty analysis completed across 3 candidates."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "uncertainty_analysis",
+          "stop_reason": null
+        },
+        {
+          "round": 3,
+          "action": "stop_and_recommend",
+          "target": "arch_b_cached",
+          "reason": "Sufficient simulation and uncertainty evidence established. Architecture B — Cached Reads (API → Redis → PostgreSQL) identified.",
+          "expected_information_gain": "Final architectural recommendation backed by evidence.",
+          "evidence_reference": [
+            "simulation_results",
+            "evaluator"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "stop_and_recommend",
+          "tool_input": {
+            "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete."
+          },
+          "tool_output": {
+            "success": true,
+            "selected_architecture_id": "arch_b_cached",
+            "selected_architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "feasibility_status": "FEASIBLE",
+            "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete.",
+            "summary": "Investigation concluded: Recommended Architecture B — Cached Reads (API → Redis → PostgreSQL) (FEASIBLE)."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "decision_policy",
+          "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete."
+        }
+      ],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.004,
+      "decision_latency_ms": 117.29,
+      "simulation_runs_count": 3,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "deterministic_adaptive",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_c_llm",
+      "scenario_id": "dev_03_boundary",
+      "selected_architecture_id": "arch_b_cached",
+      "selected_architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_b_cached",
+        "arch_c_async"
+      ],
+      "candidate_rankings": [
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_a_simple"
+      ],
+      "candidate_scores": {
+        "arch_b_cached": 0.743,
+        "arch_c_async": 0.68,
+        "arch_a_simple": 0.04
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 553.2,
+        "p50_latency_ms": 0.99,
+        "p95_latency_ms": 7.76,
+        "p99_latency_ms": 9.33,
+        "max_latency_ms": 13.93,
+        "estimated_monthly_cost_usd": 176.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": 0.856,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_b_cached",
+            "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "cost": 176.0,
+            "p95_ms": 7.76
+          },
+          "best_performance": {
+            "id": "arch_c_async",
+            "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+            "cost": 216.0,
+            "p95_ms": 3.34
+          },
+          "recommended": {
+            "id": "arch_b_cached",
+            "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "cost": 176.0,
+            "p95_ms": 7.76
+          }
+        }
+      },
+      "investigation_rounds": 1,
+      "tools_proposed": 1,
+      "tools_accepted": 1,
+      "tools_rejected": 0,
+      "tools_executed": 1,
+      "redundant_actions": 0,
+      "investigation_trace": [
+        {
+          "round": 1,
+          "action": "stop_and_recommend",
+          "target": null,
+          "reason": "Architecture B (arch_b_cached) satisfies both SLA constraints (p95 7.76 ms with upper uncertainty 7.90 ms < 8 ms, throughput 553.2 RPS > 500 RPS) and stays well within the $250 monthly budget ($176). Its latency bounds are comfortably inside the SLA, and it is the lowest‑cost feasible candidate compared to arch_c_async ($216). Thus a clear winner exists with no boundary risk.",
+          "expected_information_gain": null,
+          "evidence_reference": [
+            "arch_b_cached",
+            "arch_c_async",
+            "SLA p95 <=8ms",
+            "Throughput >=500 RPS",
+            "Budget <=$250"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "stop_and_recommend",
+          "tool_input": {
+            "stop_reason": "Recommend Architecture B as the optimal solution."
+          },
+          "tool_output": {
+            "success": true,
+            "selected_architecture_id": "arch_b_cached",
+            "selected_architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+            "feasibility_status": "FEASIBLE",
+            "stop_reason": "Recommend Architecture B as the optimal solution.",
+            "summary": "Investigation concluded: Recommended Architecture B — Cached Reads (API → Redis → PostgreSQL) (FEASIBLE)."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "decision_policy",
+          "stop_reason": "Recommend Architecture B as the optimal solution."
+        }
+      ],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.0,
+      "decision_latency_ms": 2044.35,
+      "simulation_runs_count": 3,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 1,
+      "llm_token_count": 2021,
+      "llm_cost_usd": 0.000693,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "llm_adaptive_live",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_a_fixed",
+      "scenario_id": "dev_05_incomplete_coverage",
+      "selected_architecture_id": "arch_a_simple",
+      "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_mongo_unregistered"
+      ],
+      "candidate_rankings": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_mongo_unregistered"
+      ],
+      "candidate_scores": {
+        "arch_a_simple": 0.673,
+        "arch_b_cached": 0.546,
+        "arch_c_async": 0.53,
+        "arch_mongo_unregistered": 0.43
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 395.8,
+        "p50_latency_ms": 3.59,
+        "p95_latency_ms": 9.29,
+        "p99_latency_ms": 12.72,
+        "max_latency_ms": 17.81,
+        "estimated_monthly_cost_usd": 133.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": null,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_mongo_unregistered",
+            "name": "Architecture M — Document Store (API → MongoDB 7.0)",
+            "cost": 127.0,
+            "p95_ms": 12.23
+          },
+          "best_performance": {
+            "id": "arch_c_async",
+            "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+            "cost": 216.0,
+            "p95_ms": 3.23
+          },
+          "recommended": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 9.29
+          }
+        }
+      },
+      "investigation_rounds": 0,
+      "tools_proposed": 0,
+      "tools_accepted": 0,
+      "tools_rejected": 0,
+      "tools_executed": 0,
+      "redundant_actions": 0,
+      "investigation_trace": [],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.0,
+      "decision_latency_ms": 210.12,
+      "simulation_runs_count": 4,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "deterministic_fixed",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_b_deterministic",
+      "scenario_id": "dev_05_incomplete_coverage",
+      "selected_architecture_id": "arch_a_simple",
+      "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_mongo_unregistered"
+      ],
+      "candidate_rankings": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_mongo_unregistered"
+      ],
+      "candidate_scores": {
+        "arch_a_simple": 0.673,
+        "arch_b_cached": 0.546,
+        "arch_c_async": 0.53,
+        "arch_mongo_unregistered": 0.43
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 395.8,
+        "p50_latency_ms": 3.59,
+        "p95_latency_ms": 9.29,
+        "p99_latency_ms": 12.72,
+        "max_latency_ms": 17.81,
+        "estimated_monthly_cost_usd": 133.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": null,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_mongo_unregistered",
+            "name": "Architecture M — Document Store (API → MongoDB 7.0)",
+            "cost": 127.0,
+            "p95_ms": 12.23
+          },
+          "best_performance": {
+            "id": "arch_c_async",
+            "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+            "cost": 216.0,
+            "p95_ms": 3.23
+          },
+          "recommended": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 9.29
+          }
+        }
+      },
+      "investigation_rounds": 3,
+      "tools_proposed": 3,
+      "tools_accepted": 3,
+      "tools_rejected": 0,
+      "tools_executed": 3,
+      "redundant_actions": 0,
+      "investigation_trace": [
+        {
+          "round": 1,
+          "action": "inspect_model_coverage",
+          "target": "all_candidates",
+          "reason": "Audit registry model coverage and calibration status for all candidate architectures.",
+          "expected_information_gain": "Identify uncalibrated or missing component performance models.",
+          "evidence_reference": [
+            "candidate_architectures"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "check_component_models",
+          "tool_input": {
+            "target": "all_candidates"
+          },
+          "tool_output": {
+            "success": true,
+            "coverage_by_architecture": {
+              "arch_a_simple": {
+                "name": "Architecture A — Simple (API → PostgreSQL)",
+                "required_models": [
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              },
+              "arch_b_cached": {
+                "name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+                "required_models": [
+                  "redis_cache:redis:7.2-alpine",
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "redis_cache:redis:7.2-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "lookup_table"
+                  },
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              },
+              "arch_c_async": {
+                "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+                "required_models": [
+                  "redis_cache:redis:7.2-alpine",
+                  "postgres_db:postgres:16-alpine"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "redis_cache:redis:7.2-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "lookup_table"
+                  },
+                  "postgres_db:postgres:16-alpine": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              },
+              "arch_mongo_unregistered": {
+                "name": "Architecture M — Document Store (API → MongoDB 7.0)",
+                "required_models": [
+                  "mongodb_cluster:mongodb:7.0-cluster"
+                ],
+                "missing_models": [],
+                "fully_covered": true,
+                "statuses": {
+                  "mongodb_cluster:mongodb:7.0-cluster": {
+                    "status": "VALIDATED",
+                    "is_validated": true,
+                    "is_synthetic": true,
+                    "model_type": "piecewise_ridge"
+                  }
+                }
+              }
+            },
+            "missing_models": [],
+            "total_candidates_audited": 4,
+            "summary": "Audited 4 candidates; 0 missing models identified."
+          },
+          "duration_seconds": 0.002,
+          "provenance": "model_derived",
+          "stop_reason": null
+        },
+        {
+          "round": 2,
+          "action": "inspect_uncertainty",
+          "target": "all",
+          "reason": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+          "expected_information_gain": "Detect candidate SLA boundary risks and confidence margins.",
+          "evidence_reference": [
+            "simulation_results"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "inspect_uncertainty",
+          "tool_input": {
+            "target": "all"
+          },
+          "tool_output": {
+            "success": true,
+            "uncertainty_audit": [
+              {
+                "architecture_id": "arch_a_simple",
+                "architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+                "p95_measured": 9.29,
+                "latency_uncertainty_ci_95": [
+                  9.14,
+                  9.44
+                ],
+                "ci_width_ms": 0.3,
+                "sla_target_ms": 50.0,
+                "sla_headroom_ms": 40.56,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 250.0,
+                "cost_monthly_usd": 133.0,
+                "cost_headroom_usd": 117.0,
+                "throughput_achieved_rps": 395.8,
+                "throughput_headroom_rps": 45.8
+              },
+              {
+                "architecture_id": "arch_b_cached",
+                "architecture_name": "Architecture B — Cached Reads (API → Redis → PostgreSQL)",
+                "p95_measured": 7.25,
+                "latency_uncertainty_ci_95": [
+                  7.12,
+                  7.39
+                ],
+                "ci_width_ms": 0.27,
+                "sla_target_ms": 50.0,
+                "sla_headroom_ms": 42.61,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 250.0,
+                "cost_monthly_usd": 176.0,
+                "cost_headroom_usd": 74.0,
+                "throughput_achieved_rps": 407.0,
+                "throughput_headroom_rps": 57.0
+              },
+              {
+                "architecture_id": "arch_c_async",
+                "architecture_name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+                "p95_measured": 3.23,
+                "latency_uncertainty_ci_95": [
+                  3.18,
+                  3.28
+                ],
+                "ci_width_ms": 0.1,
+                "sla_target_ms": 50.0,
+                "sla_headroom_ms": 46.72,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 250.0,
+                "cost_monthly_usd": 216.0,
+                "cost_headroom_usd": 34.0,
+                "throughput_achieved_rps": 385.4,
+                "throughput_headroom_rps": 35.4
+              },
+              {
+                "architecture_id": "arch_mongo_unregistered",
+                "architecture_name": "Architecture M — Document Store (API → MongoDB 7.0)",
+                "p95_measured": 12.23,
+                "latency_uncertainty_ci_95": [
+                  11.99,
+                  12.47
+                ],
+                "ci_width_ms": 0.48,
+                "sla_target_ms": 50.0,
+                "sla_headroom_ms": 37.53,
+                "crosses_sla_threshold": false,
+                "is_near_sla_boundary": false,
+                "budget_cap_usd": 250.0,
+                "cost_monthly_usd": 127.0,
+                "cost_headroom_usd": 123.0,
+                "throughput_achieved_rps": 395.6,
+                "throughput_headroom_rps": 45.6
+              }
+            ],
+            "total_candidates_analyzed": 4,
+            "summary": "Uncertainty analysis completed across 4 candidates."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "uncertainty_analysis",
+          "stop_reason": null
+        },
+        {
+          "round": 3,
+          "action": "stop_and_recommend",
+          "target": "arch_a_simple",
+          "reason": "Sufficient simulation and uncertainty evidence established. Architecture A — Simple (API → PostgreSQL) identified.",
+          "expected_information_gain": "Final architectural recommendation backed by evidence.",
+          "evidence_reference": [
+            "simulation_results",
+            "evaluator"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "stop_and_recommend",
+          "tool_input": {
+            "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete."
+          },
+          "tool_output": {
+            "success": true,
+            "selected_architecture_id": "arch_a_simple",
+            "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+            "feasibility_status": "FEASIBLE",
+            "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete.",
+            "summary": "Investigation concluded: Recommended Architecture A — Simple (API → PostgreSQL) (FEASIBLE)."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "decision_policy",
+          "stop_reason": "All candidate evaluations, model coverage checks, and uncertainty audits complete."
+        }
+      ],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.004,
+      "decision_latency_ms": 113.19,
+      "simulation_runs_count": 4,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 0,
+      "llm_token_count": 0,
+      "llm_cost_usd": 0.0,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "deterministic_adaptive",
+        "simulation": "simulated"
+      }
+    },
+    {
+      "strategy_name": "strategy_c_llm",
+      "scenario_id": "dev_05_incomplete_coverage",
+      "selected_architecture_id": "arch_a_simple",
+      "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+      "status": "FEASIBLE",
+      "feasible_candidate_ids": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_mongo_unregistered"
+      ],
+      "candidate_rankings": [
+        "arch_a_simple",
+        "arch_b_cached",
+        "arch_c_async",
+        "arch_mongo_unregistered"
+      ],
+      "candidate_scores": {
+        "arch_a_simple": 0.673,
+        "arch_b_cached": 0.546,
+        "arch_c_async": 0.53,
+        "arch_mongo_unregistered": 0.43
+      },
+      "predicted_metrics": {
+        "throughput_achieved_rps": 395.8,
+        "p50_latency_ms": 3.59,
+        "p95_latency_ms": 9.29,
+        "p99_latency_ms": 12.72,
+        "max_latency_ms": 17.81,
+        "estimated_monthly_cost_usd": 133.0,
+        "bottleneck_component": "db",
+        "cache_hit_rate": null,
+        "alternatives": {
+          "lowest_cost": {
+            "id": "arch_mongo_unregistered",
+            "name": "Architecture M — Document Store (API → MongoDB 7.0)",
+            "cost": 127.0,
+            "p95_ms": 12.23
+          },
+          "best_performance": {
+            "id": "arch_c_async",
+            "name": "Architecture C — Async Processing (API → Queue → Worker → PostgreSQL)",
+            "cost": 216.0,
+            "p95_ms": 3.23
+          },
+          "recommended": {
+            "id": "arch_a_simple",
+            "name": "Architecture A — Simple (API → PostgreSQL)",
+            "cost": 133.0,
+            "p95_ms": 9.29
+          }
+        }
+      },
+      "investigation_rounds": 1,
+      "tools_proposed": 1,
+      "tools_accepted": 1,
+      "tools_rejected": 0,
+      "tools_executed": 1,
+      "redundant_actions": 0,
+      "investigation_trace": [
+        {
+          "round": 1,
+          "action": "stop_and_recommend",
+          "target": null,
+          "reason": "All four candidates have been simulated, each satisfies the SLA (p95 ≤50 ms, throughput ≥350 RPS) and budget (≤$250). The authoritative evaluator selected arch_a_simple, which also has the lowest cost ($133) and ample latency headroom (9.29 ms ±0.15). No candidate approaches any constraint boundary, so the evidence is conclusive.",
+          "expected_information_gain": null,
+          "evidence_reference": [
+            "arch_a_simple throughput 395.8 RPS",
+            "arch_a_simple p95 9.29 ms (bounds [9.14,9.44])",
+            "arch_a_simple cost $133",
+            "authoritative evaluator recommendation arch_a_simple"
+          ],
+          "policy_verdict": "APPROVED",
+          "policy_reason": "Action passed all policy constraints and dispatched successfully.",
+          "tool_invoked": "stop_and_recommend",
+          "tool_input": {
+            "stop_reason": "Winner identified with sufficient performance and cost margins; further investigation unnecessary."
+          },
+          "tool_output": {
+            "success": true,
+            "selected_architecture_id": "arch_a_simple",
+            "selected_architecture_name": "Architecture A — Simple (API → PostgreSQL)",
+            "feasibility_status": "FEASIBLE",
+            "stop_reason": "Winner identified with sufficient performance and cost margins; further investigation unnecessary.",
+            "summary": "Investigation concluded: Recommended Architecture A — Simple (API → PostgreSQL) (FEASIBLE)."
+          },
+          "duration_seconds": 0.0,
+          "provenance": "decision_policy",
+          "stop_reason": "Winner identified with sufficient performance and cost margins; further investigation unnecessary."
+        }
+      ],
+      "benchmark_proposals": [],
+      "investigation_budget_spent": 0.0,
+      "decision_latency_ms": 2133.72,
+      "simulation_runs_count": 4,
+      "policy_rejection_count": 0,
+      "fallback_used": false,
+      "llm_request_count": 1,
+      "llm_token_count": 2156,
+      "llm_cost_usd": 0.000743,
+      "errors": [],
+      "provenance_map": {
+        "pipeline": "llm_adaptive_live",
+        "simulation": "simulated"
+      }
+    }
+  ],
+  "live_llm_calls_count": 3,
+  "total_llm_tokens": 6049,
+  "total_llm_cost_usd": 0.002023,
+  "live_call_records": [
+    {
+      "call_id": "call_7b9ea1c7d3a0",
+      "timestamp": "2026-10-28T09:55:46.462606+00:00",
+      "scenario_id": "dev_01_straightforward",
+      "strategy_name": "strategy_c_llm_live",
+      "round_number": 1,
+      "provider": "openai",
+      "model_name": "openai/gpt-oss-120b",
+      "request_id": "chatcmpl-adbe0b0c-1e98-4b3e-9861-55208fc01233",
+      "latency_ms": 3591.18,
+      "prompt_tokens": 1362,
+      "completion_tokens": 510,
+      "total_tokens": 1872,
+      "estimated_cost_usd": 0.000587,
+      "decision": {
+        "action": "stop_and_recommend",
+        "target": "arch_a_simple",
+        "reason": "Architecture A meets all SLA targets (p95 6.18 ms ≤ 50 ms, throughput 144.4 RPS ≥ 140 RPS) and stays within the $160 budget ($133/mo). All candidates have been simulated, feasibility is verified, and no other candidate satisfies the cost constraint, making arch_a_simple the clear winner.",
+        "expected_information_gain": null,
+        "evidence_reference": [
+          "arch_a_simple throughput 144.4 RPS >= 140 RPS",
+          "arch_a_simple p95 6.18 ms <= 50 ms",
+          "arch_a_simple cost $133 <= $160 budget"
+        ],
+        "stop_reason": "Sufficient evidence confirms arch_a_simple as the only feasible architecture; no further investigation needed.",
+        "benchmark_proposal": null
+      },
+      "policy_verdict": "APPROVED",
+      "policy_reason": "Action proposal complies with all safety, budget, target, and deduplication rules.",
+      "is_live": true,
+      "fallback_used": false,
+      "error": null
+    },
+    {
+      "call_id": "call_69756592a975",
+      "timestamp": "2026-10-28T09:55:50.402735+00:00",
+      "scenario_id": "dev_03_boundary",
+      "strategy_name": "strategy_c_llm_live",
+      "round_number": 1,
+      "provider": "openai",
+      "model_name": "openai/gpt-oss-120b",
+      "request_id": "chatcmpl-542d5665-42d6-4e20-9390-cfb538039605",
+      "latency_ms": 1931.18,
+      "prompt_tokens": 1371,
+      "completion_tokens": 650,
+      "total_tokens": 2021,
+      "estimated_cost_usd": 0.000693,
+      "decision": {
+        "action": "stop_and_recommend",
+        "target": null,
+        "reason": "Architecture B (arch_b_cached) satisfies both SLA constraints (p95 7.76 ms with upper uncertainty 7.90 ms < 8 ms, throughput 553.2 RPS > 500 RPS) and stays well within the $250 monthly budget ($176). Its latency bounds are comfortably inside the SLA, and it is the lowest‑cost feasible candidate compared to arch_c_async ($216). Thus a clear winner exists with no boundary risk.",
+        "expected_information_gain": null,
+        "evidence_reference": [
+          "arch_b_cached",
+          "arch_c_async",
+          "SLA p95 <=8ms",
+          "Throughput >=500 RPS",
+          "Budget <=$250"
+        ],
+        "stop_reason": "Recommend Architecture B as the optimal solution.",
+        "benchmark_proposal": null
+      },
+      "policy_verdict": "APPROVED",
+      "policy_reason": "Action proposal complies with all safety, budget, target, and deduplication rules.",
+      "is_live": true,
+      "fallback_used": false,
+      "error": null
+    },
+    {
+      "call_id": "call_60745b46d9cb",
+      "timestamp": "2026-10-28T09:55:52.768922+00:00",
+      "scenario_id": "dev_05_incomplete_coverage",
+      "strategy_name": "strategy_c_llm_live",
+      "round_number": 1,
+      "provider": "openai",
+      "model_name": "openai/gpt-oss-120b",
+      "request_id": "chatcmpl-dc517380-137e-47a6-ae72-599dc7e0dea8",
+      "latency_ms": 2022.71,
+      "prompt_tokens": 1457,
+      "completion_tokens": 699,
+      "total_tokens": 2156,
+      "estimated_cost_usd": 0.000743,
+      "decision": {
+        "action": "stop_and_recommend",
+        "target": null,
+        "reason": "All four candidates have been simulated, each satisfies the SLA (p95 ≤50 ms, throughput ≥350 RPS) and budget (≤$250). The authoritative evaluator selected arch_a_simple, which also has the lowest cost ($133) and ample latency headroom (9.29 ms ±0.15). No candidate approaches any constraint boundary, so the evidence is conclusive.",
+        "expected_information_gain": null,
+        "evidence_reference": [
+          "arch_a_simple throughput 395.8 RPS",
+          "arch_a_simple p95 9.29 ms (bounds [9.14,9.44])",
+          "arch_a_simple cost $133",
+          "authoritative evaluator recommendation arch_a_simple"
+        ],
+        "stop_reason": "Winner identified with sufficient performance and cost margins; further investigation unnecessary.",
+        "benchmark_proposal": null
+      },
+      "policy_verdict": "APPROVED",
+      "policy_reason": "Action proposal complies with all safety, budget, target, and deduplication rules.",
+      "is_live": true,
+      "fallback_used": false,
+      "error": null
+    }
+  ]
+}

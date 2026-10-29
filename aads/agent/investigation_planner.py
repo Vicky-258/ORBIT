@@ -5,7 +5,10 @@ and obtains structured InvestigationDecision objects with deterministic fallback
 """
 import json
 import logging
-from typing import Dict, List, Optional, Any
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Any, Tuple
 
 from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -25,15 +28,15 @@ and decide the next most valuable investigation step from a finite set of approv
 
 Approved actions:
 1. inspect_model_coverage: Check whether component models in registry are available, validated, and cover the workload.
-2. simulate_candidate: Re-simulate a specific candidate architecture under deeper conditions (target must be a valid candidate ID).
-3. inspect_uncertainty: Audit latency heuristic uncertainty bounds and calculate safety headroom against SLA constraints.
+2. simulate_candidate: Re-simulate a specific candidate architecture under deeper conditions (target MUST be exactly ONE candidate architecture ID, e.g. 'arch_a_simple', NOT comma-separated).
+3. inspect_uncertainty: Audit latency heuristic uncertainty bounds and calculate safety headroom against SLA constraints (target should be 'all' or a single candidate ID).
 4. propose_benchmark: Recommend a targeted container benchmark to reduce empirical model uncertainty (proposal-only; will not execute without authorization).
 5. stop_and_recommend: Conclude that current evidence is sufficient to recommend an architectural winner.
 6. stop_inconclusive: Conclude that available evidence is contradictory, insufficient, or hard constraints cannot be resolved.
 
 Decision Rules:
 - If all candidates are simulated, feasibility is verified, and a clear winner exists without threshold boundary risks, choose 'stop_and_recommend'.
-- If target is specified, it MUST be one of the known candidate architecture IDs or approved components.
+- If target is specified, it MUST be exactly one single candidate ID (e.g. 'arch_a_simple') or 'all' for coverage/uncertainty checks.
 - Do NOT repeat an action/target combination that was already executed in a previous round.
 - Ground your rationale directly in numerical metrics from the evidence summary.
 - You must produce a structured InvestigationDecision.
@@ -86,7 +89,7 @@ class InvestigationPlanner:
             ci_str = f"[{r.latency_uncertainty_p95_ms[0]:.2f}, {r.latency_uncertainty_p95_ms[1]:.2f}] ms" if r.latency_uncertainty_p95_ms else "N/A"
             lines.append(
                 f"  - {r.architecture_id}: {r.throughput_achieved_rps:.1f} RPS | "
-                f"p95: {r.p95_latency_ms:.2f} ms (95% CI: {ci_str}) | "
+                f"p95: {r.p95_latency_ms:.2f} ms (Uncertainty bounds: {ci_str}) | "
                 f"Cost: ${r.estimated_monthly_cost_usd:.2f}/mo | "
                 f"Bottleneck: {r.bottleneck_component}"
             )
@@ -113,39 +116,118 @@ class InvestigationPlanner:
 
         return chr(10).join(lines)
 
+    def plan_next_action_with_telemetry(
+        self,
+        state: Dict[str, Any],
+        fail_closed: bool = False,
+    ) -> Tuple[InvestigationDecision, Dict[str, Any]]:
+        """
+        Proposes the next action and returns comprehensive telemetry metadata.
+        If fail_closed is True, failures will NOT invoke fallback; instead they raise RuntimeError
+        or return error telemetry to ensure live evaluations are strictly verified.
+        """
+        evidence_summary = self.build_evidence_summary(state)
+        call_id = f"call_{uuid.uuid4().hex[:12]}"
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        telemetry: Dict[str, Any] = {
+            "call_id": call_id,
+            "timestamp": timestamp,
+            "provider": "unknown",
+            "model_name": "unknown",
+            "request_id": None,
+            "latency_ms": 0.0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "estimated_cost_usd": 0.0,
+            "is_live": False,
+            "fallback_used": False,
+            "error": None,
+        }
+
+        if not self.provider_mgr.is_llm_available():
+            msg = "LLM provider credentials unavailable."
+            telemetry["error"] = msg
+            if fail_closed:
+                raise RuntimeError(f"Fail-closed: {msg}")
+            telemetry["fallback_used"] = True
+            return self._heuristic_fallback(state), telemetry
+
+        messages = [
+            SystemMessage(content=PLANNER_SYSTEM_PROMPT),
+            HumanMessage(content="Review the current investigation evidence and select the next action:\n\n" + evidence_summary),
+        ]
+
+        t0 = time.perf_counter()
+        try:
+            model = self.provider_mgr.get_chat_model()
+            structured = model.with_structured_output(InvestigationDecision, include_raw=True)
+            res = structured.invoke(messages)
+            elapsed_ms = (time.perf_counter() - t0) * 1000.0
+
+            telemetry["latency_ms"] = round(elapsed_ms, 2)
+            telemetry["is_live"] = True
+
+            # Extract raw metadata if available
+            raw = res.get("raw")
+            if raw and hasattr(raw, "response_metadata"):
+                meta = raw.response_metadata or {}
+                telemetry["request_id"] = meta.get("id")
+                telemetry["model_name"] = meta.get("model_name", "unknown")
+                telemetry["provider"] = meta.get("model_provider", "groq" if "groq" in str(meta).lower() else "openai")
+
+            if raw and hasattr(raw, "usage_metadata") and raw.usage_metadata:
+                usage = raw.usage_metadata
+                telemetry["prompt_tokens"] = usage.get("input_tokens", 0)
+                telemetry["completion_tokens"] = usage.get("output_tokens", 0)
+                telemetry["total_tokens"] = usage.get("total_tokens", 0)
+            elif raw and hasattr(raw, "response_metadata") and "token_usage" in raw.response_metadata:
+                tu = raw.response_metadata["token_usage"]
+                telemetry["prompt_tokens"] = tu.get("prompt_tokens", 0)
+                telemetry["completion_tokens"] = tu.get("completion_tokens", 0)
+                telemetry["total_tokens"] = tu.get("total_tokens", 0)
+
+            # Estimate cost ($0.15/1M input, $0.75/1M output standard rate)
+            cost = (telemetry["prompt_tokens"] * 0.00000015) + (telemetry["completion_tokens"] * 0.00000075)
+            telemetry["estimated_cost_usd"] = round(cost, 6)
+
+            parsed = res.get("parsed")
+            parsing_err = res.get("parsing_error")
+
+            if isinstance(parsed, InvestigationDecision):
+                return parsed, telemetry
+            elif parsing_err:
+                err_msg = f"LLM output parsing error: {parsing_err}"
+                telemetry["error"] = err_msg
+                if fail_closed:
+                    raise RuntimeError(f"Fail-closed: {err_msg}")
+                telemetry["fallback_used"] = True
+                return self._heuristic_fallback(state), telemetry
+            else:
+                err_msg = f"Unexpected decision output type: {type(parsed)}"
+                telemetry["error"] = err_msg
+                if fail_closed:
+                    raise RuntimeError(f"Fail-closed: {err_msg}")
+                telemetry["fallback_used"] = True
+                return self._heuristic_fallback(state), telemetry
+
+        except Exception as e:
+            elapsed_ms = (time.perf_counter() - t0) * 1000.0
+            telemetry["latency_ms"] = round(elapsed_ms, 2)
+            telemetry["error"] = str(e)
+            if fail_closed:
+                raise RuntimeError(f"Fail-closed LLM call failed: {e}") from e
+            telemetry["fallback_used"] = True
+            return self._heuristic_fallback(state), telemetry
+
     def plan_next_action(self, state: Dict[str, Any]) -> InvestigationDecision:
         """
         Proposes the next investigation action. Uses LLM when available,
         otherwise safely falls back to deterministic heuristic planner.
         """
-        evidence_summary = self.build_evidence_summary(state)
-
-        def fallback_fn() -> InvestigationDecision:
-            return self._heuristic_fallback(state)
-
-        if not self.provider_mgr.is_llm_available():
-            logger.info("LLM unavailable; using deterministic investigation planner.")
-            return fallback_fn()
-
-        messages = [
-            SystemMessage(content=PLANNER_SYSTEM_PROMPT),
-            HumanMessage(content="Review the current investigation evidence and select the next action:" + chr(10) + chr(10) + evidence_summary),
-        ]
-
-        try:
-            model = self.provider_mgr.get_chat_model()
-            structured = model.with_structured_output(InvestigationDecision)
-            decision = structured.invoke(messages)
-
-            if isinstance(decision, InvestigationDecision):
-                return decision
-            else:
-                logger.warning(f"LLM returned non-decision type ({type(decision)}); using heuristic fallback.")
-                return fallback_fn()
-
-        except Exception as e:
-            logger.warning(f"LLM investigation planning failed ({e}); using heuristic fallback.")
-            return fallback_fn()
+        decision, _ = self.plan_next_action_with_telemetry(state, fail_closed=False)
+        return decision
 
     def _heuristic_fallback(self, state: Dict[str, Any]) -> InvestigationDecision:
         """

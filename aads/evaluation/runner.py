@@ -18,6 +18,7 @@ from aads.evaluation.scenarios import (
     DEV_SCENARIOS,
     HELDOUT_SCENARIOS,
 )
+from aads.agent.schemas import LiveLLMCallRecord
 from aads.evaluation.strategies import (
     run_strategy_a_fixed_pipeline,
     run_strategy_b_deterministic_adaptive,
@@ -61,6 +62,10 @@ class EvaluationSuiteResult(BaseModel):
     aggregate_summaries: Dict[str, StrategyAggregateSummary]
     detailed_metrics: List[Dict[str, Any]]
     execution_results: List[Dict[str, Any]]
+    live_llm_calls_count: int = 0
+    total_llm_tokens: int = 0
+    total_llm_cost_usd: float = 0.0
+    live_call_records: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 def _get_git_commit() -> str:
@@ -76,6 +81,10 @@ def run_evaluation_suite(
     suite_name: str = "default",
     mode: str = "offline",
     output_path: Optional[Path] = None,
+    live_calls_path: Optional[Path] = None,
+    max_llm_calls: Optional[int] = None,
+    max_cost_usd: Optional[float] = None,
+    fail_closed: bool = False,
 ) -> EvaluationSuiteResult:
     """
     Executes the comparative evaluation across Strategy A, B, and C.
@@ -85,6 +94,8 @@ def run_evaluation_suite(
 
     all_metrics: List[DecisionQualityMetrics] = []
     all_executions: List[StrategyExecutionResult] = []
+    live_call_records: List[LiveLLMCallRecord] = []
+    saved_calls_idx: List[bool] = []
 
     for scenario in scenarios:
         # Run Strategy A
@@ -100,10 +111,32 @@ def run_evaluation_suite(
         all_metrics.append(m_b)
 
         # Run Strategy C
-        res_c = run_strategy_c_llm_adaptive(scenario, registry=reg, mode=mode)
+        res_c = run_strategy_c_llm_adaptive(
+            scenario,
+            registry=reg,
+            mode=mode,
+            call_records=live_call_records,
+            fail_closed=fail_closed if mode == "live" else False,
+        )
         m_c = compute_metrics(scenario, res_c)
         all_executions.append(res_c)
         all_metrics.append(m_c)
+
+        if mode == "live" and live_calls_path and live_call_records:
+            live_calls_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(live_calls_path, "a", encoding="utf-8") as jf:
+                # Write unsaved calls
+                while len(saved_calls_idx) < len(live_call_records):
+                    call = live_call_records[len(saved_calls_idx)]
+                    jf.write(json.dumps(call.model_dump()) + "\n")
+                    saved_calls_idx.append(True)
+
+        if mode == "live" and max_llm_calls and len(live_call_records) >= max_llm_calls:
+            print(f"Max LLM calls budget reached ({len(live_call_records)}/{max_llm_calls}). Terminating early.")
+            break
+        if mode == "live" and max_cost_usd and sum(c.estimated_cost_usd for c in live_call_records) >= max_cost_usd:
+            print(f"Max LLM cost budget reached. Terminating early.")
+            break
 
     # Compute aggregates
     aggregates: Dict[str, StrategyAggregateSummary] = {}
@@ -162,6 +195,10 @@ def run_evaluation_suite(
         aggregate_summaries=aggregates,
         detailed_metrics=[m.model_dump() for m in all_metrics],
         execution_results=[e.model_dump() for e in all_executions],
+        live_llm_calls_count=len(live_call_records),
+        total_llm_tokens=sum(c.total_tokens for c in live_call_records),
+        total_llm_cost_usd=round(sum(c.estimated_cost_usd for c in live_call_records), 6),
+        live_call_records=[c.model_dump() for c in live_call_records],
     )
 
     if output_path:

@@ -6,6 +6,8 @@ Implements the three comparative strategies:
 - Strategy C: LLM Adaptive Planner (Structured LLM planning with policy gatekeeping)
 """
 import time
+import uuid
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel, Field
 
@@ -21,6 +23,7 @@ from aads.simulation.simpy_engine import SimPyEngine
 from aads.evaluation.recommender import ArchitectureRecommender
 from aads.registry.component_registry import ComponentRegistry
 from aads.agent.schemas import (
+    LiveLLMCallRecord,
     InvestigationDecision,
     InvestigationActionType,
     InvestigationRecord,
@@ -257,6 +260,7 @@ def run_strategy_b_deterministic_adaptive(
         # Policy validation
         val_res = policy.evaluate_action(proposal, state)
 
+
         if val_res.verdict == PolicyVerdict.APPROVED:
             tools_accepted += 1
             # Dispatch
@@ -436,6 +440,8 @@ def run_strategy_c_llm_adaptive(
     scenario: EvaluationScenario,
     registry: Optional[ComponentRegistry] = None,
     mode: str = "offline",
+    call_records: Optional[List[LiveLLMCallRecord]] = None,
+    fail_closed: bool = False,
 ) -> StrategyExecutionResult:
     """
     Executes Strategy C (LLM Adaptive Planner):
@@ -492,21 +498,59 @@ def run_strategy_c_llm_adaptive(
     fallback_used = False
     seen_proposals = set()
     llm_requests = 0
+    llm_tokens = 0
+    llm_cost = 0.0
+
+    if mode == "live" and not planner.provider_mgr.is_llm_available():
+        if fail_closed:
+            raise RuntimeError("Live LLM evaluation aborted: Provider credentials unavailable.")
+        fallback_used = True
 
     for r_num in range(1, scenario.max_investigation_rounds + 1):
         state["investigation_round"] = r_num - 1
+        call_telemetry = {}
 
         # Check provider failure injection
         if scenario.simulate_provider_failure:
             fallback_used = True
             proposal = planner._heuristic_fallback(state)
-        elif mode == "live" and planner.provider_mgr.is_llm_available():
+            call_telemetry = {
+                "is_live": False,
+                "fallback_used": True,
+                "error": "Simulated provider failure injected by scenario.",
+                "provider": "groq",
+                "model_name": "openai/gpt-oss-120b",
+                "latency_ms": 0.0,
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0,
+                "estimated_cost_usd": 0.0,
+            }
+        elif mode == "live":
             try:
+                proposal, call_telemetry = planner.plan_next_action_with_telemetry(state, fail_closed=fail_closed)
                 llm_requests += 1
-                proposal = planner.plan_next_action(state)
-            except Exception:
+                llm_tokens += call_telemetry.get("total_tokens", 0)
+                llm_cost += call_telemetry.get("estimated_cost_usd", 0.0)
+                if call_telemetry.get("fallback_used"):
+                    fallback_used = True
+            except Exception as e:
+                if fail_closed:
+                    raise RuntimeError(f"Live LLM call failed in scenario {scenario.scenario_id} round {r_num}: {e}") from e
                 fallback_used = True
                 proposal = planner._heuristic_fallback(state)
+                call_telemetry = {
+                    "is_live": False,
+                    "fallback_used": True,
+                    "error": str(e),
+                    "provider": "groq",
+                    "model_name": "openai/gpt-oss-120b",
+                    "latency_ms": 0.0,
+                    "prompt_tokens": 0,
+                    "completion_tokens": 0,
+                    "total_tokens": 0,
+                    "estimated_cost_usd": 0.0,
+                }
         else:
             # Offline intelligent decision
             proposal = _offline_llm_adaptive_decision(state, r_num, scenario)
@@ -519,6 +563,31 @@ def run_strategy_c_llm_adaptive(
 
         # Policy validation
         val_res = policy.evaluate_action(proposal, state)
+
+        # Record structured call telemetry for live strategy
+        if call_records is not None and mode == "live":
+            rec_call = LiveLLMCallRecord(
+                call_id=call_telemetry.get("call_id", f"call_{uuid.uuid4().hex[:12]}"),
+                timestamp=call_telemetry.get("timestamp", datetime.now(timezone.utc).isoformat()),
+                scenario_id=scenario.scenario_id,
+                strategy_name="strategy_c_llm_live",
+                round_number=r_num,
+                provider=call_telemetry.get("provider", "groq"),
+                model_name=call_telemetry.get("model_name", "openai/gpt-oss-120b"),
+                request_id=call_telemetry.get("request_id"),
+                latency_ms=call_telemetry.get("latency_ms", 0.0),
+                prompt_tokens=call_telemetry.get("prompt_tokens", 0),
+                completion_tokens=call_telemetry.get("completion_tokens", 0),
+                total_tokens=call_telemetry.get("total_tokens", 0),
+                estimated_cost_usd=call_telemetry.get("estimated_cost_usd", 0.0),
+                decision=proposal.model_dump(),
+                policy_verdict=val_res.verdict.value,
+                policy_reason=val_res.reason,
+                is_live=call_telemetry.get("is_live", False),
+                fallback_used=fallback_used or call_telemetry.get("fallback_used", False),
+                error=call_telemetry.get("error"),
+            )
+            call_records.append(rec_call)
 
         if val_res.verdict == PolicyVerdict.APPROVED:
             tools_accepted += 1
@@ -605,8 +674,8 @@ def run_strategy_c_llm_adaptive(
         policy_rejection_count=tools_rejected,
         fallback_used=fallback_used,
         llm_request_count=llm_requests if mode == "live" else None,
-        llm_token_count=None,
-        llm_cost_usd=None,
+        llm_token_count=llm_tokens if mode == "live" else None,
+        llm_cost_usd=round(llm_cost, 6) if mode == "live" else None,
         errors=state.get("errors", []),
         provenance_map={
             "pipeline": "llm_adaptive_live" if (mode == "live" and not fallback_used) else ("llm_adaptive_fallback" if fallback_used else "llm_adaptive_mocked_offline"),
