@@ -189,6 +189,9 @@ class ModelTrainer:
         now = datetime.now(timezone.utc).isoformat()
 
         held_out_concs = sorted(list(set(e.concurrency for e in test_exps)))
+        exp_ids = [e.experiment_id for e in experiments]
+        train_exp_ids = [e.experiment_id for e in train_exps]
+        test_exp_ids = [e.experiment_id for e in test_exps]
 
         r2_display = f"{chosen_metrics['r2']:.3f}" if chosen_metrics['r2'] is not None else "UNDEFINED_ZERO_VARIANCE"
 
@@ -209,16 +212,24 @@ class ModelTrainer:
             is_validated=is_validated,
             is_synthetic_fixture=is_synthetic,
             provenance=(
+                f"Trained from {len(experiments)} experiments ({len(train_exps)} train, {len(test_exps)} held-out test). "
+                f"Source IDs: {exp_ids}. "
                 f"Group-based held-out validation on {len(test_exps)} trials across load levels {held_out_concs} "
-                f"(zero data leakage; {len(train_exps)} train trials). MAE={chosen_metrics['mae']}ms, "
-                f"RMSE={chosen_metrics['rmse']}ms, MAPE={chosen_metrics['mape']}%, R2={r2_display}."
+                f"(zero data leakage; strict interpolation within [{int(ranges['concurrency'][0])}, {int(ranges['concurrency'][1])}]). "
+                f"MAE={chosen_metrics['mae']}ms, RMSE={chosen_metrics['rmse']}ms, MAPE={chosen_metrics['mape']}%, R2={r2_display}."
             ),
-            known_limitations=f"Valid for concurrency in [{int(ranges['concurrency'][0])}, {int(ranges['concurrency'][1])}] and throughput in [{ranges['rps'][0]:.0f}, {ranges['rps'][1]:.0f}] RPS.",
+            known_limitations=(
+                f"Interpolation only within concurrency [{int(ranges['concurrency'][0])}, {int(ranges['concurrency'][1])}] "
+                f"and throughput [{ranges['rps'][0]:.0f}, {ranges['rps'][1]:.0f}] RPS. Extrapolation beyond these bounds is unvalidated."
+            ),
             created_at=now,
         )
 
         metrics = {
             "chosen_model_type": chosen_type,
+            "source_experiment_ids": exp_ids,
+            "train_experiment_ids": train_exp_ids,
+            "test_experiment_ids": test_exp_ids,
             "train_samples": len(train_exps),
             "test_samples": len(test_exps),
             "held_out_concurrencies": held_out_concs,
@@ -227,5 +238,6 @@ class ModelTrainer:
             "chosen_eval": chosen_metrics,
             "is_validated": is_validated,
             "group_based_leakage_free": True,
+            "evaluation_nature": "interpolation_only",
         }
         return model_record, metrics

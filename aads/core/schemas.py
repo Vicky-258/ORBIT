@@ -130,6 +130,15 @@ class ExperimentRecord(BaseModel):
     is_synthetic_fixture: bool = False
     timestamp: str
     notes: Optional[str] = None
+    proposal_id: Optional[str] = None
+    authorization_id: Optional[str] = None
+    execution_id: Optional[str] = None
+    execution_mode: str = "synthetic"
+    benchmark_command: Optional[str] = None
+    duration_seconds: Optional[float] = None
+    raw_artifact_path: Optional[str] = None
+    status: str = "SUCCESS"
+    error_message: Optional[str] = None
 
 
 class ModelRecord(BaseModel):

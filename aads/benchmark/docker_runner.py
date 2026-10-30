@@ -321,6 +321,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                 trial_p95s = []
                 trial_p99s = []
                 total_samples = 0
+                total_failed_tx = 0
 
                 for rep in range(replications):
                     log_prefix = f"/tmp/pglog_{conc}_{rep}"
@@ -369,6 +370,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                     trial_p95s.append(log_stats["p95_ms"])
                     trial_p99s.append(log_stats["p99_ms"])
                     total_samples += log_stats["sample_count"]
+                    total_failed_tx += summary.get("failed_transactions", 0)
 
                 stats_res = subprocess.run(
                     ["docker", "stats", "--no-stream", "--format", "{{.CPUPerc}},{{.MemUsage}}", container_name],
@@ -420,14 +422,19 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                     p99_ms=round(mean_p99, 3),
                     cpu_pct=round(cpu_pct, 1),
                     memory_mb=round(mem_mb, 1),
-                    error_count=0,
+                    error_count=total_failed_tx,
                     trial_replications=replications,
                     variance_ms2=round(variance, 4),
                     is_synthetic_fixture=False,
+                    execution_mode="docker",
+                    benchmark_command=f"pgbench -c {conc} -j {min(conc, 4)} -T 3 -S -l",
+                    duration_seconds=3.0 * replications,
+                    raw_artifact_path=f"/tmp/pglog_{conc}_*",
                     timestamp=datetime.now(timezone.utc).isoformat(),
                     notes=(
                         f"Real pgbench trial in container {container_name}. Replications={replications}, "
-                        f"Samples={total_samples}, QuantileMethod=linear, TailPercentiles=EMPIRICALLY_MEASURED."
+                        f"Samples={total_samples}, FailedTransactions={total_failed_tx}, "
+                        f"QuantileMethod=linear, TailPercentiles=EMPIRICALLY_MEASURED."
                     ),
                 )
                 records.append(rec)

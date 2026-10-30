@@ -34,7 +34,7 @@ class BoundedBenchmarkExecutor:
     Fails closed on unauthorized, mismatched, or replayed requests.
     """
 
-    ALLOWED_COMPONENTS = {"postgres_db", "redis_cache"}
+    ALLOWED_COMPONENTS = {"postgres_db", "redis_cache", "postgresql_db"}
 
     def __init__(
         self,
@@ -105,23 +105,26 @@ class BoundedBenchmarkExecutor:
         # Check registry for persisted authorization status if supported
         if hasattr(self.registry, "get_authorization"):
             existing_auth = self.registry.get_authorization(authorization.authorization_id)
-            if existing_auth and existing_auth.status == AuthorizationStatus.EXHAUSTED:
-                self.used_authorization_ids.add(authorization.authorization_id)
-                return ExperimentExecutionResult(
-                    execution_id=exec_id,
-                    proposal_id=proposal.proposal_id,
-                    authorization_id=authorization.authorization_id,
-                    status="AUTHORIZATION_EXHAUSTED",
-                    raw_records_count=0,
-                    experiment_ids=[],
-                    error_message=(
-                        f"Execution blocked: Authorization record '{authorization.authorization_id}' "
-                        "is recorded as EXHAUSTED in the component registry."
-                    ),
-                    execution_duration_seconds=0.0,
-                    timestamp_utc=now_str,
-                    provenance="none",
-                )
+            if existing_auth:
+                auth_status = existing_auth.get("status") if isinstance(existing_auth, dict) else getattr(existing_auth, "status", None)
+                status_str = auth_status.value if hasattr(auth_status, "value") else str(auth_status)
+                if status_str == AuthorizationStatus.EXHAUSTED.value:
+                    self.used_authorization_ids.add(authorization.authorization_id)
+                    return ExperimentExecutionResult(
+                        execution_id=exec_id,
+                        proposal_id=proposal.proposal_id,
+                        authorization_id=authorization.authorization_id,
+                        status="AUTHORIZATION_EXHAUSTED",
+                        raw_records_count=0,
+                        experiment_ids=[],
+                        error_message=(
+                            f"Execution blocked: Authorization record '{authorization.authorization_id}' "
+                            "is recorded as EXHAUSTED in the component registry."
+                        ),
+                        execution_duration_seconds=0.0,
+                        timestamp_utc=now_str,
+                        provenance="none",
+                    )
 
         # 3. Authorization proposal ID binding check (Reject mismatched authorizations)
         if authorization.proposal_id != proposal.proposal_id:
@@ -284,6 +287,10 @@ class BoundedBenchmarkExecutor:
         # 11. Immutably persist records to registry with authorization lineage
         saved_ids = []
         for r in records:
+            r.proposal_id = proposal.proposal_id
+            r.authorization_id = authorization.authorization_id
+            r.execution_id = exec_id
+            r.execution_mode = authorization.execution_mode
             r.notes = (r.notes or "") + f" [AuthID:{authorization.authorization_id}] [ExecID:{exec_id}]"
             self.registry.save_experiment(r)
             saved_ids.append(r.experiment_id)

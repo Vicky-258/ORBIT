@@ -5,7 +5,7 @@ Manages performance models, benchmark experiment records, and compatibility chec
 import json
 import sqlite3
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple, Any, Union, TYPE_CHECKING
 from datetime import datetime, timezone
 
 from aads.core.config import REGISTRY_DB_PATH, BASE_DIR
@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 class ComponentRegistry:
     """Persistent SQLite-backed registry for models and benchmark experiments."""
 
-    def __init__(self, db_path: Optional[Path] = None):
-        self.db_path = db_path or REGISTRY_DB_PATH
+    def __init__(self, db_path: Optional[Union[Path, str]] = None):
+        self.db_path = Path(db_path) if db_path is not None else REGISTRY_DB_PATH
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 
@@ -320,6 +320,11 @@ class ComponentRegistry:
         )
 
     def _row_to_experiment(self, row: sqlite3.Row) -> ExperimentRecord:
+        if "raw_json" in row.keys() and row["raw_json"]:
+            try:
+                return ExperimentRecord.model_validate_json(row["raw_json"])
+            except Exception:
+                pass
         return ExperimentRecord(
             experiment_id=row["experiment_id"],
             component_name=row["component_name"],
@@ -429,7 +434,7 @@ class ComponentRegistry:
             ))
             conn.commit()
 
-    def get_authorization(self, authorization_id: str) -> Optional[Dict[str, Any]]:
+    def get_authorization(self, authorization_id: str) -> Optional[Any]:
         """Retrieve authorization record by ID."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -437,7 +442,21 @@ class ComponentRegistry:
             row = cursor.fetchone()
             if not row:
                 return None
-            return dict(row)
+            data = dict(row)
+            try:
+                from aads.agent.schemas import AuthorizationRecord, AuthorizationStatus
+                return AuthorizationRecord(
+                    authorization_id=data["authorization_id"],
+                    proposal_id=data["proposal_id"],
+                    authorized_by=data["authorized_by"],
+                    timestamp_utc=data["timestamp_utc"],
+                    execution_mode=data["execution_mode"],
+                    status=AuthorizationStatus(data["status"]),
+                    max_runtime_seconds=float(data["max_runtime_seconds"]),
+                    token=data["token"],
+                )
+            except Exception:
+                return data
 
     def get_model_history(self, component_name: str) -> List[ModelRecord]:
         """Retrieve version history of models for a component ordered by creation time."""
