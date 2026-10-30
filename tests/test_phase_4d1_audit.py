@@ -120,8 +120,9 @@ def test_group_based_split_prevents_replication_leakage():
 
 def test_small_config_fallback_split_replication_leakage_audit():
     """
-    Audits the ModelTrainer fallback behavior when len(configs) < 3.
-    Documents whether index-based slicing allows replications of the same config into both train and test.
+    Audits the ModelTrainer behavior when len(configs) < 3.
+    Verifies that the index-based slicing fallback has been removed and that
+    InsufficientIndependentGroupsError is raised to prevent replication leakage.
     """
     now = datetime.now(timezone.utc).isoformat()
     # 2 configs, 3 replications each (total 6 records)
@@ -149,24 +150,13 @@ def test_small_config_fallback_split_replication_leakage_audit():
         )
         for i in range(6)
     ]
-    # Check fallback split behavior
     configs = sorted(list(set((e.concurrency, round(e.read_ratio, 2)) for e in records)))
     assert len(configs) == 2  # Less than 3
 
-    sorted_exps = sorted(records, key=lambda e: (e.concurrency, e.achieved_rps))
-    n_total = len(sorted_exps)
-    n_test = max(1, int(n_total * 0.30))
-    test_indices = set(range(1, n_total, max(1, n_total // n_test))[:n_test])
-    train_exps = [e for i, e in enumerate(sorted_exps) if i not in test_indices]
-    test_exps = [e for i, e in enumerate(sorted_exps) if i in test_indices]
-
-    train_concs = set(e.concurrency for e in train_exps)
-    test_concs = set(e.concurrency for e in test_exps)
-
-    # In the fallback branch, the same concurrency exists in both train and test!
-    overlap = train_concs.intersection(test_concs)
-    # This documents a known boundary limitation of the fallback split for < 3 configs
-    assert len(overlap) > 0
+    # Hardened behavior: ModelTrainer rejects < 3 configurations to prevent leakage
+    from aads.modeling.model_trainer import InsufficientIndependentGroupsError
+    with pytest.raises(InsufficientIndependentGroupsError):
+        ModelTrainer._group_train_test_split(records)
 
 
 # ---------------------------------------------------------------------------
@@ -320,8 +310,8 @@ def test_authorization_proposal_id_binding_audit(temp_registry):
 
     # Audit check: does executor allow prop_b to be executed with auth_for_a?
     res = executor.execute_experiment(prop_b, authorization=auth_for_a)
-    is_bound = (res.status == "UNAUTHORIZED")
-    assert not is_bound, "Documents known gap: BoundedBenchmarkExecutor does not verify auth.proposal_id == prop.proposal_id"
+    assert res.status == "AUTHORIZATION_MISMATCH"
+    assert "Authorization record was issued for proposal" in res.error_message
 
 
 # ---------------------------------------------------------------------------

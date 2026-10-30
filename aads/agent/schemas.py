@@ -56,6 +56,9 @@ class AuthorizationStatus(str, Enum):
     AUTHORIZED = "AUTHORIZED"
     DENIED = "DENIED"
     REVOKED = "REVOKED"
+    EXHAUSTED = "EXHAUSTED"
+    MISMATCH = "MISMATCH"
+    EXPIRED = "EXPIRED"
 
 
 class AuthorizationLevel(str, Enum):

@@ -5,7 +5,7 @@ Manages performance models, benchmark experiment records, and compatibility chec
 import json
 import sqlite3
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
 from datetime import datetime, timezone
 
 from aads.core.config import REGISTRY_DB_PATH, BASE_DIR
@@ -14,6 +14,9 @@ from aads.core.schemas import (
     ExperimentRecord,
     WorkloadSpec,
 )
+
+if TYPE_CHECKING:
+    from aads.agent.schemas import AuthorizationRecord, AuthorizationStatus
 
 
 class ComponentRegistry:
@@ -46,7 +49,7 @@ class ComponentRegistry:
                     max_supported_concurrency INTEGER NOT NULL,
                     validation_rmse_ms REAL NOT NULL,
                     validation_mape_pct REAL NOT NULL,
-                    r2_score REAL NOT NULL,
+                    r2_score REAL,
                     is_validated INTEGER NOT NULL,
                     is_synthetic_fixture INTEGER NOT NULL,
                     provenance TEXT NOT NULL,
@@ -230,6 +233,69 @@ class ComponentRegistry:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM experiments ORDER BY timestamp DESC")
             return [self._row_to_experiment(row) for row in cursor.fetchall()]
+
+    def save_authorization(self, auth: Any) -> None:
+        """Persist or update an authorization record."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            status_val = auth.status.value if hasattr(auth.status, "value") else str(auth.status)
+            cursor.execute("""
+                INSERT OR REPLACE INTO authorizations (
+                    authorization_id, proposal_id, authorized_by, timestamp_utc,
+                    execution_mode, status, max_runtime_seconds, token
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                auth.authorization_id,
+                auth.proposal_id,
+                auth.authorized_by,
+                auth.timestamp_utc,
+                auth.execution_mode,
+                status_val,
+                auth.max_runtime_seconds,
+                auth.token,
+            ))
+            conn.commit()
+
+    def get_authorization(self, authorization_id: str) -> Optional[Any]:
+        """Retrieve an authorization record by ID."""
+        from aads.agent.schemas import AuthorizationRecord, AuthorizationStatus
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM authorizations WHERE authorization_id = ?", (authorization_id,))
+            row = cursor.fetchone()
+            if not row:
+                return None
+            return AuthorizationRecord(
+                authorization_id=row["authorization_id"],
+                proposal_id=row["proposal_id"],
+                authorized_by=row["authorized_by"],
+                timestamp_utc=row["timestamp_utc"],
+                execution_mode=row["execution_mode"],
+                status=AuthorizationStatus(row["status"]) if row["status"] in AuthorizationStatus._value2member_map_ else row["status"],
+                max_runtime_seconds=row["max_runtime_seconds"],
+                token=row["token"],
+            )
+
+    def list_authorizations(self) -> List[Any]:
+        """List all authorization records."""
+        from aads.agent.schemas import AuthorizationRecord, AuthorizationStatus
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM authorizations ORDER BY timestamp_utc DESC")
+            rows = cursor.fetchall()
+            return [
+                AuthorizationRecord(
+                    authorization_id=row["authorization_id"],
+                    proposal_id=row["proposal_id"],
+                    authorized_by=row["authorized_by"],
+                    timestamp_utc=row["timestamp_utc"],
+                    execution_mode=row["execution_mode"],
+                    status=AuthorizationStatus(row["status"]) if row["status"] in AuthorizationStatus._value2member_map_ else row["status"],
+                    max_runtime_seconds=row["max_runtime_seconds"],
+                    token=row["token"],
+                )
+                for row in rows
+            ]
 
     def _row_to_model(self, row: sqlite3.Row) -> ModelRecord:
         return ModelRecord(

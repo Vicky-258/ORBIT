@@ -146,7 +146,7 @@ class ModelRecord(BaseModel):
     max_supported_concurrency: int
     validation_rmse_ms: float
     validation_mape_pct: float
-    r2_score: float
+    r2_score: Optional[float] = None
     is_validated: bool
     is_synthetic_fixture: bool = False
     provenance: str

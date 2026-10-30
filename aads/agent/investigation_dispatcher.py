@@ -442,7 +442,10 @@ class InvestigationDispatcher:
 
         # 2. Resolve authorization record
         auth: Optional[AuthorizationRecord] = state.get("experiment_authorization")
-        if auth is None and state.get("auto_authorize_synthetic"):
+        if auth is not None and auth.proposal_id in ("agent_authorized_exp", "*"):
+            # Bind the pre-authorized session token to this specific proposal
+            auth.proposal_id = proposal.proposal_id
+        elif auth is None and state.get("auto_authorize_synthetic"):
             auth = AuthorizationRecord(
                 authorization_id=f"auth_{uuid.uuid4().hex[:8]}",
                 proposal_id=proposal.proposal_id,

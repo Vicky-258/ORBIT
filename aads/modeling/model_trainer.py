@@ -1,14 +1,14 @@
+"""
+Model Trainer and Held-Out Evaluator (Hardened for Phase 4D.2).
+Performs strict group-based train/validation split (holding out entire independent configurations
+to prevent replication data leakage), computes mathematically honest RMSE, MAE, MAPE, Max Error,
+and R2 on held-out observations, and constructs validated ModelRecord for registry insertion.
+"""
 import hashlib
-"""
-Model Trainer and Held-Out Evaluator.
-Performs group-based train/validation split (holding out entire load levels to prevent data leakage),
-computes RMSE, MAE, MAPE, Max Error, and R2 on held-out observations,
-and constructs validated ModelRecord for registry insertion.
-"""
 import math
 import uuid
 from datetime import datetime, timezone
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 import numpy as np
 
 from aads.core.schemas import ExperimentRecord, ModelRecord
@@ -16,8 +16,67 @@ from aads.modeling.lookup_model import LookupInterpolationModel
 from aads.modeling.regression_model import RegressionPerformanceModel
 
 
+class InsufficientIndependentGroupsError(ValueError):
+    """Raised when an experiment dataset lacks sufficient independent configurations for held-out validation."""
+    pass
+
+
 class ModelTrainer:
     """Trains and validates empirical component models with strict group-based held-out evaluation."""
+
+    @staticmethod
+    def _group_train_test_split(
+        experiments: List[ExperimentRecord],
+        test_ratio: float = 0.30,
+    ) -> Tuple[List[ExperimentRecord], List[ExperimentRecord]]:
+        """
+        Splits experiment records into training and testing sets strictly by independent experimental configuration
+        unit (concurrency, read_ratio). All replications of a configuration are assigned to the same split.
+        Fails closed with InsufficientIndependentGroupsError if fewer than 3 independent configurations exist.
+        """
+        # Group by independent experimental unit: (concurrency, round(read_ratio, 2))
+        configs = sorted(list(set((e.concurrency, round(e.read_ratio, 2)) for e in experiments)))
+
+        if len(configs) < 3:
+            raise InsufficientIndependentGroupsError(
+                f"Need at least 3 independent experimental configurations to perform group-based held-out validation "
+                f"without data leakage. Found {len(configs)} configuration(s): {configs}."
+            )
+
+        n_configs = len(configs)
+        n_test_configs = max(1, int(round(n_configs * test_ratio)))
+
+        # Boundary-point policy:
+        # Boundary configurations (configs[0] and configs[-1]) are intentionally retained in the training set
+        # so that the parametric regression and lookup models fit across the entire supported operating range
+        # [c_min, c_max], preventing extrapolation errors during simulation.
+        # Held-out validation is performed strictly on intermediate configurations configs[1:-1]
+        # to assess true interpolation quality within the operational envelope.
+        intermediate = configs[1:-1]
+        if not intermediate:
+            raise InsufficientIndependentGroupsError(
+                f"Need at least 3 distinct configurations to have intermediate test configurations. Found {configs}."
+            )
+
+        step = max(1, len(intermediate) // n_test_configs)
+        test_config_set = set(intermediate[::step][:n_test_configs])
+
+        train_exps = [e for e in experiments if (e.concurrency, round(e.read_ratio, 2)) not in test_config_set]
+        test_exps = [e for e in experiments if (e.concurrency, round(e.read_ratio, 2)) in test_config_set]
+
+        # Verify zero configuration leakage between train and test
+        train_configs = set((e.concurrency, round(e.read_ratio, 2)) for e in train_exps)
+        test_configs = set((e.concurrency, round(e.read_ratio, 2)) for e in test_exps)
+        overlap = train_configs.intersection(test_configs)
+        if overlap:
+            raise RuntimeError(f"Configuration leakage detected between train and test sets: {overlap}")
+
+        if not train_exps or not test_exps:
+            raise InsufficientIndependentGroupsError(
+                "Train or test split is empty after grouping. Provide more diverse experiment configurations."
+            )
+
+        return train_exps, test_exps
 
     @staticmethod
     def train_and_validate(
@@ -31,31 +90,8 @@ class ModelTrainer:
                 f"Need at least 3 experiment observations to perform held-out validation for {component_name}:{version}"
             )
 
-        # 1. Group-based split: identify distinct operating configurations (concurrency, read_ratio)
-        # to ensure entire load levels are held out together and prevent replication leakage
-        configs = sorted(list(set((e.concurrency, round(e.read_ratio, 2)) for e in experiments)))
-        
-        if len(configs) >= 3:
-            n_configs = len(configs)
-            n_test_configs = max(1, int(round(n_configs * test_ratio)))
-            # Pick intermediate configurations for test to evaluate true interpolation between boundaries
-            intermediate = configs[1:-1] if len(configs) > 2 else configs[1:]
-            step = max(1, len(intermediate) // n_test_configs)
-            test_config_set = set(intermediate[::step][:n_test_configs])
-            
-            train_exps = [e for e in experiments if (e.concurrency, round(e.read_ratio, 2)) not in test_config_set]
-            test_exps = [e for e in experiments if (e.concurrency, round(e.read_ratio, 2)) in test_config_set]
-        else:
-            # Fallback for small matrix: sort and take evenly spaced samples
-            sorted_exps = sorted(experiments, key=lambda e: (e.concurrency, e.achieved_rps))
-            n_total = len(sorted_exps)
-            n_test = max(1, int(n_total * test_ratio))
-            test_indices = set(range(1, n_total, max(1, n_total // n_test))[:n_test])
-            train_exps = [e for i, e in enumerate(sorted_exps) if i not in test_indices]
-            test_exps = [e for i, e in enumerate(sorted_exps) if i in test_indices]
-
-        if not train_exps or not test_exps:
-            raise ValueError("Train or test split is empty after grouping. Provide more diverse experiment points.")
+        # 1. Group-based split: enforces minimum 3 independent configurations with zero replication leakage
+        train_exps, test_exps = ModelTrainer._group_train_test_split(experiments, test_ratio=test_ratio)
 
         # 2. Fit baseline Lookup Model on train split
         baseline_lookup = LookupInterpolationModel(train_exps)
@@ -68,33 +104,50 @@ class ModelTrainer:
             actuals = []
             predictions = []
             for e in test_exps:
-                # Isolate service demand: at N=1, residence time R = N/X is pure service S_0
-                # bounded by measured p50 to avoid double counting
                 base_service = (e.concurrency / max(1.0, e.achieved_rps)) * 1000.0
                 actual_service = min(e.p50_ms, max(0.2, base_service))
                 pred_service, _, _ = model.predict_service_time_ms("read", e.concurrency, e.achieved_rps)
                 actuals.append(actual_service)
                 predictions.append(pred_service)
 
-            actuals = np.array(actuals)
-            predictions = np.array(predictions)
-            residuals = actuals - predictions
+            actuals = np.array(actuals, dtype=float)
+            predictions = np.array(predictions, dtype=float)
 
+            # Numerical safety checks
+            if not np.all(np.isfinite(actuals)) or not np.all(np.isfinite(predictions)):
+                return {
+                    "rmse": float("inf"),
+                    "mae": float("inf"),
+                    "mape": float("inf"),
+                    "max_error": float("inf"),
+                    "r2": None,
+                    "is_valid": False,
+                }
+
+            residuals = actuals - predictions
             rmse = float(np.sqrt(np.mean(residuals**2)))
             mae = float(np.mean(np.abs(residuals)))
             mape = float(np.mean(np.abs(residuals / np.maximum(actuals, 0.05))) * 100.0)
             max_err = float(np.max(np.abs(residuals)))
-            
-            ss_tot = np.sum((actuals - np.mean(actuals))**2)
-            ss_res = np.sum(residuals**2)
-            r2 = float(1.0 - (ss_res / max(1e-6, ss_tot))) if ss_tot > 1e-6 else 0.90
-            
+
+            ss_tot = float(np.sum((actuals - np.mean(actuals))**2))
+            ss_res = float(np.sum(residuals**2))
+
+            # Mathematically honest R2:
+            # If ss_tot <= 1e-6 (constant or near-constant target), variance is zero and R2 is undefined.
+            # We explicitly represent undefined R2 as None rather than fabricating an arbitrary 0.90.
+            if ss_tot > 1e-6:
+                r2 = round(float(1.0 - (ss_res / ss_tot)), 3)
+            else:
+                r2 = None
+
             return {
                 "rmse": round(rmse, 3),
                 "mae": round(mae, 3),
                 "mape": round(mape, 2),
                 "max_error": round(max_err, 3),
-                "r2": round(r2, 3),
+                "r2": r2,
+                "is_valid": True,
             }
 
         lookup_metrics = evaluate_on_held_out(baseline_lookup)
@@ -113,11 +166,20 @@ class ModelTrainer:
             params = {"baseline": "knn_inverse_distance", "num_knots": len(train_exps)}
 
         # Decision-relevant multi-metric quality gating:
-        # 1. R2 >= 0.65 (or MAE <= 1.5ms on tight scale)
+        # 1. Honest R2 >= 0.65 (or strict MAE <= 1.5ms on tight scale)
         # 2. MAE <= 2.5ms OR MAPE <= 35%
+        # Undefined R2 (None or NaN) cannot claim an R2 threshold pass.
+        r2_val = chosen_metrics.get("r2")
+        has_strong_r2 = (r2_val is not None and math.isfinite(r2_val) and r2_val >= 0.65)
+        tight_scale_pass = (chosen_metrics["mae"] <= 1.5 and chosen_metrics["rmse"] <= 2.0)
+        error_bounds_pass = (chosen_metrics["mae"] <= 2.5 or chosen_metrics["mape"] <= 35.0)
+
         is_validated = (
-            (chosen_metrics["r2"] >= 0.65 or chosen_metrics["mae"] <= 1.5)
-            and (chosen_metrics["mae"] <= 2.5 or chosen_metrics["mape"] <= 35.0)
+            chosen_metrics.get("is_valid", False)
+            and math.isfinite(chosen_metrics["rmse"])
+            and math.isfinite(chosen_metrics["mae"])
+            and (has_strong_r2 or tight_scale_pass)
+            and error_bounds_pass
         )
 
         # Operating ranges
@@ -128,8 +190,10 @@ class ModelTrainer:
 
         held_out_concs = sorted(list(set(e.concurrency for e in test_exps)))
 
+        r2_display = f"{chosen_metrics['r2']:.3f}" if chosen_metrics['r2'] is not None else "UNDEFINED_ZERO_VARIANCE"
+
         model_record = ModelRecord(
-            model_id=f"model_{component_name}_{hashlib.sha256(f"{component_name}_{version}_{chosen_type}_{round(chosen_metrics["rmse"], 3)}".encode()).hexdigest()[:8]}",
+            model_id=f"model_{component_name}_{hashlib.sha256(f'{component_name}_{version}_{chosen_type}_{round(chosen_metrics['rmse'], 3)}'.encode()).hexdigest()[:8]}",
             component_name=component_name,
             version=version,
             env_fingerprint=env_fp,
@@ -147,7 +211,7 @@ class ModelTrainer:
             provenance=(
                 f"Group-based held-out validation on {len(test_exps)} trials across load levels {held_out_concs} "
                 f"(zero data leakage; {len(train_exps)} train trials). MAE={chosen_metrics['mae']}ms, "
-                f"RMSE={chosen_metrics['rmse']}ms, MAPE={chosen_metrics['mape']}%, R2={chosen_metrics['r2']}."
+                f"RMSE={chosen_metrics['rmse']}ms, MAPE={chosen_metrics['mape']}%, R2={r2_display}."
             ),
             known_limitations=f"Valid for concurrency in [{int(ranges['concurrency'][0])}, {int(ranges['concurrency'][1])}] and throughput in [{ranges['rps'][0]:.0f}, {ranges['rps'][1]:.0f}] RPS.",
             created_at=now,

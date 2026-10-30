@@ -1,13 +1,14 @@
 """
-Validated Model Calibration Pipeline (Phase 4D).
+Validated Model Calibration Pipeline (Hardened for Phase 4D.2).
 Safely ingests newly measured benchmark evidence, performs group-based held-out validation,
 compares predictions against baseline models, and enforces quality gates before promoting models.
+Fails closed when independent groups are insufficient or validation quality gates fail.
 """
 from typing import Dict, List, Optional, Any, Tuple
 from pydantic import BaseModel, Field
 
 from aads.core.schemas import ModelRecord, ExperimentRecord
-from aads.modeling.model_trainer import ModelTrainer
+from aads.modeling.model_trainer import ModelTrainer, InsufficientIndependentGroupsError
 from aads.registry.component_registry import ComponentRegistry
 
 
@@ -15,7 +16,7 @@ class CalibrationOutcome(BaseModel):
     """Structured report of component model calibration and validation outcome."""
     component_name: str
     version: str
-    status: str = Field(description="PROMOTED, INSUFFICIENT_EVIDENCE, or REJECTED")
+    status: str = Field(description="PROMOTED, INSUFFICIENT_EVIDENCE, INSUFFICIENT_INDEPENDENT_GROUPS, or REJECTED")
     old_model_id: Optional[str] = None
     new_model_id: Optional[str] = None
     validation_rmse_ms: Optional[float] = None
@@ -46,15 +47,16 @@ class CalibrationPipeline:
         """
         Calibrates and validates a component model from benchmark evidence.
         Promotes the model in the registry only if validation quality checks pass.
+        Preserves prior model on insufficient groups or failed validation.
         """
         # 1. Fetch all experiments for this component if not provided
         all_exps = experiments if experiments is not None else self.registry.get_experiments(component_name, version)
-        
+
         # Fetch current active model for comparison
         existing_model = self.registry.get_model(component_name, version)
         old_id = existing_model.model_id if existing_model else None
 
-        # 2. Check for sufficient observations
+        # 2. Check for sufficient observations count
         if len(all_exps) < 3:
             return CalibrationOutcome(
                 component_name=component_name,
@@ -77,6 +79,19 @@ class CalibrationPipeline:
                 experiments=all_exps,
                 test_ratio=test_ratio,
             )
+        except InsufficientIndependentGroupsError as grp_exc:
+            return CalibrationOutcome(
+                component_name=component_name,
+                version=version,
+                status="INSUFFICIENT_INDEPENDENT_GROUPS",
+                old_model_id=old_id,
+                new_model_id=None,
+                summary=(
+                    f"Insufficient independent experimental groups for {component_name}:{version}: {str(grp_exc)}. "
+                    "Prior model preserved; recalibration withheld."
+                ),
+                details={"error": str(grp_exc)},
+            )
         except Exception as exc:
             return CalibrationOutcome(
                 component_name=component_name,
@@ -94,6 +109,8 @@ class CalibrationPipeline:
         mape = chosen_eval.get("mape")
         r2 = chosen_eval.get("r2")
         is_validated = eval_metrics.get("is_validated", False)
+
+        r2_display = f"{r2:.3f}" if r2 is not None else "UNDEFINED_ZERO_VARIANCE"
 
         # Check empirical upgrade: candidate is real empirical while previous was synthetic fixture
         is_empirical_upgrade = (
@@ -117,7 +134,7 @@ class CalibrationPipeline:
                 details=eval_metrics,
                 summary=(
                     f"Candidate model failed quality validation gates: RMSE={rmse}ms, MAE={mae}ms, "
-                    f"MAPE={mape}%, R2={r2}. Prior model preserved; candidate not promoted."
+                    f"MAPE={mape}%, R2={r2_display}. Prior model preserved; candidate not promoted."
                 ),
             )
 
@@ -126,7 +143,7 @@ class CalibrationPipeline:
 
         summary_msg = (
             f"Successfully calibrated and promoted model '{candidate_model.model_id}' for {component_name}:{version}. "
-            f"Held-out validation: RMSE={rmse}ms, MAE={mae}ms, MAPE={mape}%, R2={r2}."
+            f"Held-out validation: RMSE={rmse}ms, MAE={mae}ms, MAPE={mape}%, R2={r2_display}."
         )
         if is_empirical_upgrade:
             summary_msg += " (Empirical upgrade: replaced synthetic fixture with real benchmark measurements)."
