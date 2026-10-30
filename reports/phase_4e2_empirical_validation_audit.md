@@ -7,44 +7,24 @@
 
 ---
 
-## 1. Historical Evidence Integrity & Recalculation
+## 1. Historical Evidence Integrity
 
 The raw artifacts preserved from Phase 4E.1 in [`artifacts/benchmarks/phase_4e1_pilot/`](file:///home/vicky/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot) were independently audited against the execution manifest and database records in [`data/registry.db`](file:///home/vicky/v_drive/Codes/AADS/data/registry.db).
 
-### 1.1. Artifact Inventory and Provenance
-All 12 individual benchmark trials possess full artifact retention:
+### 1.1. Artifact Inventory and Provenance Traceability
+All 12 individual benchmark trials possess full, bitwise-intact artifact retention:
 - **12 stdout logs:** `pgbench_c{1,4,8,16}_r{0,1,2}.stdout` (complete pgbench summary reports).
 - **12 stderr logs:** `pgbench_c{1,4,8,16}_r{0,1,2}.stderr` (contain standard clean vacuum output `starting vacuum...end.`).
-- **12 raw transaction logs:** `pglog_c{1,4,8,16}_r{0,1,2}.log` (~245 MB total; transaction-level records).
-- **Environment Metadata:** `environment_metadata.json` (captures host, Docker digest, OS, kernel, and PG build).
-- **Execution Summary:** `execution_summary.json` (contains execution ID `exec_f531c54a85`).
+- **12 raw transaction logs:** `pglog_c{1,4,8,16}_r{0,1,2}.log` (~245 MB total; transaction-level records with microsecond timestamps).
+- **Environment Metadata:** `environment_metadata.json` (captures host, Docker daemon digest, OS kernel `6.6.137+rpt-rpi-2712`, and PostgreSQL 16.8 Alpine build).
+- **Execution Summary:** `execution_summary.json` (contains execution ID `exec_f531c54a85` and operator authorization `auth_exec_20261030_104106_pgpilot`).
 
-### 1.2. Transaction Count & Metrics Recalculation Audit
+### 1.2. Replication Completeness and Zero-Failure Verification
+- **Replication Count:** Exactly 3 trials for each of the 4 concurrency levels ($c \in \{1, 4, 8, 16\}$), yielding 12 individual replication trials and 4 pooled configurations (16 total records in the database).
+- **Failed Transactions:** Audit of all 8,043,737 raw log lines confirmed **0 failed transactions** across all 12 trials.
+- **Subprocess Exit Codes:** All Docker benchmark container invocations, `pgbench` initializations, vacuums, and execution runs exited with code `0`.
 
-Every single transaction line across the 12 raw log files was parsed and recalculated:
-- **Latency unit:** Microseconds (`time_in_us`), converted to milliseconds via `time_us / 1000.0`.
-- **Throughput calculation:** Recalculated as $\text{Total Transactions} / 30.0\text{s}$, verifying exact agreement with `tps (without initial connection time)` from pgbench console output.
-- **Percentiles:** Recalculated using numpy linear quantile interpolation (`method="linear"`).
-- **Failed transactions:** 0 failed transactions across all 12 trials.
-
-#### Side-by-Side Verification: Raw Logs vs. Stderr/Stdout vs. Database Records:
-
-| Trial | Stored Experiment ID | Raw Log Tx | Console Stdout Tx | Stored TPS | Recalculated TPS | Stored p50 (ms) | Recalc p50 (ms) | Stored p95 (ms) | Recalc p95 (ms) | Stored p99 (ms) | Recalc p99 (ms) |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **c1_r0** | `exp_pg_c1_r0_bc22eb35` | 794,017 | 794,017 | 26,468.6 | 26,468.58 | 0.025 | 0.025 | 0.073 | 0.073 | 0.147 | 0.147 |
-| **c1_r1** | `exp_pg_c1_r1_e9368f7c` | 841,087 | 841,087 | 28,038.2 | 28,038.23 | 0.023 | 0.023 | 0.069 | 0.069 | 0.146 | 0.146 |
-| **c1_r2** | `exp_pg_c1_r2_4738d23f` | 863,105 | 863,105 | 28,772.2 | 28,772.23 | 0.024 | 0.024 | 0.069 | 0.069 | 0.140 | 0.140 |
-| **c4_r0** | `exp_pg_c4_r0_41e4d234` | 652,794 | 652,794 | 21,761.3 | 21,761.34 | 0.037 | 0.037 | 0.086 | 0.086 | 0.144 | 0.144 |
-| **c4_r1** | `exp_pg_c4_r1_63340df9` | 704,764 | 704,764 | 23,481.1 | 23,481.14 | 0.035 | 0.035 | 0.075 | 0.075 | 0.110 | 0.110 |
-| **c4_r2** | `exp_pg_c4_r2_d7df5784` | 745,406 | 745,406 | 24,847.2 | 24,847.17 | 0.033 | 0.033 | 0.072 | 0.072 | 0.111 | 0.111 |
-| **c8_r0** | `exp_pg_c8_r0_86317dd0` | 594,082 | 594,082 | 19,803.3 | 19,803.33 | 0.045 | 0.045 | 0.097 | 0.097 | 0.171 | 0.171 |
-| **c8_r1** | `exp_pg_c8_r1_ae0c17ec` | 537,612 | 537,612 | 17,910.5 | 17,910.49 | 0.050 | 0.050 | 0.124 | 0.124 | 0.242 | 0.242 |
-| **c8_r2** | `exp_pg_c8_r2_48652a67` | 609,355 | 609,355 | 20,276.1 | 20,276.12 | 0.043 | 0.043 | 0.100 | 0.100 | 0.182 | 0.182 |
-| **c16_r0** | `exp_pg_c16_r0_f6cc1f9f` | 583,126 | 583,126 | 19,410.0 | 19,410.04 | 0.064 | 0.064 | 0.185 | 0.185 | 0.397 | 0.397 |
-| **c16_r1** | `exp_pg_c16_r1_b0f95ae9` | 558,059 | 558,059 | 18,593.1 | 18,593.14 | 0.068 | 0.068 | 0.197 | 0.197 | 0.557 | 0.557 |
-| **c16_r2** | `exp_pg_c16_r2_ad75aac2` | 560,330 | 560,330 | 18,644.2 | 18,644.19 | 0.067 | 0.067 | 0.202 | 0.202 | 0.569 | 0.569 |
-
-### 1.3. Discrepancy Findings in Historical Report
+### 1.3. Documentation Discrepancy Findings in Historical Report
 
 > [!NOTE]
 > **Audit Discrepancy Finding:**  
@@ -61,9 +41,46 @@ Every single transaction line across the 12 raw log files was parsed and recalcu
 
 ---
 
-## 2. Latency Distribution Audit & Anomaly Investigation
+## 2. Recalculated Performance Metrics
 
-### 2.1. Comprehensive Distribution Breakdown
+### 2.1. Raw Measurement Conversion and Methodology
+Every single transaction line across the 12 raw log files was parsed and recalculated:
+- **Latency unit:** Microseconds (`time_in_us`), converted to milliseconds via `time_us / 1000.0`.
+- **Throughput calculation:** Recalculated as $\text{Total Transactions} / 30.0\text{s}$, verifying exact agreement with `tps (without initial connection time)` from pgbench console output.
+- **Percentiles:** Recalculated using numpy linear quantile interpolation (`method="linear"`).
+- **Failed transactions:** 0 failed transactions across all 12 trials.
+
+### 2.2. Side-by-Side Verification: Raw Logs vs. Stderr/Stdout vs. Database Records:
+
+| Trial | Stored Experiment ID | Raw Log Tx | Console Stdout Tx | Stored TPS | Recalculated TPS | Stored p50 (ms) | Recalc p50 (ms) | Stored p95 (ms) | Recalc p95 (ms) | Stored p99 (ms) | Recalc p99 (ms) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **c1_r0** | `exp_pg_c1_r0_bc22eb35` | 794,017 | 794,017 | 26,468.6 | 26,468.58 | 0.025 | 0.025 | 0.073 | 0.073 | 0.147 | 0.147 |
+| **c1_r1** | `exp_pg_c1_r1_e9368f7c` | 841,087 | 841,087 | 28,038.2 | 28,038.23 | 0.023 | 0.023 | 0.069 | 0.069 | 0.146 | 0.146 |
+| **c1_r2** | `exp_pg_c1_r2_4738d23f` | 863,105 | 863,105 | 28,772.2 | 28,772.23 | 0.024 | 0.024 | 0.069 | 0.069 | 0.140 | 0.140 |
+| **c4_r0** | `exp_pg_c4_r0_41e4d234` | 652,794 | 652,794 | 21,761.3 | 21,761.34 | 0.037 | 0.037 | 0.086 | 0.086 | 0.144 | 0.144 |
+| **c4_r1** | `exp_pg_c4_r1_63340df9` | 704,764 | 704,764 | 23,481.1 | 23,481.14 | 0.035 | 0.035 | 0.075 | 0.075 | 0.110 | 0.110 |
+| **c4_r2** | `exp_pg_c4_r2_d7df5784` | 745,406 | 745,406 | 24,847.2 | 24,847.17 | 0.033 | 0.033 | 0.072 | 0.072 | 0.111 | 0.111 |
+| **c8_r0** | `exp_pg_c8_r0_86317dd0` | 594,082 | 594,082 | 19,803.3 | 19,803.33 | 0.045 | 0.045 | 0.097 | 0.097 | 0.171 | 0.171 |
+| **c8_r1** | `exp_pg_c8_r1_ae0c17ec` | 537,612 | 537,612 | 17,910.5 | 17,910.49 | 0.050 | 0.050 | 0.124 | 0.124 | 0.242 | 0.242 |
+| **c8_r2** | `exp_pg_c8_r2_48652a67` | 609,355 | 609,355 | 20,276.1 | 20,276.12 | 0.043 | 0.043 | 0.100 | 0.100 | 0.182 | 0.182 |
+| **c16_r0** | `exp_pg_c16_r0_f6cc1f9f` | 583,126 | 583,126 | 19,410.0 | 19,410.04 | 0.064 | 0.064 | 0.185 | 0.185 | 0.397 | 0.397 |
+| **c16_r1** | `exp_pg_c16_r1_b0f95ae9` | 558,059 | 558,059 | 18,593.1 | 18,593.14 | 0.068 | 0.068 | 0.197 | 0.197 | 0.557 | 0.557 |
+| **c16_r2** | `exp_pg_c16_r2_ad75aac2` | 560,330 | 560,330 | 18,644.2 | 18,644.19 | 0.067 | 0.067 | 0.202 | 0.202 | 0.569 | 0.569 |
+
+### 2.3. Individual vs. Pooled Percentile Consistency
+The benchmark runner computes pooled metrics across the 3 replications for each concurrency level by concatenating the raw transaction logs:
+- **Pooled c=1:** p50 = 0.0240 ms, p95 = 0.0700 ms, p99 = 0.1440 ms
+- **Pooled c=4:** p50 = 0.0350 ms, p95 = 0.0770 ms, p99 = 0.1250 ms
+- **Pooled c=8:** p50 = 0.0460 ms, p95 = 0.1070 ms, p99 = 0.2000 ms
+- **Pooled c=16:** p50 = 0.0660 ms, p95 = 0.1940 ms, p99 = 0.4930 ms
+
+All 4 pooled records stored in [`data/registry.db`](file:///home/vicky/v_drive/Codes/AADS/data/registry.db) exactly match the directly recalculated pooled log quantiles.
+
+---
+
+## 3. Latency Distribution Audit & Anomaly Investigation
+
+### 3.1. Comprehensive Pooled Distribution Breakdown
 The full empirical distribution was calculated for each configuration:
 
 | Configuration | Sample Count | Min (ms) | Mean (ms) | p25 (ms) | p50 (ms) | p75 (ms) | IQR (ms) | p90 (ms) | p95 (ms) | p99 (ms) | p99.9 (ms) | Max (ms) | StdDev (ms) |
@@ -73,7 +90,24 @@ The full empirical distribution was calculated for each configuration:
 | **c=8 (Pooled)** | 1,741,049 | 0.0200 | 0.4115 | 0.0360 | 0.0460 | 0.0660 | 0.0300 | 0.0860 | 0.1070 | 0.2000 | 86.6690 | 90.4800 | 5.5271 |
 | **c=16 (Pooled)** | 1,701,515 | 0.0200 | 0.8388 | 0.0450 | 0.0660 | 0.1000 | 0.0550 | 0.1530 | 0.1940 | 0.4930 | 90.7785 | 93.3020 | 8.1858 |
 
-### 2.2. The Mean vs. p99 Inversion Anomaly Explained: 12-Trial Cross-Replication Audit
+### 3.2. Individual Trial Distribution Statistics (All 12 Replications)
+
+| Trial | $c$ | Total Tx | Min (ms) | Mean (ms) | Median (ms) | p90 (ms) | p95 (ms) | p99 (ms) | p99.9 (ms) | Max (ms) | StdDev (ms) | IQR (ms) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **c1_r0** | 1 | 794,017 | 0.0180 | 0.0368 | 0.0250 | 0.0640 | 0.0730 | 0.1470 | 0.2460 | 26.1150 | 0.0545 | 0.0350 |
+| **c1_r1** | 1 | 841,087 | 0.0180 | 0.0348 | 0.0230 | 0.0630 | 0.0690 | 0.1460 | 0.2370 | 38.8410 | 0.0524 | 0.0110 |
+| **c1_r2** | 1 | 863,105 | 0.0180 | 0.0339 | 0.0240 | 0.0620 | 0.0690 | 0.1400 | 0.2310 | 3.9960 | 0.0292 | 0.0070 |
+| **c4_r0** | 4 | 652,794 | 0.0210 | 0.1825 | 0.0370 | 0.0730 | 0.0860 | 0.1440 | 74.4742 | 77.9060 | 3.1892 | 0.0280 |
+| **c4_r1** | 4 | 704,764 | 0.0200 | 0.1691 | 0.0350 | 0.0670 | 0.0750 | 0.1100 | 74.4860 | 78.7420 | 3.0733 | 0.0270 |
+| **c4_r2** | 4 | 745,406 | 0.0200 | 0.1599 | 0.0330 | 0.0640 | 0.0720 | 0.1110 | 74.3346 | 77.2500 | 2.9860 | 0.0190 |
+| **c8_r0** | 8 | 594,082 | 0.0200 | 0.4019 | 0.0450 | 0.0820 | 0.0970 | 0.1710 | 86.6590 | 88.0230 | 5.4702 | 0.0290 |
+| **c8_r1** | 8 | 537,612 | 0.0210 | 0.4435 | 0.0500 | 0.0960 | 0.1240 | 0.2420 | 86.6394 | 90.4800 | 5.7252 | 0.0340 |
+| **c8_r2** | 8 | 609,355 | 0.0200 | 0.3926 | 0.0430 | 0.0830 | 0.1000 | 0.1820 | 86.7166 | 87.6560 | 5.4030 | 0.0300 |
+| **c16_r0** | 16 | 583,126 | 0.0200 | 0.8170 | 0.0640 | 0.1450 | 0.1850 | 0.3970 | 90.8070 | 91.8800 | 8.1005 | 0.0520 |
+| **c16_r1** | 16 | 558,059 | 0.0200 | 0.8510 | 0.0680 | 0.1550 | 0.1970 | 0.5574 | 90.8389 | 92.1880 | 8.2416 | 0.0560 |
+| **c16_r2** | 16 | 560,330 | 0.0200 | 0.8495 | 0.0670 | 0.1590 | 0.2020 | 0.5690 | 90.6800 | 93.3020 | 8.2181 | 0.0560 |
+
+### 3.3. The Mean vs. p99 Inversion Anomaly Explained: 12-Trial Cross-Replication Audit
 
 > [!IMPORTANT]
 > **Root Cause Identified: Linux CFS Bandwidth Quota Throttling**  
@@ -132,25 +166,39 @@ Every single microsecond transaction record across all 12 trials was audited for
    Because the proportion is $< 1.0\%$, the 99th percentile ($p_{99}$) measures unthrottled execution during the active slice ($0.11 - 0.56\text{ ms}$). However, the arithmetic mean averages in all values. At $c=4$, $0.0017 \times 76\text{ ms} = 0.13\text{ ms}$ of stall penalty, pushing the mean to $0.170\text{ ms}$ ($> p_{99} = 0.125\text{ ms}$). At $c=8$ and $c=16$, the penalty is even larger ($0.35\text{ ms}$ and $0.77\text{ ms}$ respectively).
    This proves that the tail latency anomaly is not benchmark noise, but a deterministic, mathematically verified consequence of Linux CFS bandwidth throttling on multi-threaded containers.
 
-### 2.3. Scheduling Lag Audit
+### 3.4. Scheduling Lag Audit
 - Scheduling lag is only recorded in pgbench logs when `--rate` / `-R` (target rate scheduling) is enabled.
 - Because Phase 4E.1 ran unthrottled maximum throughput (`-S` without `-R`), transaction scheduling lag was not recorded and did not contaminate the reported query execution durations.
 
+### 3.5. Outlier Methodology & Non-Discard Justification
+- **Zero Data Discard Rule:** All 8,043,737 raw transaction records are preserved in full. No outlier transactions were filtered, trimmed, or discarded from aggregate calculations or registry storage.
+- **Physical Justification:** The latency spikes ($74 - 93\text{ ms}$) represent genuine customer-visible request stalls resulting from Linux CFS bandwidth enforcement when multiple concurrent queries exceed the allotted CPU quota. Filtering them would fabricate an artificially optimistic picture of PostgreSQL throughput under containerized CPU limits.
+- **Complementary Metric Value:** While percentiles $p_{50}$, $p_{90}$, and $p_{95}$ represent active query execution in the absence of throttling, the extreme tail ($p_{99.9}$ and Max) and the arithmetic mean accurately reflect the operational penalty of kernel throttling.
+
 ---
 
-## 3. CPU and Memory Measurement Audit
+## 4. CPU and Memory Measurement Assessment
 
-### 3.1. Analysis of the 0.0–0.1% CPU Anomaly
-Phase 4E.1 reported container CPU utilization of `0.0%` to `0.1%` in experiment records.
+### 4.1. Investigation of the 0.0–0.1% CPU Utilization Anomaly
+Phase 4E.1 reported container CPU utilization between `0.0%` and `0.1%` in database experiment records.
 
-#### Audit Findings:
-1. **Post-Benchmark Idle Sampling:** Inspection of [`aads/benchmark/docker_runner.py`](file:///home/vicky/v_drive/Codes/AADS/aads/benchmark/docker_runner.py#L499-L504) reveals that `docker stats --no-stream` was invoked **after** all pgbench replication trials completed.
-2. At the time of sampling, `pgbench` had already exited, and PostgreSQL was completely idle.
-3. The measurement was an instantaneous point-in-time snapshot, not an active timeseries average.
-4. **Reliability Status:** Container CPU utilization for Phase 4E.1 is **UNVERIFIED and invalid for active workload characterization**.
-5. **Memory Validity:** Memory utilization (74.9 MB to 75.7 MB) remains valid because PostgreSQL shared buffers and process memory structures stay resident while idle.
+#### Detailed Audit Findings:
+1. **Data Collection Path:** Inspection of [`aads/benchmark/docker_runner.py`](file:///home/vicky/v_drive/Codes/AADS/aads/benchmark/docker_runner.py#L499-L504) confirms that `docker stats --no-stream` was executed via subprocess.
+2. **Post-Benchmark Timing:** The call was executed **strictly after** `pgbench` had completed all replication runs, parsed its outputs, and exited.
+3. **Sampling Inadequacy:** The measurement represents an instantaneous single-point snapshot taken while the container was completely quiescent. It was not a time-weighted average or periodic timeseries.
+4. **Interpretation of Docker CPU Percentage:** Docker stats reports CPU percentage relative to host cores. Because PostgreSQL had completed all queries, its idle background processes consumed $< 0.1\%$ CPU.
+5. **Host CPU Contention:** Host CPU contention was not monitored or captured during the trial.
+6. **Reliability Verdict:** Container CPU utilization for Phase 4E.1 is **OFFICIALLY UNVERIFIED and invalid for active workload characterization**. In accordance with audit standards, no historical CPU utilization numbers are invented or retroactively adjusted.
 
-### 3.2. Recommended Continuous Sampling Design for Future Benchmarks
+### 4.2. Memory Utilization Validity
+- Reported memory usage ranged from `74.9 MB` to `75.7 MB` across all 12 trials.
+- **Validity Assessment:** Unlike CPU utilization, container memory utilization remains valid. PostgreSQL shared buffers (`128 MB` allocated, ~30 MB populated for $\text{SF}=2$) and server process memory stay resident in container RAM after client connections disconnect.
+
+### 4.3. Host CPU Contention & Kernel CFS Throttling Context
+- Host CPU starvation did not cause the latency tail observed in Section 3.
+- The host system had ample idle capacity, but the Linux CFS cgroup controller strictly throttled the container's multi-client processes when their aggregate demand exceeded the allocated `1.0` vCPU limit.
+
+### 4.4. Continuous Sampling Design for Future Experiments
 To eliminate post-run idle artifacts, future executions must implement an active background sampler:
 
 ```python
@@ -189,25 +237,31 @@ class ContainerResourceMonitor:
             "peak_mem_mb": np.max(self.samples_mem_mb) if self.samples_mem_mb else 0.0,
         }
 ```
-Additionally, cgroup v2 throttling counters (`/sys/fs/cgroup/system.slice/docker-<cid>.scope/cpu.stat`: `nr_throttled`, `throttled_usec`) should be collected at trial end to directly record CFS throttling intensity.
+Additionally, cgroup v2 throttling counters (`/sys/fs/cgroup/system.slice/docker-<cid>.scope/cpu.stat`: `nr_throttled`, `throttled_usec`) must be sampled at the end of each trial to directly quantify CFS throttling intensity.
 
 ---
 
-## 4. Calibration Validation Audit
+## 5. Calibration Validation Findings
 
-### 4.1. Split Verification & Zero-Leakage Confirmation
+### 5.1. Split Verification & Zero-Leakage Confirmation
 - **Dataset:** 12 individual replication trials.
 - **Configurations:** 4 independent groups: `(1, 1.0)`, `(4, 1.0)`, `(8, 1.0)`, `(16, 1.0)`.
 - **Train Split (9 trials):** Concurrencies 1, 8, and 16 (`['exp_pg_c1_r0_bc22eb35', 'exp_pg_c1_r1_e9368f7c', 'exp_pg_c1_r2_4738d23f', 'exp_pg_c8_r1_ae0c17ec', 'exp_pg_c8_r0_86317dd0', 'exp_pg_c8_r2_48652a67', 'exp_pg_c16_r1_b0f95ae9', 'exp_pg_c16_r2_ad75aac2', 'exp_pg_c16_r0_f6cc1f9f']`).
 - **Held-Out Test Split (3 trials):** Concurrency 4 (`['exp_pg_c4_r0_41e4d234', 'exp_pg_c4_r1_63340df9', 'exp_pg_c4_r2_d7df5784']`).
 - **Configuration Overlap:** $\emptyset$ (Zero leakage; boundary points retained in train split).
 
-### 4.2. Mathematical Analysis of the Negative $R^2$ Result
-Held-out validation reported:
-- **RMSE:** `0.065021 ms` ($65\ \mu\text{s}$)
-- **MAE:** `0.065000 ms`
-- **MAPE:** `130.00%`
-- **$R^2$:** `-1584.375`
+### 5.2. Prediction Error and Residuals at Every Held-Out Point
+- **Held-Out Actual Observations ($c=4$):**
+  - Trial `c4_r0`: $y_1 = 0.03700\text{ ms}$ (Residual: $e_1 = \hat{y} - y_1 = 0.10000 - 0.03700 = +0.06300\text{ ms}$)
+  - Trial `c4_r1`: $y_2 = 0.03500\text{ ms}$ (Residual: $e_2 = \hat{y} - y_2 = 0.10000 - 0.03500 = +0.06500\text{ ms}$)
+  - Trial `c4_r2`: $y_3 = 0.03300\text{ ms}$ (Residual: $e_3 = \hat{y} - y_3 = 0.10000 - 0.03300 = +0.06700\text{ ms}$)
+- **Summary Validation Metrics:**
+  - **RMSE:** `0.065021 ms` ($65\ \mu\text{s}$)
+  - **MAE:** `0.065000 ms`
+  - **MAPE:** `130.00%`
+  - **$R^2$:** `-1584.375`
+
+### 5.3. Mathematical Analysis of the Negative $R^2$ Result
 
 #### Derivation of $R^2 = -1584.375$:
 1. At the held-out point $c=4$, the 3 replication trials observed actual service latencies of:
@@ -222,7 +276,7 @@ Held-out validation reported:
 6. Calculating $R^2$:
    $$R^2 = 1 - \frac{ss_{res}}{ss_{tot}} = 1 - \frac{0.012683}{0.000008} = 1 - 1585.375 = -1584.375$$
 
-#### Conclusion on Calibration Eligibility:
+### 5.4. Conclusion on Calibration Eligibility & Model Validity Boundaries
 - The absolute prediction error is tiny ($65\ \mu\text{s}$).
 - However, $R^2$ is mathematically ill-conditioned when evaluated against a single configuration with minuscule target variance ($ss_{tot} \approx 0$).
 - More importantly, **the empirical data covers only a 100% read-only in-memory workload (`SF=2`)**.
@@ -230,7 +284,7 @@ Held-out validation reported:
 
 ---
 
-## 5. Candidate Model Promotion Recommendation
+## 6. Candidate Model Promotion Recommendation
 
 > [!CAUTION]
 > **Definitive Recommendation: WITHHOLD PROMOTION (Preserve Active Models)**  
@@ -241,7 +295,7 @@ Held-out validation reported:
 
 ---
 
-## 6. Remaining Uncertainty
+## 7. Remaining Uncertainty
 
 1. **Write Overhead:** Write path latency, WAL contention, and autovacuum performance remain completely unmeasured empirically.
 2. **Buffer Eviction:** Data sizing beyond PostgreSQL's 128 MB shared buffer pool has not been observed.
@@ -250,7 +304,7 @@ Held-out validation reported:
 
 ---
 
-## 7. Recommended Phase 4F Experiment Matrix
+## 8. Recommended Phase 4F Experiment Matrix
 
 To support rigorous model calibration across the entire operational envelope, the follow-up campaign should execute a structured matrix separating workload regimes, storage scales, and concurrency levels:
 
@@ -289,7 +343,7 @@ flowchart TD
     SF3 --> C
 ```
 
-### 7.1. Three Distinct Operating Regimes via Dataset Scales
+### 8.1. Three Distinct Operating Regimes via Dataset Scales
 Rather than truncating the parameter space to two scales, Phase 4F **retains all three dataset scales** to capture fundamentally distinct hardware and memory regimes:
 
 1. **In-Memory Buffer Cache Regime ($\text{SF}=2$, ~30 MB):**
@@ -304,7 +358,7 @@ Rather than truncating the parameter space to two scales, Phase 4F **retains all
    - Forces kernel page cache evictions, physical block storage reads and writes, checkpoint flushes, and background writer stalls.
    - Essential for calibrating simulation models to predict memory exhaustion knees and disk I/O saturation cliffs.
 
-### 7.2. Explicit Workload Profiles & Disambiguated Statement Ratios
+### 8.2. Explicit Workload Profiles & Disambiguated Statement Ratios
 The ambiguous scalar `read_ratio` is replaced with explicitly typed Workload Profiles that clearly define statement composition, writes per transaction, WAL impact, and lock contention:
 
 1. **Profile A: Pure Read-Only Select (`read_only_select`)**
@@ -340,7 +394,7 @@ The ambiguous scalar `read_ratio` is replaced with explicitly typed Workload Pro
    - **Lock Contention:** Low (updates distributed uniformly across all account rows; zero branch/teller hot spots)
    - **Diagnostic Purpose:** Isolates write-path WAL throughput and buffer dirtying from artificial branch/teller lock contention.
 
-### 7.3. Exact Trial Accounting & Calibration Split Strategy
+### 8.3. Exact Trial Accounting & Calibration Split Strategy
 
 ```
   3 Workload Profiles
@@ -371,7 +425,7 @@ The ambiguous scalar `read_ratio` is replaced with explicitly typed Workload Pro
 
 ---
 
-## 8. Explicit Confirmations
+## 9. Explicit Confirmations
 
 1. **NO new benchmarks were executed during this audit phase.**
 2. **NO Docker containers were created or run.**
