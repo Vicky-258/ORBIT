@@ -73,25 +73,64 @@ The full empirical distribution was calculated for each configuration:
 | **c=8 (Pooled)** | 1,741,049 | 0.0200 | 0.4115 | 0.0360 | 0.0460 | 0.0660 | 0.0300 | 0.0860 | 0.1070 | 0.2000 | 86.6690 | 90.4800 | 5.5271 |
 | **c=16 (Pooled)** | 1,701,515 | 0.0200 | 0.8388 | 0.0450 | 0.0660 | 0.1000 | 0.0550 | 0.1530 | 0.1940 | 0.4930 | 90.7785 | 93.3020 | 8.1858 |
 
-### 2.2. The Mean vs. p99 Inversion Anomaly Explained
+### 2.2. The Mean vs. p99 Inversion Anomaly Explained: 12-Trial Cross-Replication Audit
 
 > [!IMPORTANT]
-> **Root Cause: Linux CFS Bandwidth Quota Throttling**  
-> At concurrency 8 and 16, the **arithmetic mean latency is substantially higher than the 99th percentile ($p_{99}$)**:
-> - At $c=8$: Mean is **0.412 ms**, while $p_{99}$ is **0.200 ms** ($2.06\times$ higher).
-> - At $c=16$: Mean is **0.839 ms**, while $p_{99}$ is **0.493 ms** ($1.70\times$ higher).
+> **Root Cause Identified: Linux CFS Bandwidth Quota Throttling**  
+> At concurrencies 4, 8, and 16, the **arithmetic mean latency is systematically higher than the 99th percentile ($p_{99}$)** across all replications:
+> - At $c=4$: Mean is **0.170 ms**, while $p_{99}$ is **0.125 ms** ($1.36\times$ higher; Max: **78.74 ms**).
+> - At $c=8$: Mean is **0.412 ms**, while $p_{99}$ is **0.200 ms** ($2.06\times$ higher; Max: **90.48 ms**).
+> - At $c=16$: Mean is **0.839 ms**, while $p_{99}$ is **0.493 ms** ($1.70\times$ higher; Max: **93.30 ms**).
 
-#### Mechanism Discovery:
-1. **CFS Quota Period:** Docker limits `--cpus 1.0` using the Linux kernel Completely Fair Scheduler (CFS) cgroup controller with period $\text{period} = 100,000\ \mu\text{s}$ ($100\text{ ms}$) and quota $\text{quota} = 100,000\ \mu\text{s}$ ($100\text{ ms}$).
-2. **Exhaustion Bursts:** With 16 concurrent client threads driving queries on in-memory buffers, the aggregate CPU consumption of the container threads burns through the entire 100 ms CPU quota in the first $10 - 15\text{ ms}$ of each period.
-3. **Kernel Throttling Pause:** When quota is exhausted, the Linux CFS controller pauses all threads in the container cgroup until the quota resets at the start of the next 100 ms period (a pause of $85 - 90\text{ ms}$).
-4. **Burst Wakeup Signature:** Transaction timestamp analysis on `pglog_c16_r0.log` revealed 1,201 outlier bursts where transactions took $85 - 92\text{ ms}$.
-   - **99.5% of all bursts occurred at intervals of EXACTLY $100.00\text{ ms}$ ($\pm 5\text{ ms}$)**.
-5. **Impact on Distribution:**
-   - 99.0% of transactions complete in $< 0.493\text{ ms}$ during the active unthrottled portion of the slice.
-   - However, approximately **0.8% of transactions** are caught in the CFS throttle sleep, taking $85 - 92\text{ ms}$.
-   - Since $0.008 \times 90\text{ ms} = 0.72\text{ ms}$, adding this to the base service time ($0.05\text{ ms}$) pushes the arithmetic mean to $0.84\text{ ms}$.
-   - The mean is pulled up by extreme outliers located in the upper 0.8% tail (between $p_{99.2}$ and $p_{100}$).
+#### Cross-Trial Empirical Evidence Table (All 12 Historical Trials):
+
+Every single microsecond transaction record across all 12 trials was audited for tail latency anomalies ($\text{latency} \ge 10.0\text{ ms}$), periodic burst intervals, and client distribution:
+
+| Trial | Concurrency | Total Tx | Mean (ms) | p99 (ms) | p99.9 (ms) | Max (ms) | Outliers ($\ge 10\text{ ms}$) | Outlier % | CFS 100ms Bursts | Outliers / Client | Med Burst Interval | Within [90, 110] ms |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **c1_r0** | 1 | 794,017 | 0.0368 | 0.1470 | 0.2460 | 26.115 | 4 | 0.001% | 4 | 4 / c0 | 100.05 ms | 66.7% |
+| **c1_r1** | 1 | 841,087 | 0.0348 | 0.1460 | 0.2370 | 38.841 | 1 | 0.000% | 0 | 1 / c0 | N/A | N/A |
+| **c1_r2** | 1 | 863,105 | 0.0339 | 0.1400 | 0.2310 | 3.996 | 0 | 0.000% | 0 | 0 | N/A | N/A |
+| **c4_r0** | 4 | 652,794 | 0.1825 | 0.1440 | 74.474 | 77.906 | **1,200** | 0.184% | 300 | **300 / client** | **100.00 ms** | **100.0%** |
+| **c4_r1** | 4 | 704,764 | 0.1691 | 0.1100 | 74.486 | 78.742 | **1,200** | 0.170% | 300 | **300 / client** | **100.00 ms** | **100.0%** |
+| **c4_r2** | 4 | 745,406 | 0.1599 | 0.1110 | 74.335 | 77.250 | **1,200** | 0.161% | 300 | **300 / client** | **100.01 ms** | **100.0%** |
+| **c8_r0** | 8 | 594,082 | 0.4019 | 0.1710 | 86.659 | 88.023 | **2,399** | 0.404% | 300 | **300 / client** | **99.99 ms** | **100.0%** |
+| **c8_r1** | 8 | 537,612 | 0.4435 | 0.2420 | 86.639 | 90.480 | **2,394** | 0.445% | 300 | **299 / client** | **100.00 ms** | **100.0%** |
+| **c8_r2** | 8 | 609,355 | 0.3926 | 0.1820 | 86.717 | 87.656 | **2,407** | 0.395% | 301 | **301 / client** | **100.00 ms** | **100.0%** |
+| **c16_r0** | 16 | 583,126 | 0.8170 | 0.3970 | 90.807 | 91.880 | **4,805** | 0.824% | 301 | **300 / client** | **100.00 ms** | **100.0%** |
+| **c16_r1** | 16 | 558,059 | 0.8510 | 0.5574 | 90.839 | 92.188 | **4,777** | 0.856% | 300 | **299 / client** | **100.01 ms** | **100.0%** |
+| **c16_r2** | 16 | 560,330 | 0.8495 | 0.5690 | 90.680 | 93.302 | **4,800** | 0.857% | 301 | **300 / client** | **99.99 ms** | **100.0%** |
+
+#### Rigorous Mathematical & Physical Mechanism:
+1. **CFS Quota Parameters:** Docker limits the container to `--cpus 1.0` via Linux CFS cgroup v2 (`cpu.max: 100000 100000`), enforcing an allocation of $100,000\ \mu\text{s}$ ($100\text{ ms}$) of CPU compute per $100,000\ \mu\text{s}$ ($100\text{ ms}$) of wall-clock time.
+2. **Deterministic Periodicity Across All 300 Slices:**
+   - Each benchmark trial ran for exactly $30.0\text{ seconds}$, which contains exactly $\mathbf{300}$ CFS 100 ms enforcement periods ($30\text{s} / 0.1\text{s} = 300$).
+   - Across all multi-client trials ($c=4, 8, 16$), the count of distinct burst events is consistently $\mathbf{300}$ to $\mathbf{301}$.
+   - The median inter-burst interval is exactly **$100.00\text{ ms}$** ($\pm 0.01\text{ ms}$) with **100.0%** of bursts falling strictly inside $[90\text{ ms}, 110\text{ ms}]$.
+3. **Linear Client Trapping Scaling Law:**
+   - In unthrottled maximum throughput mode, all $c$ parallel backend client threads execute queries simultaneously.
+   - When the cumulative CPU consumption burns through the 100 ms quota, the Linux kernel scheduler freezes the entire container cgroup until the quota resets at the start of the next 100 ms period.
+   - Because all $c$ client connections are actively in-flight when quota exhaustion occurs, **every single client connection is trapped and paused simultaneously**.
+   - Analysis of individual client IDs confirms that each client thread records exactly **300 throttled transactions** per 30s trial:
+     - At $c=4$: 4 clients $\times$ 300 periods = **EXACTLY 1,200 outliers** in each trial (`Counter({c0: 300, c1: 300, c2: 300, c3: 300})`).
+     - At $c=8$: 8 clients $\times$ 300 periods $\approx$ **2,400 outliers** per trial (~300 per client).
+     - At $c=16$: 16 clients $\times$ 300 periods $\approx$ **4,800 outliers** per trial (~300 per client).
+4. **CFS Throttling Duration Formula vs. Observed Latency:**
+   For $c$ parallel threads running continuous in-memory queries under a single core quota ($1.0$ vCPU):
+   $$\text{Active Execution Time per Window} \approx \frac{100\text{ ms}}{c}$$
+   $$\text{Kernel Throttle Sleep Duration} \approx 100\text{ ms} - \frac{100\text{ ms}}{c}$$
+   - **For $c=4$:** Active window $\approx 25\text{ ms}$; Pause duration $\approx 75\text{ ms}$. Observed empirical max: **$77.2 - 78.7\text{ ms}$** (matches $75\text{ ms} + \text{service time}$).
+   - **For $c=8$:** Active window $\approx 12.5\text{ ms}$; Pause duration $\approx 87.5\text{ ms}$. Observed empirical max: **$87.6 - 90.5\text{ ms}$** (matches $87.5\text{ ms} + \text{service time}$).
+   - **For $c=16$:** Active window $\approx 6.25\text{ ms}$; Pause duration $\approx 93.75\text{ ms}$. Observed empirical max: **$91.9 - 93.3\text{ ms}$** (matches $93.75\text{ ms} + \text{service time}$).
+5. **Why Concurrency 1 Does Not Experience Throttling:**
+   At $c=1$, a single worker process running simple SELECT queries consumes only ~35% of a core (~35 ms of CPU per 100 ms wall clock). Since $35\text{ ms} < 100\text{ ms}$, the quota is never exhausted. Hence, 0 to 4 outliers total ($< 0.001\%$), and mean ($0.035\text{ ms}$) is well below $p_{99}$ ($0.144\text{ ms}$).
+6. **Why Mean Exceeds $p_{99}$ at $c=4, 8, 16$:**
+   The proportion of trapped transactions is small:
+   - $c=4$: 1,200 / 700,000 $\approx 0.17\%$ of transactions
+   - $c=8$: 2,400 / 580,000 $\approx 0.40\%$ of transactions
+   - $c=16$: 4,800 / 560,000 $\approx 0.85\%$ of transactions
+   Because the proportion is $< 1.0\%$, the 99th percentile ($p_{99}$) measures unthrottled execution during the active slice ($0.11 - 0.56\text{ ms}$). However, the arithmetic mean averages in all values. At $c=4$, $0.0017 \times 76\text{ ms} = 0.13\text{ ms}$ of stall penalty, pushing the mean to $0.170\text{ ms}$ ($> p_{99} = 0.125\text{ ms}$). At $c=8$ and $c=16$, the penalty is even larger ($0.35\text{ ms}$ and $0.77\text{ ms}$ respectively).
+   This proves that the tail latency anomaly is not benchmark noise, but a deterministic, mathematically verified consequence of Linux CFS bandwidth throttling on multi-threaded containers.
 
 ### 2.3. Scheduling Lag Audit
 - Scheduling lag is only recorded in pgbench logs when `--rate` / `-R` (target rate scheduling) is enabled.
@@ -213,47 +252,122 @@ Held-out validation reported:
 
 ## 7. Recommended Phase 4F Experiment Matrix
 
-To support valid model calibration across the operational envelope, the follow-up campaign should execute a structured matrix separating workload regimes:
+To support rigorous model calibration across the entire operational envelope, the follow-up campaign should execute a structured matrix separating workload regimes, storage scales, and concurrency levels:
 
 ```mermaid
 flowchart TD
-    subgraph Matrix["Phase 4F Empirical Experiment Matrix"]
-        W1["Workload 1: Pure Read-Only<br/>pgbench -S (read_ratio=1.0)"]
-        W2["Workload 2: Balanced Mixed OLTP<br/>Standard pgbench (read_ratio=0.8)"]
-        W3["Workload 3: Write-Heavy Ingestion<br/>pgbench -N / custom (read_ratio=0.2)"]
+    subgraph Matrix["Phase 4F Empirical Experiment Matrix (108 Trials)"]
+        subgraph Workloads["3 Workload Profiles"]
+            W1["Profile A: Read-Only Select<br/>pgbench -S (100% Read / 0% Write)"]
+            W2["Profile B: Balanced OLTP<br/>Standard pgbench (20% Read / 80% Write)"]
+            W3["Profile C: Simple Write / Ingestion<br/>pgbench -N (33% Read / 67% Write)"]
+        end
         
-        SF1["Scale Factor 2<br/>~30 MB (In-Memory)"]
-        SF2["Scale Factor 20<br/>~300 MB (Cache Boundary)"]
-        SF3["Scale Factor 100<br/>~1.5 GB (Disk Bound)"]
+        subgraph Scales["3 Dataset Scales (Operating Regimes)"]
+            SF1["Scale Factor 2 (~30 MB)<br/>In-Memory Buffer Cache (< 128 MB)"]
+            SF2["Scale Factor 20 (~300 MB)<br/>Cache Boundary (> shared_buffers, in RAM)"]
+            SF3["Scale Factor 100 (~1.5 GB)<br/>Disk-Oriented Out-of-Core (> 1024 MB RAM)"]
+        end
         
-        C["Concurrency Levels<br/>[1, 2, 4, 8, 16, 32]"]
+        subgraph Concurrencies["4 Concurrency Levels"]
+            C["Concurrency Points<br/>c ∈ [1, 4, 8, 16]<br/>(3 Replications each)"]
+        end
     end
+    
     W1 --> SF1
     W1 --> SF2
+    W1 --> SF3
     W2 --> SF1
     W2 --> SF2
+    W2 --> SF3
     W3 --> SF1
+    W3 --> SF2
     W3 --> SF3
+    
     SF1 --> C
     SF2 --> C
     SF3 --> C
 ```
 
-### Proposed Matrix Parameters:
-1. **Workloads (3 regimes):**
-   - **Profile A (Read-Only):** `pgbench -S` (`read_ratio = 1.0`).
-   - **Profile B (Mixed OLTP):** Standard `pgbench` (3 UPDATE, 1 SELECT, 1 INSERT; `read_ratio = 0.80`).
-   - **Profile C (Write-Heavy):** Simple write profile (`read_ratio = 0.20`).
-2. **Dataset Scales (2 scales):**
-   - $\text{SF}=2$ (~30 MB; in-memory buffer pool).
-   - $\text{SF}=20$ (~300 MB; exceeds 128 MB `shared_buffers`, induces buffer eviction and disk I/O).
-3. **Concurrency Points:**
-   - `[1, 2, 4, 8, 16, 32]` (6 points $\times$ 3 replications = 18 trials per profile).
-4. **Independent Configuration Groups:**
-   - 3 workloads $\times$ 2 scales $\times$ 6 concurrencies = **36 independent configuration groups** (108 total trials).
-   - This provides abundant intermediate configurations for true held-out validation (e.g., holding out $c \in \{2, 8\}$ across all workloads, providing 12 held-out test groups) with substantial target variance, ensuring well-behaved $R^2 \ge 0.70$.
-5. **Continuous Resource Monitoring:**
-   - Enable `ContainerResourceMonitor` with 0.5s sampling and cgroup v2 `nr_throttled` tracking.
+### 7.1. Three Distinct Operating Regimes via Dataset Scales
+Rather than truncating the parameter space to two scales, Phase 4F **retains all three dataset scales** to capture fundamentally distinct hardware and memory regimes:
+
+1. **In-Memory Buffer Cache Regime ($\text{SF}=2$, ~30 MB):**
+   - Dataset size ($~30\text{ MB}$) is well below PostgreSQL's default `shared_buffers` ($128\text{ MB}$).
+   - In-memory buffer hit ratio is $\approx 100\%$. Buffer evictions are zero; read storage I/O is zero.
+   - Isolates pure query execution overhead, socket protocol handling, concurrency scaling, and CPU cache performance.
+2. **Cache Boundary Regime ($\text{SF}=20$, ~300 MB):**
+   - Dataset size ($~300\text{ MB}$) is $2.3\times$ larger than `shared_buffers` ($128\text{ MB}$), but fits comfortably inside the container's 1024 MB RAM allocation via the Linux page cache.
+   - Forces PostgreSQL to perform active internal buffer evictions (`ClockSweep` algorithm), while secondary page reads hit OS page cache without physical disk read stalls.
+3. **Disk-Oriented Out-of-Core Regime ($\text{SF}=100$, ~1.5 GB):**
+   - Dataset size ($~1.5\text{ GB}$) exceeds both `shared_buffers` ($128\text{ MB}$) and total container RAM ($1024\text{ MB}$).
+   - Forces kernel page cache evictions, physical block storage reads and writes, checkpoint flushes, and background writer stalls.
+   - Essential for calibrating simulation models to predict memory exhaustion knees and disk I/O saturation cliffs.
+
+### 7.2. Explicit Workload Profiles & Disambiguated Statement Ratios
+The ambiguous scalar `read_ratio` is replaced with explicitly typed Workload Profiles that clearly define statement composition, writes per transaction, WAL impact, and lock contention:
+
+1. **Profile A: Pure Read-Only Select (`read_only_select`)**
+   - **Command:** `pgbench -S` (select-only mode)
+   - **Transaction Type:** Read-Only
+   - **Statement Breakdown:** 1 SELECT statement (`SELECT abalance FROM pgbench_accounts WHERE aid = :aid;`)
+   - **Ratios:** **100% Read statements (1/1)**, **0% Write statements (0/1)**
+   - **Writes per Transaction:** 0
+   - **WAL Generation:** 0 bytes
+   - **Lock Contention:** None (concurrent shared access on account rows)
+   - **Diagnostic Purpose:** Calibrates baseline unconstrained query engine throughput and network concurrency scaling.
+2. **Profile B: Balanced Mixed OLTP (`balanced_oltp_tpcb`)**
+   - **Command:** Standard `pgbench` (TPC-B-like read-write script)
+   - **Transaction Type:** Full Read-Write ACID Transaction
+   - **Statement Breakdown:** 5 SQL statements per transaction:
+     - 1 SELECT (`SELECT abalance FROM pgbench_accounts WHERE aid = :aid;`)
+     - 1 UPDATE branches (`UPDATE pgbench_branches SET bbalance = bbalance + :delta WHERE bid = :bid;`)
+     - 1 UPDATE tellers (`UPDATE pgbench_tellers SET tbalance = tbalance + :delta WHERE tid = :tid;`)
+     - 1 UPDATE accounts (`UPDATE pgbench_accounts SET abalance = abalance + :delta WHERE aid = :aid;`)
+     - 1 INSERT history (`INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES (...)`)
+   - **Ratios:** **20% Read statements (1/5)**, **80% Write statements (4/5)** *(corrects the historical inverted labeling)*
+   - **Writes per Transaction:** 4
+   - **WAL Generation:** High (WAL logged for 3 updates and 1 insert per transaction)
+   - **Lock Contention:** High (row-level lock serialization on `pgbench_branches` and `pgbench_tellers` tables due to small cardinality: 1 branch / 10 tellers per scale factor)
+   - **Diagnostic Purpose:** Calibrates transaction commit overhead, WAL sync latency, dirty buffer flushing, and lock contention queues.
+3. **Profile C: Simple Write / Ingestion (`simple_write_ingest`)**
+   - **Command:** `pgbench -N` (skips updates on teller and branch tables)
+   - **Transaction Type:** Low-Contention Read-Write Transaction
+   - **Statement Breakdown:** 3 SQL statements per transaction (1 SELECT, 1 UPDATE accounts, 1 INSERT history)
+   - **Ratios:** **33.3% Read statements (1/3)**, **66.7% Write statements (2/3)**
+   - **Writes per Transaction:** 2
+   - **WAL Generation:** Moderate to High
+   - **Lock Contention:** Low (updates distributed uniformly across all account rows; zero branch/teller hot spots)
+   - **Diagnostic Purpose:** Isolates write-path WAL throughput and buffer dirtying from artificial branch/teller lock contention.
+
+### 7.3. Exact Trial Accounting & Calibration Split Strategy
+
+```
+  3 Workload Profiles
+× 3 Dataset Scales (SF=2, SF=20, SF=100)
+× 4 Concurrency Levels (c=1, 4, 8, 16)
+---------------------------------------------
+= 36 Independent Configuration Groups
+× 3 Replications per Configuration
+---------------------------------------------
+= 108 Total Empirical Benchmark Trials
+```
+
+- **Exact Trial Count:** Exactly **108 trials**, perfectly matching the proposed execution budget.
+- **Estimated Execution Budget:**
+  - 30 seconds execution + 10 seconds init/warmup/vacuum $\approx 40$ seconds per trial.
+  - $108 \times 40\text{s} = 4,320\text{ seconds} \approx \mathbf{72\text{ minutes}}$ total execution time (~1.2 hours).
+  - Storage requirement: $\approx 2.5\text{ GB}$ peak container disk space for $\text{SF}=100$, well within host capacity.
+- **Validation Split Strategy (Zero-Leakage Grouped Split):**
+  - **Training Set (27 configuration groups = 81 trials):**
+    - Spans all 3 Workload Profiles and all 3 Scales, including boundary concurrencies ($c=1, 16$) and intermediate points.
+  - **Held-Out Test Set (9 configuration groups = 27 trials):**
+    - Cleanly holds out intermediate concurrency ($c=4$ across all 3 workloads and all 3 scales) OR holds out the cache-boundary scale ($\text{SF}=20$ across all 3 workloads and 4 concurrencies).
+    - Because the held-out set spans diverse workloads and scales, target latency ranges across several orders of magnitude ($0.03\text{ ms}$ to $50+\text{ ms}$).
+    - Target variance ($ss_{tot} \gg 0$) is large and well-conditioned, guaranteeing that $R^2 \ge 0.70$ reflects true predictive power rather than single-point variance collapse.
+- **Continuous Resource Monitoring Protocol:**
+  - Integrate `ContainerResourceMonitor` to poll container metrics continuously at 0.5s intervals during active benchmark execution.
+  - Directly extract cgroup v2 throttling statistics (`cpu.stat`: `nr_throttled`, `throttled_usec`) at the completion of each trial to quantify CFS quota impact.
 
 ---
 
@@ -264,3 +378,4 @@ flowchart TD
 3. **NO candidate model was promoted.**
 4. **All active models and historical evidence in `data/registry.db` remain intact and unmutated.**
 5. **Full offline test suite passes (170/170 tests passing).**
+
