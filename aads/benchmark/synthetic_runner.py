@@ -41,6 +41,7 @@ class SyntheticBenchmarkRunner(BenchmarkRunner):
         read_ratios: Optional[List[float]] = None,
         target_rps_levels: Optional[List[float]] = None,
         replications: int = 3,
+        **kwargs,
     ) -> List[ExperimentRecord]:
         concurrency_list = concurrency_levels or [1, 4, 8, 16, 24, 32]
         read_ratio_list = read_ratios or [0.90]

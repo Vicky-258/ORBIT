@@ -46,8 +46,8 @@ class BoundedBenchmarkExecutor:
         self.registry = registry or ComponentRegistry()
         self.docker_runner = docker_runner or DockerBenchmarkRunner(
             cpu_limit="1.0",
-            memory_limit="512m",
-            timeout_seconds=60,
+            memory_limit="1024m",
+            timeout_seconds=600,
         )
         self.synthetic_runner = synthetic_runner or SyntheticBenchmarkRunner()
         self.default_execution_mode = default_execution_mode
@@ -246,6 +246,10 @@ class BoundedBenchmarkExecutor:
                 read_ratios=[read_ratio],
                 target_rps_levels=[proposal.target_rps] if proposal.target_rps else None,
                 replications=replications,
+                duration_seconds=getattr(proposal, "duration_seconds", 30),
+                warmup_seconds=getattr(proposal, "warmup_seconds", 10),
+                scale_factor=getattr(proposal, "scale_factor", 2),
+                artifacts_dir=getattr(proposal, "artifacts_dir", None),
             )
         except (TimeoutError, subprocess.TimeoutExpired) as timeout_exc:
             duration = round(time.perf_counter() - start_t, 3)

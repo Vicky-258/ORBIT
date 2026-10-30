@@ -1,0 +1,35 @@
+{
+  "container_name": "aads-pgbench-90bea007",
+  "image": "postgres:16-alpine",
+  "cpu_limit": "1.0",
+  "memory_limit": "1024m",
+  "host_machine": "x86_64",
+  "host_os": "Linux-6.18.59-1-lts-x86_64-with-glibc2.44",
+  "scale_factor": 2,
+  "warmup_seconds": 10,
+  "duration_seconds": 30,
+  "concurrency_list": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "replications": 3,
+  "timestamp_start_utc": "2026-10-30T08:36:03.038509+00:00",
+  "docker_image_digest": "postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+  "postgres_version": "PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+  "postgres_key_configs": [
+    "128MB",
+    "4MB",
+    "100",
+    "5min",
+    "on"
+  ],
+  "host_meminfo": [
+    "MemTotal:       16086420 kB",
+    "MemAvailable:    3603288 kB",
+    "SwapTotal:      24129020 kB",
+    "SwapFree:       22035292 kB"
+  ],
+  "host_loadavg": "3.11 2.07 1.46 2/1503 47122"
+}

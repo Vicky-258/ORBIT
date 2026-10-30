@@ -1,0 +1,207 @@
+{
+  "pilot_phase": "Phase 4E.1",
+  "component_name": "postgresql_db",
+  "version": "16-alpine",
+  "proposal_id": "prop_postgres_pilot_4e1_001",
+  "authorization_id": "auth_postgres_pilot_4e1_001",
+  "execution_id": "exec_f531c54a85",
+  "status": "SUCCESS",
+  "wall_clock_seconds": 388.87,
+  "concurrency_levels": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "replications": 3,
+  "warmup_seconds": 10,
+  "duration_seconds_per_trial": 30,
+  "total_individual_trials": 12,
+  "total_pooled_trials": 4,
+  "total_experiment_records": 16,
+  "individual_records": [
+    {
+      "experiment_id": "exp_pg_c1_r0_bc22eb35",
+      "concurrency": 1,
+      "achieved_rps": 26468.6,
+      "avg_latency_ms": 0.038,
+      "p50_ms": 0.025,
+      "p95_ms": 0.073,
+      "p99_ms": 0.147,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c1_r0.log"
+    },
+    {
+      "experiment_id": "exp_pg_c1_r1_e9368f7c",
+      "concurrency": 1,
+      "achieved_rps": 28038.2,
+      "avg_latency_ms": 0.036,
+      "p50_ms": 0.023,
+      "p95_ms": 0.069,
+      "p99_ms": 0.146,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c1_r1.log"
+    },
+    {
+      "experiment_id": "exp_pg_c1_r2_4738d23f",
+      "concurrency": 1,
+      "achieved_rps": 28772.2,
+      "avg_latency_ms": 0.035,
+      "p50_ms": 0.024,
+      "p95_ms": 0.069,
+      "p99_ms": 0.14,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c1_r2.log"
+    },
+    {
+      "experiment_id": "exp_pg_c4_r0_41e4d234",
+      "concurrency": 4,
+      "achieved_rps": 21761.3,
+      "avg_latency_ms": 0.184,
+      "p50_ms": 0.037,
+      "p95_ms": 0.086,
+      "p99_ms": 0.144,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c4_r0.log"
+    },
+    {
+      "experiment_id": "exp_pg_c4_r1_63340df9",
+      "concurrency": 4,
+      "achieved_rps": 23481.1,
+      "avg_latency_ms": 0.17,
+      "p50_ms": 0.035,
+      "p95_ms": 0.075,
+      "p99_ms": 0.11,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c4_r1.log"
+    },
+    {
+      "experiment_id": "exp_pg_c4_r2_d7df5784",
+      "concurrency": 4,
+      "achieved_rps": 24847.2,
+      "avg_latency_ms": 0.161,
+      "p50_ms": 0.033,
+      "p95_ms": 0.072,
+      "p99_ms": 0.111,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c4_r2.log"
+    },
+    {
+      "experiment_id": "exp_pg_c8_r0_86317dd0",
+      "concurrency": 8,
+      "achieved_rps": 19803.3,
+      "avg_latency_ms": 0.404,
+      "p50_ms": 0.045,
+      "p95_ms": 0.097,
+      "p99_ms": 0.171,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c8_r0.log"
+    },
+    {
+      "experiment_id": "exp_pg_c8_r1_ae0c17ec",
+      "concurrency": 8,
+      "achieved_rps": 17910.5,
+      "avg_latency_ms": 0.447,
+      "p50_ms": 0.05,
+      "p95_ms": 0.124,
+      "p99_ms": 0.242,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c8_r1.log"
+    },
+    {
+      "experiment_id": "exp_pg_c8_r2_48652a67",
+      "concurrency": 8,
+      "achieved_rps": 20276.1,
+      "avg_latency_ms": 0.395,
+      "p50_ms": 0.043,
+      "p95_ms": 0.1,
+      "p99_ms": 0.182,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c8_r2.log"
+    },
+    {
+      "experiment_id": "exp_pg_c16_r0_f6cc1f9f",
+      "concurrency": 16,
+      "achieved_rps": 19410.0,
+      "avg_latency_ms": 0.824,
+      "p50_ms": 0.064,
+      "p95_ms": 0.185,
+      "p99_ms": 0.397,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c16_r0.log"
+    },
+    {
+      "experiment_id": "exp_pg_c16_r1_b0f95ae9",
+      "concurrency": 16,
+      "achieved_rps": 18593.1,
+      "avg_latency_ms": 0.861,
+      "p50_ms": 0.068,
+      "p95_ms": 0.197,
+      "p99_ms": 0.557,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c16_r1.log"
+    },
+    {
+      "experiment_id": "exp_pg_c16_r2_ad75aac2",
+      "concurrency": 16,
+      "achieved_rps": 18644.2,
+      "avg_latency_ms": 0.858,
+      "p50_ms": 0.067,
+      "p95_ms": 0.202,
+      "p99_ms": 0.569,
+      "failed_transactions": 0,
+      "raw_artifact_path": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4e1_pilot/pglog_c16_r2.log"
+    }
+  ],
+  "pooled_records": [
+    {
+      "experiment_id": "exp_pg_c1_agg_80c07f19",
+      "concurrency": 1,
+      "achieved_rps": 27759.7,
+      "avg_latency_ms": 0.036,
+      "p50_ms": 0.024,
+      "p95_ms": 0.07,
+      "p99_ms": 0.144,
+      "failed_transactions": 0,
+      "notes": "Aggregated across 3 replications for concurrency 1. TotalTransactions=2498209, FailedTransactions=0. AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled 2498209 samples). Replication p95 sample variance=0.0 ms^2. [AuthID:auth_postgres_pilot_4e1_001] [ExecID:exec_f531c54a85]"
+    },
+    {
+      "experiment_id": "exp_pg_c4_agg_d210ddb2",
+      "concurrency": 4,
+      "achieved_rps": 23363.2,
+      "avg_latency_ms": 0.171,
+      "p50_ms": 0.035,
+      "p95_ms": 0.077,
+      "p99_ms": 0.125,
+      "failed_transactions": 0,
+      "notes": "Aggregated across 3 replications for concurrency 4. TotalTransactions=2102964, FailedTransactions=0. AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled 2102964 samples). Replication p95 sample variance=0.0001 ms^2. [AuthID:auth_postgres_pilot_4e1_001] [ExecID:exec_f531c54a85]"
+    },
+    {
+      "experiment_id": "exp_pg_c8_agg_03f27c2d",
+      "concurrency": 8,
+      "achieved_rps": 19330.0,
+      "avg_latency_ms": 0.414,
+      "p50_ms": 0.046,
+      "p95_ms": 0.107,
+      "p99_ms": 0.2,
+      "failed_transactions": 0,
+      "notes": "Aggregated across 3 replications for concurrency 8. TotalTransactions=1741049, FailedTransactions=0. AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled 1741049 samples). Replication p95 sample variance=0.0002 ms^2. [AuthID:auth_postgres_pilot_4e1_001] [ExecID:exec_f531c54a85]"
+    },
+    {
+      "experiment_id": "exp_pg_c16_agg_4fa81892",
+      "concurrency": 16,
+      "achieved_rps": 18882.5,
+      "avg_latency_ms": 0.847,
+      "p50_ms": 0.066,
+      "p95_ms": 0.194,
+      "p99_ms": 0.493,
+      "failed_transactions": 0,
+      "notes": "Aggregated across 3 replications for concurrency 16. TotalTransactions=1701515, FailedTransactions=0. AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled 1701515 samples). Replication p95 sample variance=0.0001 ms^2. [AuthID:auth_postgres_pilot_4e1_001] [ExecID:exec_f531c54a85]"
+    }
+  ],
+  "calibration_verdict": {
+    "status": "WITHHELD",
+    "active_model_preserved": true,
+    "reason": "Read-only in-memory workload (SF=2) yields sub-millisecond latencies (0.02-0.07 ms) with near-zero target variance, producing extreme negative R2 (-1584.4). Needs mixed read/write and larger scale factors before promoting to replace full-spectrum models."
+  }
+}
