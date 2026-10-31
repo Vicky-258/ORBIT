@@ -1,0 +1,42 @@
+{
+  "proposal_id": "prop_postgres_monitoring_4f0_001",
+  "authorization_id": "auth_postgres_monitoring_4f0_001",
+  "execution_id": "exec_6ace0f6703",
+  "status": "SUCCESS",
+  "target_component": "postgresql_db",
+  "version": "16-alpine",
+  "concurrency_levels": [
+    8
+  ],
+  "replications": 2,
+  "scale_factor": 2,
+  "duration_seconds": 30,
+  "warmup_seconds": 10,
+  "wall_clock_duration_seconds": 74.22,
+  "individual_experiments_count": 2,
+  "pooled_experiments_count": 1,
+  "experiment_ids": [
+    "exp_pg_c8_r0_a6118c02",
+    "exp_pg_c8_r1_8a81a7c5",
+    "exp_pg_c8_agg_34b7dcb1"
+  ],
+  "artifacts_directory": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4f0_monitoring",
+  "saved_artifacts": [
+    "correlation_analysis_c8_r0.json",
+    "correlation_analysis_c8_r1.json",
+    "environment_metadata.json",
+    "monitoring_samples_c8_r0.csv",
+    "monitoring_samples_c8_r0.json",
+    "monitoring_samples_c8_r1.csv",
+    "monitoring_samples_c8_r1.json",
+    "monitoring_summary_c8_r0.json",
+    "monitoring_summary_c8_r1.json",
+    "pgbench_c8_r0.stderr",
+    "pgbench_c8_r0.stdout",
+    "pgbench_c8_r1.stderr",
+    "pgbench_c8_r1.stdout",
+    "pglog_c8_r0.log",
+    "pglog_c8_r1.log"
+  ],
+  "timestamp_utc": "2026-10-31T05:37:53.561116+00:00"
+}
