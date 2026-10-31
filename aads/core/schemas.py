@@ -135,6 +135,8 @@ class ExperimentRecord(BaseModel):
     execution_id: Optional[str] = None
     execution_mode: str = "synthetic"
     benchmark_command: Optional[str] = None
+    workload_profile: Optional[str] = None
+    scale_factor: Optional[int] = None
     duration_seconds: Optional[float] = None
     raw_artifact_path: Optional[str] = None
     status: str = "SUCCESS"

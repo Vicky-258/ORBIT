@@ -249,6 +249,9 @@ class BoundedBenchmarkExecutor:
                 duration_seconds=getattr(proposal, "duration_seconds", 30),
                 warmup_seconds=getattr(proposal, "warmup_seconds", 10),
                 scale_factor=getattr(proposal, "scale_factor", 2),
+                scale_factors=getattr(proposal, "scale_factors", None),
+                workload_profile=getattr(proposal, "workload_profile", "read_only_select"),
+                workload_profiles=getattr(proposal, "workload_profiles", None),
                 artifacts_dir=getattr(proposal, "artifacts_dir", None),
                 execution_id=exec_id,
             )

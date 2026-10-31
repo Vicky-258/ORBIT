@@ -19,6 +19,7 @@ import numpy as np
 
 from aads.benchmark.resource_monitor import ContainerResourceMonitor
 from aads.benchmark.runner_interface import BenchmarkRunner
+from aads.benchmark.workload_profiles import resolve_workload_profile, WorkloadProfile, WorkloadProfileType
 from aads.core.schemas import ExperimentRecord
 
 
@@ -287,12 +288,33 @@ class DockerBenchmarkRunner(BenchmarkRunner):
         duration_seconds: int = 30,
         warmup_seconds: int = 10,
         scale_factor: int = 2,
+        scale_factors: Optional[List[int]] = None,
+        workload_profile: Optional[str] = None,
+        workload_profiles: Optional[List[str]] = None,
         artifacts_dir: Optional[Union[Path, str]] = None,
         preserve_individual_replications: bool = True,
         execution_id: Optional[str] = None,
+        checkpoint_callback: Optional[Any] = None,
         **kwargs,
     ) -> List[ExperimentRecord]:
-        container_name = f"aads-pgbench-{uuid.uuid4().hex[:8]}"
+        target_scale_factors = scale_factors if (scale_factors and len(scale_factors) > 0) else [scale_factor]
+
+        if workload_profiles and len(workload_profiles) > 0:
+            target_profiles = [resolve_workload_profile(w) for w in workload_profiles]
+        elif workload_profile:
+            target_profiles = [resolve_workload_profile(workload_profile)]
+        else:
+            target_profiles = [resolve_workload_profile("read_only_select")]
+
+        is_default_single = (
+            len(target_scale_factors) == 1
+            and len(target_profiles) == 1
+            and target_scale_factors[0] == 2
+            and target_profiles[0].name == "read_only_select"
+            and not scale_factors
+            and not workload_profiles
+        )
+
         image = "postgres:16-alpine"
         env_fp = f"docker:{image}:cpus={self.cpu_limit}:mem={self.memory_limit}:{self.host_machine}"
         records: List[ExperimentRecord] = []
@@ -301,319 +323,364 @@ class DockerBenchmarkRunner(BenchmarkRunner):
         if art_dir:
             art_dir.mkdir(parents=True, exist_ok=True)
 
-        try:
-            # 1. Start isolated PostgreSQL container
-            start_cmd = [
-                "docker", "run", "-d",
-                "--name", container_name,
-                "--cpus", self.cpu_limit,
-                "--memory", self.memory_limit,
-                "-e", "POSTGRES_PASSWORD=aadsbenchpass",
-                "-e", "POSTGRES_DB=aadsbench",
-                image,
-            ]
-            res_start = subprocess.run(start_cmd, capture_output=True, text=True, timeout=15)
-            if res_start.returncode != 0:
-                raise RuntimeError(
-                    f"Failed to start PostgreSQL container (exit code {res_start.returncode}): {res_start.stderr.strip()}"
-                )
-
-            # 2. Wait for PostgreSQL to be ready
-            ready = False
-            for _ in range(20):
-                check = subprocess.run(
-                    ["docker", "exec", container_name, "pg_isready", "-U", "postgres"],
-                    capture_output=True,
-                    timeout=5,
-                )
-                if check.returncode == 0:
-                    ready = True
-                    break
-                time.sleep(0.5)
-
-            if not ready:
-                raise RuntimeError("PostgreSQL container failed to become ready in time.")
-
-            # 3. Initialize test dataset (scale factor 2 ~ 200,000 rows)
-            init_cmd = [
-                "docker", "exec", container_name,
-                "pgbench", "-i", "-s", str(scale_factor), "-U", "postgres", "aadsbench",
-            ]
-            res_init = subprocess.run(init_cmd, capture_output=True, text=True, timeout=60)
-            if res_init.returncode != 0:
-                raise RuntimeError(f"pgbench initialization failed: {res_init.stderr.strip()}")
-
-            # Capture environmental metadata
-            env_metadata: Dict[str, Any] = {
-                "container_name": container_name,
-                "image": image,
-                "cpu_limit": self.cpu_limit,
-                "memory_limit": self.memory_limit,
-                "host_machine": self.host_machine,
-                "host_os": platform.platform(),
-                "scale_factor": scale_factor,
-                "warmup_seconds": warmup_seconds,
-                "duration_seconds": duration_seconds,
-                "concurrency_list": concurrency_list,
-                "replications": replications,
-                "timestamp_start_utc": datetime.now(timezone.utc).isoformat(),
-            }
+        for sf in target_scale_factors:
+            container_name = f"aads-pgbench-{uuid.uuid4().hex[:8]}"
             try:
-                digest_res = subprocess.run(
-                    ["docker", "inspect", "--format", "{{index .RepoDigests 0}}", image],
-                    capture_output=True, text=True, timeout=5,
-                )
-                if digest_res.returncode == 0 and digest_res.stdout.strip():
-                    env_metadata["docker_image_digest"] = digest_res.stdout.strip()
-            except Exception:
-                pass
-
-            try:
-                ver_res = subprocess.run(
-                    ["docker", "exec", container_name, "psql", "-U", "postgres", "-d", "aadsbench", "-t", "-c", "SELECT version();"],
-                    capture_output=True, text=True, timeout=5,
-                )
-                if ver_res.returncode == 0 and ver_res.stdout.strip():
-                    env_metadata["postgres_version"] = ver_res.stdout.strip()
-            except Exception:
-                pass
-
-            try:
-                cfg_res = subprocess.run(
-                    ["docker", "exec", container_name, "psql", "-U", "postgres", "-d", "aadsbench", "-t", "-c",
-                     "SHOW shared_buffers; SHOW work_mem; SHOW max_connections; SHOW checkpoint_timeout; SHOW synchronous_commit;"],
-                    capture_output=True, text=True, timeout=5,
-                )
-                if cfg_res.returncode == 0 and cfg_res.stdout.strip():
-                    env_metadata["postgres_key_configs"] = [line.strip() for line in cfg_res.stdout.strip().splitlines() if line.strip()]
-            except Exception:
-                pass
-
-            try:
-                with open("/proc/meminfo", "r") as f:
-                    mem_lines = [line.strip() for line in f if any(k in line for k in ["MemTotal:", "MemAvailable:", "SwapTotal:", "SwapFree:"])]
-                    env_metadata["host_meminfo"] = mem_lines
-                with open("/proc/loadavg", "r") as f:
-                    env_metadata["host_loadavg"] = f.read().strip()
-            except Exception:
-                pass
-
-            if art_dir:
-                (art_dir / "environment_metadata.json").write_text(json.dumps(env_metadata, indent=2))
-
-            # 4. Warm-up
-            warm_timeout = max(15, warmup_seconds + 15)
-            res_warm = subprocess.run(
-                ["docker", "exec", container_name, "pgbench", "-T", str(warmup_seconds), "-c", "2", "-U", "postgres", "aadsbench"],
-                capture_output=True,
-                text=True,
-                timeout=warm_timeout,
-            )
-            if res_warm.returncode != 0:
-                raise RuntimeError(f"pgbench warm-up failed: {res_warm.stderr.strip()}")
-
-            # 5. Run measurement trials for each concurrency level
-            for conc in concurrency_list:
-                trial_tps = []
-                trial_latencies = []
-                trial_p50s = []
-                trial_p90s = []
-                trial_p95s = []
-                trial_p99s = []
-                trial_total_tx = []
-                rep_log_contents = []
-                total_samples = 0
-                total_failed_tx = 0
-
-                trial_cpu_pcts = []
-                trial_mem_mbs = []
-                for rep in range(replications):
-                    log_prefix = f"/tmp/pglog_{conc}_{rep}"
-                    rep_exp_id = f"exp_pg_c{conc}_r{rep}_{uuid.uuid4().hex[:8]}"
-
-                    # Active continuous resource and throttling monitor
-                    monitor = ContainerResourceMonitor(
-                        container_name=container_name,
-                        interval_sec=0.5,
-                        execution_id=execution_id or f"exec_{uuid.uuid4().hex[:10]}",
-                        experiment_id=rep_exp_id,
+                # 1. Start isolated PostgreSQL container
+                start_cmd = [
+                    "docker", "run", "-d",
+                    "--name", container_name,
+                    "--cpus", self.cpu_limit,
+                    "--memory", self.memory_limit,
+                    "-e", "POSTGRES_PASSWORD=aadsbenchpass",
+                    "-e", "POSTGRES_DB=aadsbench",
+                    image,
+                ]
+                res_start = subprocess.run(start_cmd, capture_output=True, text=True, timeout=15)
+                if res_start.returncode != 0:
+                    raise RuntimeError(
+                        f"Failed to start PostgreSQL container (exit code {res_start.returncode}): {res_start.stderr.strip()}"
                     )
-                    monitor.start()
 
-                    bench_cmd = [
-                        "docker", "exec", container_name,
-                        "pgbench",
-                        "-c", str(conc),
-                        "-j", str(min(conc, 4)),
-                        "-T", str(duration_seconds),
-                        "-S",
-                        "-l",
-                        f"--log-prefix={log_prefix}",
-                        "-U", "postgres",
-                        "aadsbench",
-                    ]
-                    bench_timeout = max(20, duration_seconds + 30)
-                    try:
-                        run_res = subprocess.run(bench_cmd, capture_output=True, text=True, timeout=bench_timeout)
-                    finally:
-                        samples, mon_summary = monitor.stop()
-
-                    if run_res.returncode != 0:
-                        raise RuntimeError(
-                            f"pgbench execution failed at concurrency {conc} (exit code {run_res.returncode}): {run_res.stderr.strip()}"
-                        )
-
-                    summary = PgbenchOutputParser.parse_summary(run_res.stdout)
-
-                    cat_res = subprocess.run(
-                        ["docker", "exec", container_name, "sh", "-c", f"cat {log_prefix}.*"],
-                        capture_output=True,
-                        text=True,
-                        timeout=max(10, duration_seconds // 2),
-                    )
-                    if cat_res.returncode != 0 or not cat_res.stdout.strip():
-                        raise ValueError(
-                            f"Failed to retrieve pgbench transaction logs for concurrency {conc}, rep {rep}."
-                        )
-
-                    subprocess.run(
-                        ["docker", "exec", container_name, "sh", "-c", f"rm -f {log_prefix}.*"],
+                # 2. Wait for PostgreSQL to be ready
+                ready = False
+                for _ in range(20):
+                    check = subprocess.run(
+                        ["docker", "exec", container_name, "pg_isready", "-U", "postgres"],
                         capture_output=True,
                         timeout=5,
                     )
+                    if check.returncode == 0:
+                        ready = True
+                        break
+                    time.sleep(0.5)
 
-                    rep_log_text = cat_res.stdout
-                    rep_log_contents.append(rep_log_text)
-                    log_stats = PgbenchOutputParser.parse_transaction_logs(rep_log_text)
+                if not ready:
+                    raise RuntimeError("PostgreSQL container failed to become ready in time.")
 
-                    raw_rep_artifact = f"/tmp/pglog_{conc}_{rep}.*"
-                    if art_dir:
-                        log_file = art_dir / f"pglog_c{conc}_r{rep}.log"
-                        log_file.write_text(rep_log_text)
-                        (art_dir / f"pgbench_c{conc}_r{rep}.stdout").write_text(run_res.stdout)
-                        (art_dir / f"pgbench_c{conc}_r{rep}.stderr").write_text(run_res.stderr)
-                        raw_rep_artifact = str(log_file)
-                        # Save continuous monitoring artifacts (samples CSV/JSON and summary JSON)
-                        monitor.save_artifacts(art_dir, f"c{conc}_r{rep}")
+                # 3. Initialize test dataset for scale factor sf
+                init_timeout = max(60, sf * 4)
+                init_cmd = [
+                    "docker", "exec", container_name,
+                    "pgbench", "-i", "-s", str(sf), "-U", "postgres", "aadsbench",
+                ]
+                res_init = subprocess.run(init_cmd, capture_output=True, text=True, timeout=init_timeout)
+                if res_init.returncode != 0:
+                    raise RuntimeError(f"pgbench initialization failed for SF={sf}: {res_init.stderr.strip()}")
 
-                        # Save correlation analysis between latency spikes and throttling events
-                        lat_ms, ts_sec = PgbenchOutputParser.parse_transaction_timestamps_and_latencies(rep_log_text)
-                        corr = ContainerResourceMonitor.correlate_latency_spikes(
-                            latencies_ms=lat_ms,
-                            timestamps_epoch_sec=ts_sec,
-                            samples=samples,
-                            spike_threshold_ms=10.0,
-                        )
-                        (art_dir / f"correlation_analysis_c{conc}_r{rep}.json").write_text(json.dumps(corr, indent=2))
-
-                    trial_tps.append(summary["tps"])
-                    trial_latencies.append(summary["latency_avg_ms"])
-                    trial_p50s.append(log_stats["p50_ms"])
-                    trial_p90s.append(log_stats.get("p90_ms", log_stats["p95_ms"] * 0.95))
-                    trial_p95s.append(log_stats["p95_ms"])
-                    trial_p99s.append(log_stats["p99_ms"])
-                    trial_total_tx.append(summary["total_transactions"])
-                    total_samples += log_stats["sample_count"]
-                    failed_this_rep = summary.get("failed_transactions", 0)
-                    total_failed_tx += failed_this_rep
-
-                    # Active metrics from continuous monitoring
-                    active_cpu_pct = mon_summary.mean_container_cpu_pct if mon_summary.mean_container_cpu_pct is not None else 25.0
-                    active_mem_mb = mon_summary.peak_memory_mb if mon_summary.peak_memory_mb is not None else 120.0
-                    trial_cpu_pcts.append(active_cpu_pct)
-                    trial_mem_mbs.append(active_mem_mb)
-
-                    # Individual replication ExperimentRecord
-                    rep_rec = ExperimentRecord(
-                        experiment_id=rep_exp_id,
-                        component_name=component_name,
-                        version=version,
-                        env_fingerprint=env_fp,
-                        benchmark_framework="pgbench:16-select-only",
-                        concurrency=conc,
-                        read_ratio=1.0,
-                        offered_rps=round(summary["tps"] * 1.05, 1),
-                        achieved_rps=round(summary["tps"], 1),
-                        p50_ms=round(log_stats["p50_ms"], 3),
-                        p90_ms=round(log_stats.get("p90_ms", log_stats["p95_ms"] * 0.95), 3),
-                        p95_ms=round(log_stats["p95_ms"], 3),
-                        p99_ms=round(log_stats["p99_ms"], 3),
-                        cpu_pct=round(active_cpu_pct, 1),
-                        memory_mb=round(active_mem_mb, 1),
-                        error_count=failed_this_rep,
-                        trial_replications=1,
-                        variance_ms2=0.0,
-                        is_synthetic_fixture=False,
-                        execution_mode="docker",
-                        benchmark_command=f"pgbench -c {conc} -j {min(conc, 4)} -T {duration_seconds} -S -l",
-                        duration_seconds=float(duration_seconds),
-                        raw_artifact_path=raw_rep_artifact,
-                        timestamp=datetime.now(timezone.utc).isoformat(),
-                        notes=(
-                            f"Replication {rep+1} of {replications} for concurrency {conc}. "
-                            f"Transactions: total={summary['total_transactions']}, failed={failed_this_rep}. "
-                            f"ActiveMonitoring: samples={mon_summary.sample_count}, mean_cpu_pct={round(active_cpu_pct, 1)}, "
-                            f"peak_cpu_pct={round(mon_summary.peak_container_cpu_pct or 0.0, 1)}, "
-                            f"cgroup_throttled_events={mon_summary.throttling_events_count}, throttled_sec={round(mon_summary.throttled_time_seconds or 0.0, 4)}."
-                        ),
+                # Capture environmental metadata
+                env_metadata: Dict[str, Any] = {
+                    "container_name": container_name,
+                    "image": image,
+                    "cpu_limit": self.cpu_limit,
+                    "memory_limit": self.memory_limit,
+                    "host_machine": self.host_machine,
+                    "host_os": platform.platform(),
+                    "scale_factor": sf,
+                    "target_scale_factors": target_scale_factors,
+                    "target_workload_profiles": [p.name for p in target_profiles],
+                    "warmup_seconds": warmup_seconds,
+                    "duration_seconds": duration_seconds,
+                    "concurrency_list": concurrency_list,
+                    "replications": replications,
+                    "timestamp_start_utc": datetime.now(timezone.utc).isoformat(),
+                }
+                try:
+                    digest_res = subprocess.run(
+                        ["docker", "inspect", "--format", "{{index .RepoDigests 0}}", image],
+                        capture_output=True, text=True, timeout=5,
                     )
-                    if preserve_individual_replications:
-                        records.append(rep_rec)
+                    if digest_res.returncode == 0 and digest_res.stdout.strip():
+                        env_metadata["docker_image_digest"] = digest_res.stdout.strip()
+                except Exception:
+                    pass
 
-                # Pooled active resource metrics across replications
-                pooled_cpu_pct = round(sum(trial_cpu_pcts) / len(trial_cpu_pcts), 1) if trial_cpu_pcts else 25.0
-                pooled_mem_mb = round(max(trial_mem_mbs), 1) if trial_mem_mbs else 120.0
-
-                # Aggregated record per concurrency (pooled across replications if replications > 1)
-                if replications > 1:
-                    pooled_text = "\n".join(rep_log_contents)
-                    pooled_stats = PgbenchOutputParser.parse_transaction_logs(pooled_text)
-                    mean_tps = sum(trial_tps) / replications
-                    mean_p95 = sum(trial_p95s) / replications
-                    variance = (
-                        sum((x - mean_p95) ** 2 for x in trial_p95s) / (replications - 1)
+                try:
+                    ver_res = subprocess.run(
+                        ["docker", "exec", container_name, "psql", "-U", "postgres", "-d", "aadsbench", "-t", "-c", "SELECT version();"],
+                        capture_output=True, text=True, timeout=5,
                     )
+                    if ver_res.returncode == 0 and ver_res.stdout.strip():
+                        env_metadata["postgres_version"] = ver_res.stdout.strip()
+                except Exception:
+                    pass
 
-                    agg_rec = ExperimentRecord(
-                        experiment_id=f"exp_pg_c{conc}_agg_{uuid.uuid4().hex[:8]}",
-                        component_name=component_name,
-                        version=version,
-                        env_fingerprint=env_fp,
-                        benchmark_framework="pgbench:16-select-only",
-                        concurrency=conc,
-                        read_ratio=1.0,
-                        offered_rps=round(mean_tps * 1.05, 1),
-                        achieved_rps=round(mean_tps, 1),
-                        p50_ms=round(pooled_stats["p50_ms"], 3),
-                        p90_ms=round(pooled_stats.get("p90_ms", pooled_stats["p95_ms"] * 0.95), 3),
-                        p95_ms=round(pooled_stats["p95_ms"], 3),
-                        p99_ms=round(pooled_stats["p99_ms"], 3),
-                        cpu_pct=pooled_cpu_pct,
-                        memory_mb=pooled_mem_mb,
-                        error_count=total_failed_tx,
-                        trial_replications=replications,
-                        variance_ms2=round(variance, 4),
-                        is_synthetic_fixture=False,
-                        execution_mode="docker",
-                        benchmark_command=f"pgbench -c {conc} -j {min(conc, 4)} -T {duration_seconds} -S -l",
-                        duration_seconds=float(duration_seconds * replications),
-                        raw_artifact_path=str(art_dir) if art_dir else f"/tmp/pglog_{conc}_*",
-                        timestamp=datetime.now(timezone.utc).isoformat(),
-                        notes=(
-                            f"Aggregated across {replications} replications for concurrency {conc}. "
-                            f"TotalTransactions={sum(trial_total_tx)}, FailedTransactions={total_failed_tx}. "
-                            f"ActiveMonitoring: pooled_cpu_pct={pooled_cpu_pct}, peak_mem_mb={pooled_mem_mb}. "
-                            f"AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled {pooled_stats['sample_count']} samples). "
-                            f"Replication p95 sample variance={round(variance, 4)} ms^2."
-                        ),
+                try:
+                    cfg_res = subprocess.run(
+                        ["docker", "exec", container_name, "psql", "-U", "postgres", "-d", "aadsbench", "-t", "-c",
+                         "SHOW shared_buffers; SHOW work_mem; SHOW max_connections; SHOW checkpoint_timeout; SHOW synchronous_commit;"],
+                        capture_output=True, text=True, timeout=5,
                     )
-                    records.append(agg_rec)
+                    if cfg_res.returncode == 0 and cfg_res.stdout.strip():
+                        env_metadata["postgres_key_configs"] = [line.strip() for line in cfg_res.stdout.strip().splitlines() if line.strip()]
+                except Exception:
+                    pass
 
-        finally:
-            try:
-                subprocess.run(["docker", "rm", "-f", container_name], capture_output=True, timeout=10)
-            except Exception as exc:
-                cleanup_error = f"Container cleanup error: {str(exc)}"
+                try:
+                    with open("/proc/meminfo", "r") as f:
+                        mem_lines = [line.strip() for line in f if any(k in line for k in ["MemTotal:", "MemAvailable:", "SwapTotal:", "SwapFree:"])]
+                        env_metadata["host_meminfo"] = mem_lines
+                    with open("/proc/loadavg", "r") as f:
+                        env_metadata["host_loadavg"] = f.read().strip()
+                except Exception:
+                    pass
+
+                if art_dir:
+                    env_file = art_dir / "environment_metadata.json"
+                    if not env_file.exists():
+                        env_file.write_text(json.dumps(env_metadata, indent=2))
+
+                # For each workload profile
+                for profile in target_profiles:
+                    # Warm-up for this profile
+                    warm_timeout = max(15, warmup_seconds + 15)
+                    warm_cmd = [
+                        "docker", "exec", container_name,
+                        "pgbench", "-T", str(warmup_seconds), "-c", "2", "-U", "postgres",
+                    ] + profile.command_flags + ["aadsbench"]
+                    res_warm = subprocess.run(
+                        warm_cmd,
+                        capture_output=True,
+                        text=True,
+                        timeout=warm_timeout,
+                    )
+                    if res_warm.returncode != 0:
+                        raise RuntimeError(f"pgbench warm-up failed for profile {profile.name}: {res_warm.stderr.strip()}")
+
+                    # Run measurement trials for each concurrency level
+                    for conc in concurrency_list:
+                        trial_tps = []
+                        trial_latencies = []
+                        trial_p50s = []
+                        trial_p90s = []
+                        trial_p95s = []
+                        trial_p99s = []
+                        trial_total_tx = []
+                        rep_log_contents = []
+                        total_samples = 0
+                        total_failed_tx = 0
+
+                        trial_cpu_pcts = []
+                        trial_mem_mbs = []
+                        for rep in range(replications):
+                            trial_prefix = f"c{conc}_r{rep}" if is_default_single else f"sf{sf}_{profile.name}_c{conc}_r{rep}"
+                            log_prefix = f"/tmp/pglog_{trial_prefix}"
+                            rep_exp_id = (
+                                f"exp_pg_c{conc}_r{rep}_{uuid.uuid4().hex[:8]}"
+                                if is_default_single
+                                else f"exp_pg_sf{sf}_{profile.name}_c{conc}_r{rep}_{uuid.uuid4().hex[:8]}"
+                            )
+
+                            # Active continuous resource and throttling monitor
+                            monitor = ContainerResourceMonitor(
+                                container_name=container_name,
+                                interval_sec=0.5,
+                                execution_id=execution_id or f"exec_{uuid.uuid4().hex[:10]}",
+                                experiment_id=rep_exp_id,
+                            )
+                            monitor.start()
+
+                            bench_cmd = [
+                                "docker", "exec", container_name,
+                                "pgbench",
+                                "-c", str(conc),
+                                "-j", str(min(conc, 4)),
+                                "-T", str(duration_seconds),
+                            ] + profile.command_flags + [
+                                "-l",
+                                f"--log-prefix={log_prefix}",
+                                "-U", "postgres",
+                                "aadsbench",
+                            ]
+                            bench_timeout = max(20, duration_seconds + 30)
+                            try:
+                                run_res = subprocess.run(bench_cmd, capture_output=True, text=True, timeout=bench_timeout)
+                            finally:
+                                samples, mon_summary = monitor.stop()
+
+                            if run_res.returncode != 0:
+                                raise RuntimeError(
+                                    f"pgbench execution failed at SF={sf}, profile={profile.name}, conc={conc} (exit code {run_res.returncode}): {run_res.stderr.strip()}"
+                                )
+
+                            summary = PgbenchOutputParser.parse_summary(run_res.stdout)
+
+                            cat_res = subprocess.run(
+                                ["docker", "exec", container_name, "sh", "-c", f"cat {log_prefix}.*"],
+                                capture_output=True,
+                                text=True,
+                                timeout=max(10, duration_seconds // 2),
+                            )
+                            if cat_res.returncode != 0 or not cat_res.stdout.strip():
+                                raise ValueError(
+                                    f"Failed to retrieve pgbench transaction logs for SF={sf}, profile={profile.name}, conc={conc}, rep={rep}."
+                                )
+
+                            subprocess.run(
+                                ["docker", "exec", container_name, "sh", "-c", f"rm -f {log_prefix}.*"],
+                                capture_output=True,
+                                timeout=5,
+                            )
+
+                            rep_log_text = cat_res.stdout
+                            rep_log_contents.append(rep_log_text)
+                            log_stats = PgbenchOutputParser.parse_transaction_logs(rep_log_text)
+
+                            raw_rep_artifact = f"/tmp/pglog_{trial_prefix}.*"
+                            if art_dir:
+                                log_file = art_dir / f"pglog_{trial_prefix}.log"
+                                log_file.write_text(rep_log_text)
+                                (art_dir / f"pgbench_{trial_prefix}.stdout").write_text(run_res.stdout)
+                                (art_dir / f"pgbench_{trial_prefix}.stderr").write_text(run_res.stderr)
+                                raw_rep_artifact = str(log_file)
+                                # Save continuous monitoring artifacts (samples CSV/JSON and summary JSON)
+                                monitor.save_artifacts(art_dir, trial_prefix)
+
+                                # Save correlation analysis between latency spikes and throttling events
+                                lat_ms, ts_sec = PgbenchOutputParser.parse_transaction_timestamps_and_latencies(rep_log_text)
+                                corr = ContainerResourceMonitor.correlate_latency_spikes(
+                                    latencies_ms=lat_ms,
+                                    timestamps_epoch_sec=ts_sec,
+                                    samples=samples,
+                                    spike_threshold_ms=10.0,
+                                )
+                                (art_dir / f"correlation_analysis_{trial_prefix}.json").write_text(json.dumps(corr, indent=2))
+
+                            trial_tps.append(summary["tps"])
+                            trial_latencies.append(summary["latency_avg_ms"])
+                            trial_p50s.append(log_stats["p50_ms"])
+                            trial_p90s.append(log_stats.get("p90_ms", log_stats["p95_ms"] * 0.95))
+                            trial_p95s.append(log_stats["p95_ms"])
+                            trial_p99s.append(log_stats["p99_ms"])
+                            trial_total_tx.append(summary["total_transactions"])
+                            total_samples += log_stats["sample_count"]
+                            failed_this_rep = summary.get("failed_transactions", 0)
+                            total_failed_tx += failed_this_rep
+
+                            # Active metrics from continuous monitoring
+                            active_cpu_pct = mon_summary.mean_container_cpu_pct if mon_summary.mean_container_cpu_pct is not None else 25.0
+                            active_mem_mb = mon_summary.peak_memory_mb if mon_summary.peak_memory_mb is not None else 120.0
+                            trial_cpu_pcts.append(active_cpu_pct)
+                            trial_mem_mbs.append(active_mem_mb)
+
+                            # Individual replication ExperimentRecord
+                            rep_rec = ExperimentRecord(
+                                experiment_id=rep_exp_id,
+                                component_name=component_name,
+                                version=version,
+                                env_fingerprint=env_fp,
+                                benchmark_framework=f"pgbench:16-{profile.name}",
+                                concurrency=conc,
+                                read_ratio=profile.statement_read_ratio,
+                                workload_profile=profile.name,
+                                scale_factor=sf,
+                                offered_rps=round(summary["tps"] * 1.05, 1),
+                                achieved_rps=round(summary["tps"], 1),
+                                p50_ms=round(log_stats["p50_ms"], 3),
+                                p90_ms=round(log_stats.get("p90_ms", log_stats["p95_ms"] * 0.95), 3),
+                                p95_ms=round(log_stats["p95_ms"], 3),
+                                p99_ms=round(log_stats["p99_ms"], 3),
+                                cpu_pct=round(active_cpu_pct, 1),
+                                memory_mb=round(active_mem_mb, 1),
+                                error_count=failed_this_rep,
+                                trial_replications=1,
+                                variance_ms2=0.0,
+                                is_synthetic_fixture=False,
+                                execution_mode="docker",
+                                benchmark_command=f"pgbench -c {conc} -j {min(conc, 4)} -T {duration_seconds} {' '.join(profile.command_flags)} -l".strip(),
+                                duration_seconds=float(duration_seconds),
+                                raw_artifact_path=raw_rep_artifact,
+                                timestamp=datetime.now(timezone.utc).isoformat(),
+                                notes=(
+                                    f"Profile={profile.name}, ScaleFactor={sf}, Concurrency={conc}, Rep={rep+1}/{replications}. "
+                                    f"Transactions: total={summary['total_transactions']}, failed={failed_this_rep}. "
+                                    f"ActiveMonitoring: samples={mon_summary.sample_count}, mean_cpu_pct={round(active_cpu_pct, 1)}, "
+                                    f"peak_cpu_pct={round(mon_summary.peak_container_cpu_pct or 0.0, 1)}, "
+                                    f"cgroup_throttled_events={mon_summary.throttling_events_count}, throttled_sec={round(mon_summary.throttled_time_seconds or 0.0, 4)}."
+                                ),
+                            )
+                            if checkpoint_callback and callable(checkpoint_callback):
+                                checkpoint_callback(rep_rec)
+
+                            if preserve_individual_replications:
+                                records.append(rep_rec)
+
+                        # Pooled active resource metrics across replications
+                        pooled_cpu_pct = round(sum(trial_cpu_pcts) / len(trial_cpu_pcts), 1) if trial_cpu_pcts else 25.0
+                        pooled_mem_mb = round(max(trial_mem_mbs), 1) if trial_mem_mbs else 120.0
+
+                        # Aggregated record per concurrency (pooled across replications if replications > 1)
+                        if replications > 1:
+                            pooled_text = "\n".join(rep_log_contents)
+                            pooled_stats = PgbenchOutputParser.parse_transaction_logs(pooled_text)
+                            mean_tps = sum(trial_tps) / replications
+                            mean_p95 = sum(trial_p95s) / replications
+                            variance = (
+                                sum((x - mean_p95) ** 2 for x in trial_p95s) / (replications - 1)
+                            )
+                            agg_exp_id = (
+                                f"exp_pg_c{conc}_agg_{uuid.uuid4().hex[:8]}"
+                                if is_default_single
+                                else f"exp_pg_sf{sf}_{profile.name}_c{conc}_agg_{uuid.uuid4().hex[:8]}"
+                            )
+
+                            agg_rec = ExperimentRecord(
+                                experiment_id=agg_exp_id,
+                                component_name=component_name,
+                                version=version,
+                                env_fingerprint=env_fp,
+                                benchmark_framework=f"pgbench:16-{profile.name}",
+                                concurrency=conc,
+                                read_ratio=profile.statement_read_ratio,
+                                workload_profile=profile.name,
+                                scale_factor=sf,
+                                offered_rps=round(mean_tps * 1.05, 1),
+                                achieved_rps=round(mean_tps, 1),
+                                p50_ms=round(pooled_stats["p50_ms"], 3),
+                                p90_ms=round(pooled_stats.get("p90_ms", pooled_stats["p95_ms"] * 0.95), 3),
+                                p95_ms=round(pooled_stats["p95_ms"], 3),
+                                p99_ms=round(pooled_stats["p99_ms"], 3),
+                                cpu_pct=pooled_cpu_pct,
+                                memory_mb=pooled_mem_mb,
+                                error_count=total_failed_tx,
+                                trial_replications=replications,
+                                variance_ms2=round(variance, 4),
+                                is_synthetic_fixture=False,
+                                execution_mode="docker",
+                                benchmark_command=f"pgbench -c {conc} -j {min(conc, 4)} -T {duration_seconds} {' '.join(profile.command_flags)} -l".strip(),
+                                duration_seconds=float(duration_seconds * replications),
+                                raw_artifact_path=str(art_dir) if art_dir else f"/tmp/pglog_{conc}_*",
+                                timestamp=datetime.now(timezone.utc).isoformat(),
+                                notes=(
+                                    f"Aggregated across {replications} replications for SF={sf}, Profile={profile.name}, Concurrency={conc}. "
+                                    f"TotalTransactions={sum(trial_total_tx)}, FailedTransactions={total_failed_tx}. "
+                                    f"ActiveMonitoring: pooled_cpu_pct={pooled_cpu_pct}, peak_mem_mb={pooled_mem_mb}. "
+                                    f"AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled {pooled_stats['sample_count']} samples). "
+                                    f"Replication p95 sample variance={round(variance, 4)} ms^2."
+                                ),
+                            )
+                            if checkpoint_callback and callable(checkpoint_callback):
+                                checkpoint_callback(agg_rec)
+                            records.append(agg_rec)
+
+                    # State cleanup between workloads if this workload performed writes
+                    if profile.write_statements_per_tx > 0:
+                        try:
+                            subprocess.run(
+                                ["docker", "exec", container_name, "psql", "-U", "postgres", "-d", "aadsbench", "-c", "VACUUM ANALYZE;"],
+                                capture_output=True,
+                                timeout=30,
+                            )
+                        except Exception:
+                            pass
+
+            finally:
+                try:
+                    subprocess.run(["docker", "rm", "-f", container_name], capture_output=True, timeout=10)
+                except Exception as exc:
+                    cleanup_error = f"Container cleanup error: {str(exc)}"
+
+        return records
 
         return records
 
