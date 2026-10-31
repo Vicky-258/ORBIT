@@ -250,6 +250,7 @@ class BoundedBenchmarkExecutor:
                 warmup_seconds=getattr(proposal, "warmup_seconds", 10),
                 scale_factor=getattr(proposal, "scale_factor", 2),
                 artifacts_dir=getattr(proposal, "artifacts_dir", None),
+                execution_id=exec_id,
             )
         except (TimeoutError, subprocess.TimeoutExpired) as timeout_exc:
             duration = round(time.perf_counter() - start_t, 3)

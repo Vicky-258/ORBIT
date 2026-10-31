@@ -13,10 +13,11 @@ import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union, Tuple
 
 import numpy as np
 
+from aads.benchmark.resource_monitor import ContainerResourceMonitor
 from aads.benchmark.runner_interface import BenchmarkRunner
 from aads.core.schemas import ExperimentRecord
 
@@ -130,6 +131,30 @@ class PgbenchOutputParser:
             "has_schedule_lag": len(schedule_lags_ms) > 0,
             "mean_schedule_lag_ms": round(float(np.mean(schedule_lags_ms)), 3) if schedule_lags_ms else None,
         }
+
+    @staticmethod
+    def parse_transaction_timestamps_and_latencies(log_text: str) -> Tuple[List[float], List[float]]:
+        """
+        Extracts latency (ms) and absolute timestamp (epoch seconds) for all transactions.
+        Format per line: client_id transaction_no time_in_us file_no epoch_sec epoch_usec [schedule_lag]
+        """
+        latencies_ms: List[float] = []
+        timestamps_sec: List[float] = []
+        for line in log_text.strip().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split()
+            if len(parts) >= 6:
+                try:
+                    time_us = float(parts[2])
+                    sec = float(parts[4])
+                    usec = float(parts[5])
+                    latencies_ms.append(time_us / 1000.0)
+                    timestamps_sec.append(sec + (usec / 1_000_000.0))
+                except (ValueError, TypeError):
+                    continue
+        return latencies_ms, timestamps_sec
 
 
 class RedisBenchmarkParser:
@@ -264,6 +289,8 @@ class DockerBenchmarkRunner(BenchmarkRunner):
         scale_factor: int = 2,
         artifacts_dir: Optional[Union[Path, str]] = None,
         preserve_individual_replications: bool = True,
+        execution_id: Optional[str] = None,
+        **kwargs,
     ) -> List[ExperimentRecord]:
         container_name = f"aads-pgbench-{uuid.uuid4().hex[:8]}"
         image = "postgres:16-alpine"
@@ -398,8 +425,21 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                 total_samples = 0
                 total_failed_tx = 0
 
+                trial_cpu_pcts = []
+                trial_mem_mbs = []
                 for rep in range(replications):
                     log_prefix = f"/tmp/pglog_{conc}_{rep}"
+                    rep_exp_id = f"exp_pg_c{conc}_r{rep}_{uuid.uuid4().hex[:8]}"
+
+                    # Active continuous resource and throttling monitor
+                    monitor = ContainerResourceMonitor(
+                        container_name=container_name,
+                        interval_sec=0.5,
+                        execution_id=execution_id or f"exec_{uuid.uuid4().hex[:10]}",
+                        experiment_id=rep_exp_id,
+                    )
+                    monitor.start()
+
                     bench_cmd = [
                         "docker", "exec", container_name,
                         "pgbench",
@@ -413,7 +453,11 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                         "aadsbench",
                     ]
                     bench_timeout = max(20, duration_seconds + 30)
-                    run_res = subprocess.run(bench_cmd, capture_output=True, text=True, timeout=bench_timeout)
+                    try:
+                        run_res = subprocess.run(bench_cmd, capture_output=True, text=True, timeout=bench_timeout)
+                    finally:
+                        samples, mon_summary = monitor.stop()
+
                     if run_res.returncode != 0:
                         raise RuntimeError(
                             f"pgbench execution failed at concurrency {conc} (exit code {run_res.returncode}): {run_res.stderr.strip()}"
@@ -449,6 +493,18 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                         (art_dir / f"pgbench_c{conc}_r{rep}.stdout").write_text(run_res.stdout)
                         (art_dir / f"pgbench_c{conc}_r{rep}.stderr").write_text(run_res.stderr)
                         raw_rep_artifact = str(log_file)
+                        # Save continuous monitoring artifacts (samples CSV/JSON and summary JSON)
+                        monitor.save_artifacts(art_dir, f"c{conc}_r{rep}")
+
+                        # Save correlation analysis between latency spikes and throttling events
+                        lat_ms, ts_sec = PgbenchOutputParser.parse_transaction_timestamps_and_latencies(rep_log_text)
+                        corr = ContainerResourceMonitor.correlate_latency_spikes(
+                            latencies_ms=lat_ms,
+                            timestamps_epoch_sec=ts_sec,
+                            samples=samples,
+                            spike_threshold_ms=10.0,
+                        )
+                        (art_dir / f"correlation_analysis_c{conc}_r{rep}.json").write_text(json.dumps(corr, indent=2))
 
                     trial_tps.append(summary["tps"])
                     trial_latencies.append(summary["latency_avg_ms"])
@@ -461,9 +517,15 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                     failed_this_rep = summary.get("failed_transactions", 0)
                     total_failed_tx += failed_this_rep
 
+                    # Active metrics from continuous monitoring
+                    active_cpu_pct = mon_summary.mean_container_cpu_pct if mon_summary.mean_container_cpu_pct is not None else 25.0
+                    active_mem_mb = mon_summary.peak_memory_mb if mon_summary.peak_memory_mb is not None else 120.0
+                    trial_cpu_pcts.append(active_cpu_pct)
+                    trial_mem_mbs.append(active_mem_mb)
+
                     # Individual replication ExperimentRecord
                     rep_rec = ExperimentRecord(
-                        experiment_id=f"exp_pg_c{conc}_r{rep}_{uuid.uuid4().hex[:8]}",
+                        experiment_id=rep_exp_id,
                         component_name=component_name,
                         version=version,
                         env_fingerprint=env_fp,
@@ -476,8 +538,8 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                         p90_ms=round(log_stats.get("p90_ms", log_stats["p95_ms"] * 0.95), 3),
                         p95_ms=round(log_stats["p95_ms"], 3),
                         p99_ms=round(log_stats["p99_ms"], 3),
-                        cpu_pct=25.0,
-                        memory_mb=120.0,
+                        cpu_pct=round(active_cpu_pct, 1),
+                        memory_mb=round(active_mem_mb, 1),
                         error_count=failed_this_rep,
                         trial_replications=1,
                         variance_ms2=0.0,
@@ -490,41 +552,17 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                         notes=(
                             f"Replication {rep+1} of {replications} for concurrency {conc}. "
                             f"Transactions: total={summary['total_transactions']}, failed={failed_this_rep}. "
-                            f"Empirical percentiles computed via linear interpolation on {log_stats['sample_count']} samples."
+                            f"ActiveMonitoring: samples={mon_summary.sample_count}, mean_cpu_pct={round(active_cpu_pct, 1)}, "
+                            f"peak_cpu_pct={round(mon_summary.peak_container_cpu_pct or 0.0, 1)}, "
+                            f"cgroup_throttled_events={mon_summary.throttling_events_count}, throttled_sec={round(mon_summary.throttled_time_seconds or 0.0, 4)}."
                         ),
                     )
                     if preserve_individual_replications:
                         records.append(rep_rec)
 
-                stats_res = subprocess.run(
-                    ["docker", "stats", "--no-stream", "--format", "{{.CPUPerc}},{{.MemUsage}}", container_name],
-                    capture_output=True,
-                    text=True,
-                    timeout=5,
-                )
-                cpu_pct = 25.0
-                mem_mb = 120.0
-                if stats_res.returncode == 0 and stats_res.stdout:
-                    parts = stats_res.stdout.strip().split(",")
-                    if len(parts) >= 1:
-                        cpu_clean = parts[0].replace("%", "").strip()
-                        try:
-                            cpu_pct = float(cpu_clean)
-                        except ValueError:
-                            pass
-                    if len(parts) >= 2:
-                        mem_clean = parts[1].split("/")[0].strip()
-                        if "MiB" in mem_clean:
-                            try:
-                                mem_mb = float(mem_clean.replace("MiB", "").strip())
-                            except ValueError:
-                                pass
-
-                # Update CPU/Mem on replication records for this conc
-                for r in records:
-                    if r.concurrency == conc:
-                        r.cpu_pct = round(cpu_pct, 1)
-                        r.memory_mb = round(mem_mb, 1)
+                # Pooled active resource metrics across replications
+                pooled_cpu_pct = round(sum(trial_cpu_pcts) / len(trial_cpu_pcts), 1) if trial_cpu_pcts else 25.0
+                pooled_mem_mb = round(max(trial_mem_mbs), 1) if trial_mem_mbs else 120.0
 
                 # Aggregated record per concurrency (pooled across replications if replications > 1)
                 if replications > 1:
@@ -550,8 +588,8 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                         p90_ms=round(pooled_stats.get("p90_ms", pooled_stats["p95_ms"] * 0.95), 3),
                         p95_ms=round(pooled_stats["p95_ms"], 3),
                         p99_ms=round(pooled_stats["p99_ms"], 3),
-                        cpu_pct=round(cpu_pct, 1),
-                        memory_mb=round(mem_mb, 1),
+                        cpu_pct=pooled_cpu_pct,
+                        memory_mb=pooled_mem_mb,
                         error_count=total_failed_tx,
                         trial_replications=replications,
                         variance_ms2=round(variance, 4),
@@ -564,6 +602,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                         notes=(
                             f"Aggregated across {replications} replications for concurrency {conc}. "
                             f"TotalTransactions={sum(trial_total_tx)}, FailedTransactions={total_failed_tx}. "
+                            f"ActiveMonitoring: pooled_cpu_pct={pooled_cpu_pct}, peak_mem_mb={pooled_mem_mb}. "
                             f"AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled {pooled_stats['sample_count']} samples). "
                             f"Replication p95 sample variance={round(variance, 4)} ms^2."
                         ),
