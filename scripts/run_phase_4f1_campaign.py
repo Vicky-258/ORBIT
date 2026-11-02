@@ -23,7 +23,8 @@ from aads.agent.schemas import (
     ExperimentProposal,
 )
 from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
-from aads.benchmark.docker_runner import DockerBenchmarkRunner
+import numpy as np
+from aads.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
 from aads.benchmark.workload_profiles import (
     BALANCED_OLTP_TPCB,
     READ_ONLY_SELECT,
@@ -262,7 +263,84 @@ def main():
         )
         print(row)
 
-    # 6. Save Execution Summary Artifact
+    # 6. Compute Detailed Latency Distribution & Throttling Summary across all configurations
+    distribution_summary: Dict[str, Any] = {}
+    for sf in args.scale_factors:
+        for profile in target_profiles:
+            for conc in args.concurrencies:
+                cfg_key = f"sf{sf}_{profile.name}_c{conc}"
+                all_lats: List[float] = []
+                mon_sums: List[Dict[str, Any]] = []
+
+                for rep in range(args.replications):
+                    log_file = artifacts_path / f"pglog_{cfg_key}_r{rep}.log"
+                    if log_file.exists():
+                        lats, _ = PgbenchOutputParser.parse_transaction_timestamps_and_latencies(log_file.read_text())
+                        all_lats.extend(lats)
+
+                    mon_file = artifacts_path / f"monitoring_summary_{cfg_key}_r{rep}.json"
+                    if mon_file.exists():
+                        try:
+                            mon_sums.append(json.loads(mon_file.read_text()))
+                        except Exception:
+                            pass
+
+                if all_lats:
+                    arr = np.array(all_lats, dtype=np.float64)
+                    p25 = float(np.percentile(arr, 25))
+                    p75 = float(np.percentile(arr, 75))
+                    spikes_10 = int(np.sum(arr >= 10.0))
+                    spikes_50 = int(np.sum(arr >= 50.0))
+                    spikes_100 = int(np.sum(arr >= 100.0))
+
+                    total_throttled_ev = sum(s.get("throttling_events_count", 0) for s in mon_sums)
+                    total_throttled_s = sum(s.get("throttled_time_seconds", 0.0) for s in mon_sums)
+                    mean_throt_rate = sum(s.get("throttling_event_rate_per_sec", 0.0) for s in mon_sums) / max(1, len(mon_sums))
+                    mean_cpu = sum(s.get("mean_container_cpu_pct", 0.0) for s in mon_sums) / max(1, len(mon_sums))
+                    mean_host = sum(s.get("mean_host_cpu_pct", 0.0) for s in mon_sums) / max(1, len(mon_sums))
+                    peak_mem = max((s.get("peak_memory_mb", 0.0) for s in mon_sums), default=0.0)
+
+                    # Find pooled experiment record
+                    matching_pooled = next(
+                        (r for r in pooled_records if r.scale_factor == sf and r.workload_profile == profile.name and r.concurrency == conc),
+                        None,
+                    )
+                    tps = matching_pooled.achieved_rps if matching_pooled else 0.0
+
+                    distribution_summary[cfg_key] = {
+                        "scale_factor": sf,
+                        "workload_profile": profile.name,
+                        "concurrency": conc,
+                        "replications": args.replications,
+                        "achieved_tps": round(tps, 1),
+                        "total_transactions": len(arr),
+                        "min_ms": round(float(np.min(arr)), 4),
+                        "mean_ms": round(float(np.mean(arr)), 4),
+                        "std_ms": round(float(np.std(arr)), 4),
+                        "p50_ms": round(float(np.percentile(arr, 50)), 4),
+                        "p90_ms": round(float(np.percentile(arr, 90)), 4),
+                        "p95_ms": round(float(np.percentile(arr, 95)), 4),
+                        "p99_ms": round(float(np.percentile(arr, 99)), 4),
+                        "p999_ms": round(float(np.percentile(arr, 99.9)), 4),
+                        "max_ms": round(float(np.max(arr)), 4),
+                        "iqr_ms": round(p75 - p25, 4),
+                        "spikes_over_10ms_count": spikes_10,
+                        "spikes_over_10ms_pct": round(spikes_10 / len(arr) * 100.0, 3) if len(arr) > 0 else 0.0,
+                        "spikes_over_50ms_count": spikes_50,
+                        "spikes_over_100ms_count": spikes_100,
+                        "mean_container_cpu_pct": round(mean_cpu, 2),
+                        "mean_host_cpu_pct": round(mean_host, 2),
+                        "peak_memory_mb": round(peak_mem, 2),
+                        "total_throttling_events": total_throttled_ev,
+                        "total_throttled_time_seconds": round(total_throttled_s, 3),
+                        "mean_throttling_rate_per_sec": round(mean_throt_rate, 2),
+                    }
+
+    dist_summary_file = artifacts_path / "campaign_distribution_summary.json"
+    dist_summary_file.write_text(json.dumps(distribution_summary, indent=2))
+    print(f"Distribution summary saved to: {dist_summary_file}")
+
+    # 7. Save Execution Summary Artifact
     summary_file = artifacts_path / "execution_summary.json"
     saved_artifacts = sorted([p.name for p in artifacts_path.iterdir() if p.is_file()])
     summary_data = {

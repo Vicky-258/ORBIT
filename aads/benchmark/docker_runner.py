@@ -116,6 +116,7 @@ class PgbenchOutputParser:
         p90 = float(np.percentile(lat_arr, 90, method="linear"))
         p95 = float(np.percentile(lat_arr, 95, method="linear"))
         p99 = float(np.percentile(lat_arr, 99, method="linear"))
+        p999 = float(np.percentile(lat_arr, 99.9, method="linear"))
 
         return {
             "sample_count": len(latencies_ms),
@@ -125,6 +126,7 @@ class PgbenchOutputParser:
             "p90_ms": round(p90, 3),
             "p95_ms": round(p95, 3),
             "p99_ms": round(p99, 3),
+            "p999_ms": round(p999, 3),
             "min_ms": round(float(np.min(lat_arr)), 3),
             "max_ms": round(float(np.max(lat_arr)), 3),
             "mean_ms": round(float(np.mean(lat_arr)), 3),
@@ -601,6 +603,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                                 notes=(
                                     f"Profile={profile.name}, ScaleFactor={sf}, Concurrency={conc}, Rep={rep+1}/{replications}. "
                                     f"Transactions: total={summary['total_transactions']}, failed={failed_this_rep}. "
+                                    f"Latency: mean={log_stats.get('mean_ms', 0.0)}ms, p999={log_stats.get('p999_ms', 0.0)}ms, max={log_stats.get('max_ms', 0.0)}ms, std={log_stats.get('std_ms', 0.0)}ms. "
                                     f"ActiveMonitoring: samples={mon_summary.sample_count}, mean_cpu_pct={round(active_cpu_pct, 1)}, "
                                     f"peak_cpu_pct={round(mon_summary.peak_container_cpu_pct or 0.0, 1)}, "
                                     f"cgroup_throttled_events={mon_summary.throttling_events_count}, throttled_sec={round(mon_summary.throttled_time_seconds or 0.0, 4)}."
@@ -661,6 +664,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                                 notes=(
                                     f"Aggregated across {replications} replications for SF={sf}, Profile={profile.name}, Concurrency={conc}. "
                                     f"TotalTransactions={sum(trial_total_tx)}, FailedTransactions={total_failed_tx}. "
+                                    f"Latency: mean={pooled_stats.get('mean_ms', 0.0)}ms, p999={pooled_stats.get('p999_ms', 0.0)}ms, max={pooled_stats.get('max_ms', 0.0)}ms, std={pooled_stats.get('std_ms', 0.0)}ms. "
                                     f"ActiveMonitoring: pooled_cpu_pct={pooled_cpu_pct}, peak_mem_mb={pooled_mem_mb}. "
                                     f"AggregationMethod=POOLED_RAW_TRANSACTION_PERCENTILES (pooled {pooled_stats['sample_count']} samples). "
                                     f"Replication p95 sample variance={round(variance, 4)} ms^2."
