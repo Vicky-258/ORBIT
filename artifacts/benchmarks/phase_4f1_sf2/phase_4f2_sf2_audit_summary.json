@@ -1,0 +1,1924 @@
+{
+  "audit_phase": "Phase 4F.2",
+  "audit_target": "Phase 4F.1 SF=2 Multi-Workload Empirical Campaign",
+  "audit_timestamp_utc": "2026-11-02T06:05:30.150867+00:00",
+  "total_trials_audited": 36,
+  "total_pooled_configurations_audited": 12,
+  "total_transactions_reconciled": 11079871,
+  "discrepancies_count": 0,
+  "discrepancies": [],
+  "reconciliation_verdict": "VERIFIED_BITWISE_INTEGRITY",
+  "environment_audit": {
+    "verified_cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "verified_architecture": "x86_64",
+    "verified_kernel_release": "6.18.59-1-lts",
+    "verified_host_platform": "Linux-6.18.59-1-lts-x86_64-with-glibc2.44",
+    "verified_docker_version": "29.9.2",
+    "verified_postgres_digest": "postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+    "verified_postgres_version": "PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+    "verified_cgroup_cpu_max": "100000 100000 (1.0 vCPU)",
+    "verified_cgroup_memory_max": "1073741824 (1024 MB)",
+    "discrepancy_investigation": {
+      "reported_suffix": "rpt-rpi-2712",
+      "origin": "Raspberry Pi 5 OS kernel package suffix from earlier mock / evaluation report templates.",
+      "status": "DOCUMENTATION_ERRATUM",
+      "explanation": "The kernel suffix 'rpt-rpi-2712' was inadvertently carried over into markdown report headers. The raw environment metadata file (environment_metadata.json) and host system correctly record 'Linux-6.18.59-1-lts-x86_64-with-glibc2.44' running on an Intel Core i5-12450H (x86_64) machine."
+    }
+  },
+  "storage_and_wal_audit": {
+    "metrics_collected": [
+      "pgbench client throughput (TPS)",
+      "pgbench transaction latencies (microsecond resolution)",
+      "container active CPU utilization (%)",
+      "host active CPU utilization (%)",
+      "cgroup v2 CPU usage (usage_usec)",
+      "cgroup v2 throttling counters (nr_throttled, throttled_usec, nr_periods)",
+      "container memory usage (memory.current, memory.max)"
+    ],
+    "metrics_not_collected": [
+      "cgroup v2 storage I/O statistics (io.stat: rbytes, wbytes, riops, wiops)",
+      "host disk I/O metrics (iostat, /proc/diskstats, writeback duration)",
+      "PostgreSQL WAL statistics (pg_stat_wal: wal_records, wal_fpi, wal_bytes, wal_sync_time)",
+      "PostgreSQL checkpoint statistics (pg_stat_bgwriter: checkpoints_timed, checkpoints_req, checkpoint_write_time, checkpoint_sync_time)",
+      "PostgreSQL internal lock waits (pg_stat_activity: wait_event, wait_event_type)"
+    ],
+    "unsupported_historical_claims": [
+      {
+        "claim": "Single-threaded write performance is completely bounded by synchronous WAL writes (fsync) and disk persistence.",
+        "status": "UNSUPPORTED_CAUSAL_CLAIM",
+        "reason": "Neither fsync duration nor disk I/O latency was measured; assertion relies on external domain assumptions."
+      },
+      {
+        "claim": "Monitoring logs confirm this coincided with a PostgreSQL background checkpoint flush dirtying shared buffers, causing temporary fsync stall.",
+        "status": "UNSUPPORTED_CAUSAL_CLAIM",
+        "reason": "Monitoring logs do not capture checkpoint events or buffer dirtying; no pg_stat_bgwriter records exist."
+      }
+    ]
+  },
+  "trial_isolation_audit": {
+    "database_initialization_method": "Single container startup; pgbench -i -s 2 executed ONCE at container initialization.",
+    "inter_trial_reset": "NONE. Database was neither dropped, truncated, nor re-initialized between trials.",
+    "table_growth": {
+      "initial_history_rows": 0,
+      "history_rows_after_read_only": 0,
+      "history_rows_after_balanced_oltp": 451675,
+      "final_history_rows_after_simple_write": 1387048,
+      "accumulated_history_size_mb": "~69 MB"
+    },
+    "table_bloat_and_mvcc_churn": "During balanced_oltp_tpcb, pgbench_branches (2 rows) and pgbench_tellers (20 rows) underwent 1.35 million updates without intermediate VACUUM FULL. Dead tuple accumulation and vacuum contention occurred unpredictably.",
+    "recommendation_for_future_phases": "Harden trial isolation by either restarting fresh containers per profile or executing 'TRUNCATE pgbench_history; CHECKPOINT; VACUUM ANALYZE;' between trials to ensure identical starting conditions."
+  },
+  "anomaly_investigation": {
+    "reported_trial_in_prompt": "sf2_balanced_oltp_tpcb_c4_r0",
+    "actual_trial_in_manifest": "sf2_balanced_oltp_tpcb_c4_r1",
+    "provenance_correction": "Anomaly occurred in Replication 1 (r1), NOT Replication 0 (r0).",
+    "max_latency_ms": 3152.95,
+    "max_latency_client": 2,
+    "max_latency_tx_num": 700,
+    "simultaneously_stalled_clients_count": 4,
+    "simultaneously_stalled_transactions": [
+      {
+        "client_id": 0,
+        "tx_number": 664,
+        "latency_ms": 3151.283,
+        "epoch_sec": 1793597019,
+        "epoch_usec": 569976,
+        "timestamp_iso_utc": "2026-11-02T05:23:39.569976+00:00"
+      },
+      {
+        "client_id": 1,
+        "tx_number": 672,
+        "latency_ms": 3151.182,
+        "epoch_sec": 1793597019,
+        "epoch_usec": 566480,
+        "timestamp_iso_utc": "2026-11-02T05:23:39.566480+00:00"
+      },
+      {
+        "client_id": 2,
+        "tx_number": 700,
+        "latency_ms": 3152.95,
+        "epoch_sec": 1793597019,
+        "epoch_usec": 570285,
+        "timestamp_iso_utc": "2026-11-02T05:23:39.570285+00:00"
+      },
+      {
+        "client_id": 3,
+        "tx_number": 655,
+        "latency_ms": 3146.405,
+        "epoch_sec": 1793597019,
+        "epoch_usec": 562360,
+        "timestamp_iso_utc": "2026-11-02T05:23:39.562360+00:00"
+      }
+    ],
+    "stall_duration_sec": 3.15,
+    "retained_postgresql_logs_available": false,
+    "retained_checkpoint_stats_available": false,
+    "retained_storage_io_metrics_available": false,
+    "classification": "UNVERIFIED",
+    "audit_verdict": "Direct causal evidence is absent. While a background checkpoint flush or host scheduling delay is plausible, the cause cannot be definitively verified without engine logs or I/O statistics."
+  },
+  "pooled_configurations": [
+    {
+      "config_key": "sf2_read_only_select_c1",
+      "workload_profile": "read_only_select",
+      "concurrency": 1,
+      "replications": 3,
+      "total_transactions": 3552388,
+      "achieved_tps": 39473.4,
+      "latency": {
+        "min_ms": 0.018,
+        "mean_ms": 0.0248,
+        "p50_ms": 0.021,
+        "p90_ms": 0.026,
+        "p95_ms": 0.056,
+        "p99_ms": 0.086,
+        "p999_ms": 0.192,
+        "max_ms": 20.303,
+        "std_ms": 0.0309,
+        "iqr_ms": 0.003
+      },
+      "spikes": {
+        "ge_10ms_count": 4,
+        "ge_10ms_pct": 0.0,
+        "ge_50ms_count": 0,
+        "ge_100ms_count": 0
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_read_only_select_c4",
+      "workload_profile": "read_only_select",
+      "concurrency": 4,
+      "replications": 3,
+      "total_transactions": 2421349,
+      "achieved_tps": 26874.4,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.1478,
+        "p50_ms": 0.029,
+        "p90_ms": 0.062,
+        "p95_ms": 0.07,
+        "p99_ms": 0.117,
+        "p999_ms": 74.296,
+        "max_ms": 79.035,
+        "std_ms": 2.8705,
+        "iqr_ms": 0.014
+      },
+      "spikes": {
+        "ge_10ms_count": 3608,
+        "ge_10ms_pct": 0.149,
+        "ge_50ms_count": 3600,
+        "ge_100ms_count": 0
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_read_only_select_c8",
+      "workload_profile": "read_only_select",
+      "concurrency": 8,
+      "replications": 3,
+      "total_transactions": 1946541,
+      "achieved_tps": 21607.7,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.3682,
+        "p50_ms": 0.04,
+        "p90_ms": 0.078,
+        "p95_ms": 0.091,
+        "p99_ms": 0.16,
+        "p999_ms": 86.685,
+        "max_ms": 88.643,
+        "std_ms": 5.2381,
+        "iqr_ms": 0.029
+      },
+      "spikes": {
+        "ge_10ms_count": 7208,
+        "ge_10ms_pct": 0.37,
+        "ge_50ms_count": 7192,
+        "ge_100ms_count": 0
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_read_only_select_c16",
+      "workload_profile": "read_only_select",
+      "concurrency": 16,
+      "replications": 3,
+      "total_transactions": 1772545,
+      "achieved_tps": 19671.1,
+      "latency": {
+        "min_ms": 0.019,
+        "mean_ms": 0.8031,
+        "p50_ms": 0.062,
+        "p90_ms": 0.143,
+        "p95_ms": 0.184,
+        "p99_ms": 0.385,
+        "p999_ms": 90.882,
+        "max_ms": 93.705,
+        "std_ms": 8.0337,
+        "iqr_ms": 0.051
+      },
+      "spikes": {
+        "ge_10ms_count": 14358,
+        "ge_10ms_pct": 0.81,
+        "ge_50ms_count": 14327,
+        "ge_100ms_count": 0
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_balanced_oltp_tpcb_c1",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 1,
+      "replications": 3,
+      "total_transactions": 101522,
+      "achieved_tps": 1128.1,
+      "latency": {
+        "min_ms": 0.504,
+        "mean_ms": 0.8819,
+        "p50_ms": 0.72,
+        "p90_ms": 1.122,
+        "p95_ms": 1.313,
+        "p99_ms": 3.759,
+        "p999_ms": 12.3631,
+        "max_ms": 130.975,
+        "std_ms": 1.0854,
+        "iqr_ms": 0.273
+      },
+      "spikes": {
+        "ge_10ms_count": 158,
+        "ge_10ms_pct": 0.156,
+        "ge_50ms_count": 6,
+        "ge_100ms_count": 2
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_balanced_oltp_tpcb_c4",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 4,
+      "replications": 3,
+      "total_transactions": 122521,
+      "achieved_tps": 1361.4,
+      "latency": {
+        "min_ms": 0.616,
+        "mean_ms": 2.9329,
+        "p50_ms": 2.236,
+        "p90_ms": 3.992,
+        "p95_ms": 5.513,
+        "p99_ms": 13.5776,
+        "p999_ms": 35.5816,
+        "max_ms": 3152.95,
+        "std_ms": 24.7837,
+        "iqr_ms": 1.296
+      },
+      "spikes": {
+        "ge_10ms_count": 2298,
+        "ge_10ms_pct": 1.876,
+        "ge_50ms_count": 49,
+        "ge_100ms_count": 8
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_balanced_oltp_tpcb_c8",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 8,
+      "replications": 3,
+      "total_transactions": 118415,
+      "achieved_tps": 1315.6,
+      "latency": {
+        "min_ms": 0.669,
+        "mean_ms": 6.075,
+        "p50_ms": 4.006,
+        "p90_ms": 11.974,
+        "p95_ms": 18.032,
+        "p99_ms": 31.4972,
+        "p999_ms": 71.3936,
+        "max_ms": 630.502,
+        "std_ms": 8.8059,
+        "iqr_ms": 4.145
+      },
+      "spikes": {
+        "ge_10ms_count": 15821,
+        "ge_10ms_pct": 13.361,
+        "ge_50ms_count": 301,
+        "ge_100ms_count": 50
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_balanced_oltp_tpcb_c16",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 16,
+      "replications": 3,
+      "total_transactions": 109217,
+      "achieved_tps": 1213.0,
+      "latency": {
+        "min_ms": 0.664,
+        "mean_ms": 13.1813,
+        "p50_ms": 7.485,
+        "p90_ms": 33.491,
+        "p95_ms": 44.122,
+        "p99_ms": 67.749,
+        "p999_ms": 108.8072,
+        "max_ms": 662.261,
+        "std_ms": 16.3713,
+        "iqr_ms": 12.089
+      },
+      "spikes": {
+        "ge_10ms_count": 43154,
+        "ge_10ms_pct": 39.512,
+        "ge_50ms_count": 3633,
+        "ge_100ms_count": 165
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_simple_write_ingest_c1",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 1,
+      "replications": 3,
+      "total_transactions": 104108,
+      "achieved_tps": 1156.8,
+      "latency": {
+        "min_ms": 0.481,
+        "mean_ms": 0.8593,
+        "p50_ms": 0.741,
+        "p90_ms": 1.05,
+        "p95_ms": 1.184,
+        "p99_ms": 2.9269,
+        "p999_ms": 17.7757,
+        "max_ms": 131.684,
+        "std_ms": 1.0913,
+        "iqr_ms": 0.248
+      },
+      "spikes": {
+        "ge_10ms_count": 168,
+        "ge_10ms_pct": 0.161,
+        "ge_50ms_count": 2,
+        "ge_100ms_count": 1
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_simple_write_ingest_c4",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 4,
+      "replications": 3,
+      "total_transactions": 256068,
+      "achieved_tps": 2845.3,
+      "latency": {
+        "min_ms": 0.536,
+        "mean_ms": 1.4016,
+        "p50_ms": 1.081,
+        "p90_ms": 1.289,
+        "p95_ms": 1.614,
+        "p99_ms": 10.4493,
+        "p999_ms": 32.1681,
+        "max_ms": 141.693,
+        "std_ms": 2.4472,
+        "iqr_ms": 0.162
+      },
+      "spikes": {
+        "ge_10ms_count": 2700,
+        "ge_10ms_pct": 1.054,
+        "ge_50ms_count": 63,
+        "ge_100ms_count": 11
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_simple_write_ingest_c8",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 8,
+      "replications": 3,
+      "total_transactions": 275733,
+      "achieved_tps": 3063.8,
+      "latency": {
+        "min_ms": 0.542,
+        "mean_ms": 2.606,
+        "p50_ms": 1.155,
+        "p90_ms": 1.456,
+        "p95_ms": 3.9324,
+        "p99_ms": 55.214,
+        "p999_ms": 60.1039,
+        "max_ms": 196.826,
+        "std_ms": 8.2487,
+        "iqr_ms": 0.179
+      },
+      "spikes": {
+        "ge_10ms_count": 7452,
+        "ge_10ms_pct": 2.703,
+        "ge_50ms_count": 5310,
+        "ge_100ms_count": 59
+      },
+      "manifest_reconciled": true
+    },
+    {
+      "config_key": "sf2_simple_write_ingest_c16",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 16,
+      "replications": 3,
+      "total_transactions": 299464,
+      "achieved_tps": 3325.0,
+      "latency": {
+        "min_ms": 0.549,
+        "mean_ms": 4.7972,
+        "p50_ms": 1.283,
+        "p90_ms": 2.247,
+        "p95_ms": 13.2595,
+        "p99_ms": 75.171,
+        "p999_ms": 78.0935,
+        "max_ms": 265.879,
+        "std_ms": 14.993,
+        "iqr_ms": 0.233
+      },
+      "spikes": {
+        "ge_10ms_count": 15643,
+        "ge_10ms_pct": 5.224,
+        "ge_50ms_count": 13188,
+        "ge_100ms_count": 41
+      },
+      "manifest_reconciled": true
+    }
+  ],
+  "individual_trials": [
+    {
+      "trial_key": "sf2_read_only_select_c1_r0",
+      "workload_profile": "read_only_select",
+      "concurrency": 1,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_read_only_select_c1_r0_8bf09f8a",
+      "transaction_count": 1160186,
+      "stdout_transaction_count": 1160186,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 38674.79,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.018,
+        "mean_ms": 0.0253,
+        "p50_ms": 0.022,
+        "p90_ms": 0.026,
+        "p95_ms": 0.058,
+        "p99_ms": 0.086,
+        "p999_ms": 0.191,
+        "max_ms": 16.333,
+        "std_ms": 0.0345,
+        "iqr_ms": 0.002
+      },
+      "spikes": {
+        "ge_10ms_count": 2,
+        "ge_10ms_pct": 0.0,
+        "ge_50ms_count": 0,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 99.86,
+        "pct_matching_100ms_cfs_period": 100.0
+      },
+      "resources": {
+        "container_cpu_pct": 97.49,
+        "host_cpu_pct": 12.18,
+        "peak_memory_mb": 228.57,
+        "cgroup_nr_throttled": 140,
+        "cgroup_throttled_sec": 0.280454,
+        "throttling_rate_per_sec": 4.66
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c1_r1",
+      "workload_profile": "read_only_select",
+      "concurrency": 1,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_read_only_select_c1_r1_12a34ab2",
+      "transaction_count": 1143879,
+      "stdout_transaction_count": 1143879,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 38131.91,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.018,
+        "mean_ms": 0.0256,
+        "p50_ms": 0.021,
+        "p90_ms": 0.027,
+        "p95_ms": 0.059,
+        "p99_ms": 0.099,
+        "p999_ms": 0.209,
+        "max_ms": 20.303,
+        "std_ms": 0.0361,
+        "iqr_ms": 0.003
+      },
+      "spikes": {
+        "ge_10ms_count": 2,
+        "ge_10ms_pct": 0.0,
+        "ge_50ms_count": 0,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 99.93,
+        "pct_matching_100ms_cfs_period": 100.0
+      },
+      "resources": {
+        "container_cpu_pct": 96.95,
+        "host_cpu_pct": 14.05,
+        "peak_memory_mb": 230.2,
+        "cgroup_nr_throttled": 122,
+        "cgroup_throttled_sec": 0.207083,
+        "throttling_rate_per_sec": 4.06
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c1_r2",
+      "workload_profile": "read_only_select",
+      "concurrency": 1,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_read_only_select_c1_r2_9fdf03b7",
+      "transaction_count": 1248323,
+      "stdout_transaction_count": 1248323,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 41613.44,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.018,
+        "mean_ms": 0.0235,
+        "p50_ms": 0.021,
+        "p90_ms": 0.025,
+        "p95_ms": 0.029,
+        "p99_ms": 0.07,
+        "p999_ms": 0.175,
+        "max_ms": 3.52,
+        "std_ms": 0.0204,
+        "iqr_ms": 0.002
+      },
+      "spikes": {
+        "ge_10ms_count": 0,
+        "ge_10ms_pct": 0.0,
+        "ge_50ms_count": 0,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.0,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 97.78,
+        "host_cpu_pct": 10.09,
+        "peak_memory_mb": 233.66,
+        "cgroup_nr_throttled": 149,
+        "cgroup_throttled_sec": 0.175296,
+        "throttling_rate_per_sec": 4.96
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c4_r0",
+      "workload_profile": "read_only_select",
+      "concurrency": 4,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_read_only_select_c4_r0_4f46a2f5",
+      "transaction_count": 820608,
+      "stdout_transaction_count": 820608,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 27306.87,
+      "duration_sec": 30.05,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.1455,
+        "p50_ms": 0.029,
+        "p90_ms": 0.062,
+        "p95_ms": 0.069,
+        "p99_ms": 0.117,
+        "p999_ms": 74.3362,
+        "max_ms": 78.19,
+        "std_ms": 2.85,
+        "iqr_ms": 0.013
+      },
+      "spikes": {
+        "ge_10ms_count": 1204,
+        "ge_10ms_pct": 0.147,
+        "ge_50ms_count": 1200,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 100.01,
+        "pct_matching_100ms_cfs_period": 99.75
+      },
+      "resources": {
+        "container_cpu_pct": 98.52,
+        "host_cpu_pct": 11.86,
+        "peak_memory_mb": 224.89,
+        "cgroup_nr_throttled": 301,
+        "cgroup_throttled_sec": 87.143858,
+        "throttling_rate_per_sec": 9.99
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c4_r1",
+      "workload_profile": "read_only_select",
+      "concurrency": 4,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_read_only_select_c4_r1_1899e6c8",
+      "transaction_count": 813840,
+      "stdout_transaction_count": 813840,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 27084.63,
+      "duration_sec": 30.05,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.1467,
+        "p50_ms": 0.029,
+        "p90_ms": 0.062,
+        "p95_ms": 0.07,
+        "p99_ms": 0.118,
+        "p999_ms": 74.2872,
+        "max_ms": 77.704,
+        "std_ms": 2.8586,
+        "iqr_ms": 0.014
+      },
+      "spikes": {
+        "ge_10ms_count": 1204,
+        "ge_10ms_pct": 0.148,
+        "ge_50ms_count": 1200,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 100.0,
+        "pct_matching_100ms_cfs_period": 99.75
+      },
+      "resources": {
+        "container_cpu_pct": 98.59,
+        "host_cpu_pct": 14.1,
+        "peak_memory_mb": 224.63,
+        "cgroup_nr_throttled": 301,
+        "cgroup_throttled_sec": 86.232115,
+        "throttling_rate_per_sec": 9.99
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c4_r2",
+      "workload_profile": "read_only_select",
+      "concurrency": 4,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_read_only_select_c4_r2_71ed1774",
+      "transaction_count": 786901,
+      "stdout_transaction_count": 786901,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 26231.58,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.1514,
+        "p50_ms": 0.03,
+        "p90_ms": 0.063,
+        "p95_ms": 0.071,
+        "p99_ms": 0.117,
+        "p999_ms": 74.279,
+        "max_ms": 79.035,
+        "std_ms": 2.9038,
+        "iqr_ms": 0.015
+      },
+      "spikes": {
+        "ge_10ms_count": 1200,
+        "ge_10ms_pct": 0.152,
+        "ge_50ms_count": 1200,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 100.0,
+        "pct_matching_100ms_cfs_period": 99.75
+      },
+      "resources": {
+        "container_cpu_pct": 98.36,
+        "host_cpu_pct": 13.6,
+        "peak_memory_mb": 223.72,
+        "cgroup_nr_throttled": 300,
+        "cgroup_throttled_sec": 86.570589,
+        "throttling_rate_per_sec": 9.98
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c8_r0",
+      "workload_profile": "read_only_select",
+      "concurrency": 8,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_read_only_select_c8_r0_5de649c4",
+      "transaction_count": 652942,
+      "stdout_transaction_count": 652942,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 21748.01,
+      "duration_sec": 30.02,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.3655,
+        "p50_ms": 0.04,
+        "p90_ms": 0.077,
+        "p95_ms": 0.09,
+        "p99_ms": 0.16,
+        "p999_ms": 86.697,
+        "max_ms": 87.697,
+        "std_ms": 5.2196,
+        "iqr_ms": 0.028
+      },
+      "spikes": {
+        "ge_10ms_count": 2403,
+        "ge_10ms_pct": 0.368,
+        "ge_50ms_count": 2395,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.69,
+        "pct_matching_100ms_cfs_period": 49.96
+      },
+      "resources": {
+        "container_cpu_pct": 98.62,
+        "host_cpu_pct": 11.94,
+        "peak_memory_mb": 226.06,
+        "cgroup_nr_throttled": 301,
+        "cgroup_throttled_sec": 159.519651,
+        "throttling_rate_per_sec": 10.0
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c8_r1",
+      "workload_profile": "read_only_select",
+      "concurrency": 8,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_read_only_select_c8_r1_6ff9b6be",
+      "transaction_count": 645290,
+      "stdout_transaction_count": 645290,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 21503.88,
+      "duration_sec": 30.01,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.37,
+        "p50_ms": 0.04,
+        "p90_ms": 0.078,
+        "p95_ms": 0.091,
+        "p99_ms": 0.161,
+        "p999_ms": 86.629,
+        "max_ms": 88.054,
+        "std_ms": 5.249,
+        "iqr_ms": 0.029
+      },
+      "spikes": {
+        "ge_10ms_count": 2398,
+        "ge_10ms_pct": 0.372,
+        "ge_50ms_count": 2398,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.58,
+        "pct_matching_100ms_cfs_period": 49.9
+      },
+      "resources": {
+        "container_cpu_pct": 98.57,
+        "host_cpu_pct": 12.58,
+        "peak_memory_mb": 225.6,
+        "cgroup_nr_throttled": 300,
+        "cgroup_throttled_sec": 161.613164,
+        "throttling_rate_per_sec": 9.98
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c8_r2",
+      "workload_profile": "read_only_select",
+      "concurrency": 8,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_read_only_select_c8_r2_5ed660cf",
+      "transaction_count": 648309,
+      "stdout_transaction_count": 648309,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 21571.23,
+      "duration_sec": 30.05,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.369,
+        "p50_ms": 0.04,
+        "p90_ms": 0.079,
+        "p95_ms": 0.092,
+        "p99_ms": 0.159,
+        "p999_ms": 86.728,
+        "max_ms": 88.643,
+        "std_ms": 5.2457,
+        "iqr_ms": 0.029
+      },
+      "spikes": {
+        "ge_10ms_count": 2407,
+        "ge_10ms_pct": 0.371,
+        "ge_50ms_count": 2399,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.94,
+        "pct_matching_100ms_cfs_period": 49.88
+      },
+      "resources": {
+        "container_cpu_pct": 98.6,
+        "host_cpu_pct": 13.46,
+        "peak_memory_mb": 225.87,
+        "cgroup_nr_throttled": 301,
+        "cgroup_throttled_sec": 147.155441,
+        "throttling_rate_per_sec": 9.99
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c16_r0",
+      "workload_profile": "read_only_select",
+      "concurrency": 16,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_read_only_select_c16_r0_8488a2f8",
+      "transaction_count": 580173,
+      "stdout_transaction_count": 580173,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 19324.72,
+      "duration_sec": 30.02,
+      "latency": {
+        "min_ms": 0.019,
+        "mean_ms": 0.8187,
+        "p50_ms": 0.064,
+        "p90_ms": 0.15,
+        "p95_ms": 0.192,
+        "p99_ms": 0.468,
+        "p999_ms": 90.8398,
+        "max_ms": 93.705,
+        "std_ms": 8.0818,
+        "iqr_ms": 0.054
+      },
+      "spikes": {
+        "ge_10ms_count": 4793,
+        "ge_10ms_pct": 0.826,
+        "ge_50ms_count": 4778,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.03,
+        "pct_matching_100ms_cfs_period": 25.04
+      },
+      "resources": {
+        "container_cpu_pct": 98.24,
+        "host_cpu_pct": 15.04,
+        "peak_memory_mb": 237.81,
+        "cgroup_nr_throttled": 301,
+        "cgroup_throttled_sec": 110.121894,
+        "throttling_rate_per_sec": 10.0
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c16_r1",
+      "workload_profile": "read_only_select",
+      "concurrency": 16,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_read_only_select_c16_r1_05e0ebf5",
+      "transaction_count": 594990,
+      "stdout_transaction_count": 594990,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 19820.93,
+      "duration_sec": 30.02,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.7964,
+        "p50_ms": 0.061,
+        "p90_ms": 0.14,
+        "p95_ms": 0.18,
+        "p99_ms": 0.357,
+        "p999_ms": 90.916,
+        "max_ms": 92.095,
+        "std_ms": 8.0151,
+        "iqr_ms": 0.049
+      },
+      "spikes": {
+        "ge_10ms_count": 4783,
+        "ge_10ms_pct": 0.804,
+        "ge_50ms_count": 4767,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.03,
+        "pct_matching_100ms_cfs_period": 25.09
+      },
+      "resources": {
+        "container_cpu_pct": 98.26,
+        "host_cpu_pct": 11.34,
+        "peak_memory_mb": 240.35,
+        "cgroup_nr_throttled": 301,
+        "cgroup_throttled_sec": 106.939529,
+        "throttling_rate_per_sec": 10.0
+      }
+    },
+    {
+      "trial_key": "sf2_read_only_select_c16_r2",
+      "workload_profile": "read_only_select",
+      "concurrency": 16,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_read_only_select_c16_r2_7a29cd06",
+      "transaction_count": 597382,
+      "stdout_transaction_count": 597382,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 19867.56,
+      "duration_sec": 30.06,
+      "latency": {
+        "min_ms": 0.02,
+        "mean_ms": 0.7945,
+        "p50_ms": 0.061,
+        "p90_ms": 0.139,
+        "p95_ms": 0.179,
+        "p99_ms": 0.348,
+        "p999_ms": 90.882,
+        "max_ms": 92.64,
+        "std_ms": 8.0051,
+        "iqr_ms": 0.049
+      },
+      "spikes": {
+        "ge_10ms_count": 4782,
+        "ge_10ms_pct": 0.8,
+        "ge_50ms_count": 4782,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.03,
+        "pct_matching_100ms_cfs_period": 25.1
+      },
+      "resources": {
+        "container_cpu_pct": 98.22,
+        "host_cpu_pct": 11.09,
+        "peak_memory_mb": 243.4,
+        "cgroup_nr_throttled": 301,
+        "cgroup_throttled_sec": 109.163883,
+        "throttling_rate_per_sec": 9.99
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c1_r0",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 1,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c1_r0_b6345007",
+      "transaction_count": 35356,
+      "stdout_transaction_count": 35356,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1178.59,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.504,
+        "mean_ms": 0.844,
+        "p50_ms": 0.699,
+        "p90_ms": 1.07,
+        "p95_ms": 1.226,
+        "p99_ms": 2.1864,
+        "p999_ms": 12.65,
+        "max_ms": 130.975,
+        "std_ms": 1.2129,
+        "iqr_ms": 0.237
+      },
+      "spikes": {
+        "ge_10ms_count": 100,
+        "ge_10ms_pct": 0.283,
+        "ge_50ms_count": 2,
+        "ge_100ms_count": 2,
+        "median_inter_spike_interval_ms": 28.58,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 39.49,
+        "host_cpu_pct": 5.93,
+        "peak_memory_mb": 258.48,
+        "cgroup_nr_throttled": 0,
+        "cgroup_throttled_sec": 0.0,
+        "throttling_rate_per_sec": 0.0
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c1_r1",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 1,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c1_r1_e6b50595",
+      "transaction_count": 32631,
+      "stdout_transaction_count": 32631,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1087.73,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.526,
+        "mean_ms": 0.9148,
+        "p50_ms": 0.742,
+        "p90_ms": 1.157,
+        "p95_ms": 1.388,
+        "p99_ms": 4.1571,
+        "p999_ms": 10.3521,
+        "max_ms": 79.872,
+        "std_ms": 1.0172,
+        "iqr_ms": 0.295
+      },
+      "spikes": {
+        "ge_10ms_count": 34,
+        "ge_10ms_pct": 0.104,
+        "ge_50ms_count": 2,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 552.3,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 39.17,
+        "host_cpu_pct": 5.78,
+        "peak_memory_mb": 277.27,
+        "cgroup_nr_throttled": 0,
+        "cgroup_throttled_sec": 0.0,
+        "throttling_rate_per_sec": 0.0
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c1_r2",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 1,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c1_r2_118a335e",
+      "transaction_count": 33535,
+      "stdout_transaction_count": 33535,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1117.86,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.515,
+        "mean_ms": 0.8899,
+        "p50_ms": 0.722,
+        "p90_ms": 1.1386,
+        "p95_ms": 1.345,
+        "p99_ms": 4.083,
+        "p999_ms": 7.6633,
+        "max_ms": 73.583,
+        "std_ms": 1.0031,
+        "iqr_ms": 0.279
+      },
+      "spikes": {
+        "ge_10ms_count": 24,
+        "ge_10ms_pct": 0.072,
+        "ge_50ms_count": 2,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 1143.52,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 38.95,
+        "host_cpu_pct": 7.31,
+        "peak_memory_mb": 279.52,
+        "cgroup_nr_throttled": 0,
+        "cgroup_throttled_sec": 0.0,
+        "throttling_rate_per_sec": 0.0
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c4_r0",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 4,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c4_r0_c1401630",
+      "transaction_count": 44197,
+      "stdout_transaction_count": 44197,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1473.24,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.616,
+        "mean_ms": 2.7098,
+        "p50_ms": 2.22,
+        "p90_ms": 3.9194,
+        "p95_ms": 5.3364,
+        "p99_ms": 13.6437,
+        "p999_ms": 35.6525,
+        "max_ms": 90.508,
+        "std_ms": 2.9367,
+        "iqr_ms": 1.277
+      },
+      "spikes": {
+        "ge_10ms_count": 811,
+        "ge_10ms_pct": 1.835,
+        "ge_50ms_count": 20,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 34.6,
+        "pct_matching_100ms_cfs_period": 1.11
+      },
+      "resources": {
+        "container_cpu_pct": 78.24,
+        "host_cpu_pct": 12.18,
+        "peak_memory_mb": 303.08,
+        "cgroup_nr_throttled": 8,
+        "cgroup_throttled_sec": 0.093695,
+        "throttling_rate_per_sec": 0.27
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c4_r1",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 4,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c4_r1_2785388b",
+      "transaction_count": 33599,
+      "stdout_transaction_count": 33599,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1119.96,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.645,
+        "mean_ms": 3.5658,
+        "p50_ms": 2.298,
+        "p90_ms": 4.208,
+        "p95_ms": 5.997,
+        "p99_ms": 14.389,
+        "p999_ms": 36.9608,
+        "max_ms": 3152.95,
+        "std_ms": 47.0957,
+        "iqr_ms": 1.378
+      },
+      "spikes": {
+        "ge_10ms_count": 719,
+        "ge_10ms_pct": 2.14,
+        "ge_50ms_count": 12,
+        "ge_100ms_count": 8,
+        "median_inter_spike_interval_ms": 45.46,
+        "pct_matching_100ms_cfs_period": 5.85
+      },
+      "resources": {
+        "container_cpu_pct": 78.7,
+        "host_cpu_pct": 14.95,
+        "peak_memory_mb": 303.95,
+        "cgroup_nr_throttled": 46,
+        "cgroup_throttled_sec": 0.888876,
+        "throttling_rate_per_sec": 1.53
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c4_r2",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 4,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c4_r2_40ca6390",
+      "transaction_count": 44725,
+      "stdout_transaction_count": 44725,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1490.86,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.64,
+        "mean_ms": 2.678,
+        "p50_ms": 2.211,
+        "p90_ms": 3.9,
+        "p95_ms": 5.3018,
+        "p99_ms": 12.9823,
+        "p999_ms": 34.0376,
+        "max_ms": 86.021,
+        "std_ms": 2.7327,
+        "iqr_ms": 1.256
+      },
+      "spikes": {
+        "ge_10ms_count": 768,
+        "ge_10ms_pct": 1.717,
+        "ge_50ms_count": 17,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 45.13,
+        "pct_matching_100ms_cfs_period": 1.04
+      },
+      "resources": {
+        "container_cpu_pct": 77.03,
+        "host_cpu_pct": 10.58,
+        "peak_memory_mb": 321.11,
+        "cgroup_nr_throttled": 2,
+        "cgroup_throttled_sec": 0.13327,
+        "throttling_rate_per_sec": 0.07
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c8_r0",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 8,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c8_r0_d8ba3fe1",
+      "transaction_count": 40303,
+      "stdout_transaction_count": 40303,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1343.4,
+      "duration_sec": 29.98,
+      "latency": {
+        "min_ms": 0.688,
+        "mean_ms": 5.9491,
+        "p50_ms": 3.994,
+        "p90_ms": 11.7594,
+        "p95_ms": 17.2716,
+        "p99_ms": 32.3533,
+        "p999_ms": 65.6178,
+        "max_ms": 164.154,
+        "std_ms": 6.4768,
+        "iqr_ms": 4.143
+      },
+      "spikes": {
+        "ge_10ms_count": 5308,
+        "ge_10ms_pct": 13.17,
+        "ge_50ms_count": 86,
+        "ge_100ms_count": 10,
+        "median_inter_spike_interval_ms": 16.59,
+        "pct_matching_100ms_cfs_period": 1.0
+      },
+      "resources": {
+        "container_cpu_pct": 91.07,
+        "host_cpu_pct": 12.67,
+        "peak_memory_mb": 376.69,
+        "cgroup_nr_throttled": 192,
+        "cgroup_throttled_sec": 4.380962,
+        "throttling_rate_per_sec": 6.39
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c8_r1",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 8,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c8_r1_c668dee5",
+      "transaction_count": 39624,
+      "stdout_transaction_count": 39624,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1320.77,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.691,
+        "mean_ms": 6.0513,
+        "p50_ms": 4.045,
+        "p90_ms": 12.267,
+        "p95_ms": 18.7352,
+        "p99_ms": 30.7568,
+        "p999_ms": 57.0923,
+        "max_ms": 78.066,
+        "std_ms": 6.1907,
+        "iqr_ms": 4.1405
+      },
+      "spikes": {
+        "ge_10ms_count": 5403,
+        "ge_10ms_pct": 13.636,
+        "ge_50ms_count": 74,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 16.31,
+        "pct_matching_100ms_cfs_period": 0.94
+      },
+      "resources": {
+        "container_cpu_pct": 92.04,
+        "host_cpu_pct": 11.88,
+        "peak_memory_mb": 393.79,
+        "cgroup_nr_throttled": 220,
+        "cgroup_throttled_sec": 5.858821,
+        "throttling_rate_per_sec": 7.32
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c8_r2",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 8,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c8_r2_f5d7d821",
+      "transaction_count": 38488,
+      "stdout_transaction_count": 38488,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1282.57,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.669,
+        "mean_ms": 6.2314,
+        "p50_ms": 3.979,
+        "p90_ms": 11.9678,
+        "p95_ms": 18.1462,
+        "p99_ms": 31.6586,
+        "p999_ms": 146.5494,
+        "max_ms": 630.502,
+        "std_ms": 12.4561,
+        "iqr_ms": 4.1372
+      },
+      "spikes": {
+        "ge_10ms_count": 5110,
+        "ge_10ms_pct": 13.277,
+        "ge_50ms_count": 141,
+        "ge_100ms_count": 40,
+        "median_inter_spike_interval_ms": 16.58,
+        "pct_matching_100ms_cfs_period": 0.94
+      },
+      "resources": {
+        "container_cpu_pct": 87.78,
+        "host_cpu_pct": 12.46,
+        "peak_memory_mb": 408.98,
+        "cgroup_nr_throttled": 218,
+        "cgroup_throttled_sec": 5.408677,
+        "throttling_rate_per_sec": 7.25
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c16_r0",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 16,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c16_r0_eb0624e3",
+      "transaction_count": 36973,
+      "stdout_transaction_count": 36973,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1230.94,
+      "duration_sec": 30.03,
+      "latency": {
+        "min_ms": 0.743,
+        "mean_ms": 12.9852,
+        "p50_ms": 7.338,
+        "p90_ms": 33.1386,
+        "p95_ms": 43.7936,
+        "p99_ms": 68.1436,
+        "p999_ms": 111.8934,
+        "max_ms": 163.061,
+        "std_ms": 14.7984,
+        "iqr_ms": 12.036
+      },
+      "spikes": {
+        "ge_10ms_count": 14396,
+        "ge_10ms_pct": 38.937,
+        "ge_50ms_count": 1214,
+        "ge_100ms_count": 76,
+        "median_inter_spike_interval_ms": 5.64,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 94.63,
+        "host_cpu_pct": 12.17,
+        "peak_memory_mb": 444.73,
+        "cgroup_nr_throttled": 238,
+        "cgroup_throttled_sec": 11.45879,
+        "throttling_rate_per_sec": 7.91
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c16_r1",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 16,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c16_r1_a9858b69",
+      "transaction_count": 36866,
+      "stdout_transaction_count": 36866,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1228.74,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.664,
+        "mean_ms": 13.0136,
+        "p50_ms": 7.486,
+        "p90_ms": 33.237,
+        "p95_ms": 43.6097,
+        "p99_ms": 66.8175,
+        "p999_ms": 102.7557,
+        "max_ms": 155.085,
+        "std_ms": 14.4183,
+        "iqr_ms": 11.9417
+      },
+      "spikes": {
+        "ge_10ms_count": 14562,
+        "ge_10ms_pct": 39.5,
+        "ge_50ms_count": 1152,
+        "ge_100ms_count": 41,
+        "median_inter_spike_interval_ms": 5.55,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 95.48,
+        "host_cpu_pct": 13.27,
+        "peak_memory_mb": 455.55,
+        "cgroup_nr_throttled": 242,
+        "cgroup_throttled_sec": 12.114562,
+        "throttling_rate_per_sec": 8.05
+      }
+    },
+    {
+      "trial_key": "sf2_balanced_oltp_tpcb_c16_r2",
+      "workload_profile": "balanced_oltp_tpcb",
+      "concurrency": 16,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_balanced_oltp_tpcb_c16_r2_fe0cdbe9",
+      "transaction_count": 35378,
+      "stdout_transaction_count": 35378,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1179.18,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.702,
+        "mean_ms": 13.5609,
+        "p50_ms": 7.6415,
+        "p90_ms": 34.2,
+        "p95_ms": 45.2093,
+        "p99_ms": 68.1465,
+        "p999_ms": 108.2559,
+        "max_ms": 662.261,
+        "std_ms": 19.5373,
+        "iqr_ms": 12.2995
+      },
+      "spikes": {
+        "ge_10ms_count": 14196,
+        "ge_10ms_pct": 40.127,
+        "ge_50ms_count": 1267,
+        "ge_100ms_count": 48,
+        "median_inter_spike_interval_ms": 5.42,
+        "pct_matching_100ms_cfs_period": 0.01
+      },
+      "resources": {
+        "container_cpu_pct": 94.28,
+        "host_cpu_pct": 13.73,
+        "peak_memory_mb": 478.61,
+        "cgroup_nr_throttled": 241,
+        "cgroup_throttled_sec": 12.87101,
+        "throttling_rate_per_sec": 8.01
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c1_r0",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 1,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c1_r0_d9ca3a36",
+      "transaction_count": 34364,
+      "stdout_transaction_count": 34364,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1145.53,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.5,
+        "mean_ms": 0.8677,
+        "p50_ms": 0.746,
+        "p90_ms": 1.057,
+        "p95_ms": 1.188,
+        "p99_ms": 2.3577,
+        "p999_ms": 24.3313,
+        "max_ms": 38.425,
+        "std_ms": 1.16,
+        "iqr_ms": 0.253
+      },
+      "spikes": {
+        "ge_10ms_count": 73,
+        "ge_10ms_pct": 0.212,
+        "ge_50ms_count": 0,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 494.46,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 37.06,
+        "host_cpu_pct": 6.93,
+        "peak_memory_mb": 464.65,
+        "cgroup_nr_throttled": 0,
+        "cgroup_throttled_sec": 0.0,
+        "throttling_rate_per_sec": 0.0
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c1_r1",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 1,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c1_r1_958b1326",
+      "transaction_count": 34631,
+      "stdout_transaction_count": 34631,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1154.44,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.492,
+        "mean_ms": 0.8611,
+        "p50_ms": 0.746,
+        "p90_ms": 1.068,
+        "p95_ms": 1.2205,
+        "p99_ms": 4.1248,
+        "p999_ms": 8.2719,
+        "max_ms": 32.672,
+        "std_ms": 0.6791,
+        "iqr_ms": 0.253
+      },
+      "spikes": {
+        "ge_10ms_count": 23,
+        "ge_10ms_pct": 0.066,
+        "ge_50ms_count": 0,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 1482.33,
+        "pct_matching_100ms_cfs_period": 4.55
+      },
+      "resources": {
+        "container_cpu_pct": 37.02,
+        "host_cpu_pct": 7.1,
+        "peak_memory_mb": 480.53,
+        "cgroup_nr_throttled": 0,
+        "cgroup_throttled_sec": 0.0,
+        "throttling_rate_per_sec": 0.0
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c1_r2",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 1,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c1_r2_4c25fed1",
+      "transaction_count": 35113,
+      "stdout_transaction_count": 35113,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 1170.52,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.481,
+        "mean_ms": 0.8493,
+        "p50_ms": 0.73,
+        "p90_ms": 1.024,
+        "p95_ms": 1.147,
+        "p99_ms": 2.2594,
+        "p999_ms": 20.8486,
+        "max_ms": 131.684,
+        "std_ms": 1.3264,
+        "iqr_ms": 0.242
+      },
+      "spikes": {
+        "ge_10ms_count": 72,
+        "ge_10ms_pct": 0.205,
+        "ge_50ms_count": 2,
+        "ge_100ms_count": 1,
+        "median_inter_spike_interval_ms": 499.54,
+        "pct_matching_100ms_cfs_period": 0.0
+      },
+      "resources": {
+        "container_cpu_pct": 36.64,
+        "host_cpu_pct": 7.49,
+        "peak_memory_mb": 481.02,
+        "cgroup_nr_throttled": 0,
+        "cgroup_throttled_sec": 0.0,
+        "throttling_rate_per_sec": 0.0
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c4_r0",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 4,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c4_r0_bfe1f5fe",
+      "transaction_count": 87624,
+      "stdout_transaction_count": 87624,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 2920.97,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.543,
+        "mean_ms": 1.3652,
+        "p50_ms": 1.086,
+        "p90_ms": 1.268,
+        "p95_ms": 1.401,
+        "p99_ms": 11.1275,
+        "p999_ms": 33.3202,
+        "max_ms": 56.189,
+        "std_ms": 2.1743,
+        "iqr_ms": 0.154
+      },
+      "spikes": {
+        "ge_10ms_count": 980,
+        "ge_10ms_pct": 1.118,
+        "ge_50ms_count": 4,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 100.96,
+        "pct_matching_100ms_cfs_period": 35.14
+      },
+      "resources": {
+        "container_cpu_pct": 93.41,
+        "host_cpu_pct": 13.06,
+        "peak_memory_mb": 507.3,
+        "cgroup_nr_throttled": 213,
+        "cgroup_throttled_sec": 6.402461,
+        "throttling_rate_per_sec": 7.08
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c4_r1",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 4,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c4_r1_e0580fed",
+      "transaction_count": 81531,
+      "stdout_transaction_count": 81531,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 2717.8,
+      "duration_sec": 29.93,
+      "latency": {
+        "min_ms": 0.536,
+        "mean_ms": 1.4674,
+        "p50_ms": 1.086,
+        "p90_ms": 1.326,
+        "p95_ms": 1.7475,
+        "p99_ms": 12.9764,
+        "p999_ms": 30.1319,
+        "max_ms": 141.693,
+        "std_ms": 2.8764,
+        "iqr_ms": 0.188
+      },
+      "spikes": {
+        "ge_10ms_count": 1120,
+        "ge_10ms_pct": 1.374,
+        "ge_50ms_count": 36,
+        "ge_100ms_count": 7,
+        "median_inter_spike_interval_ms": 100.1,
+        "pct_matching_100ms_cfs_period": 46.47
+      },
+      "resources": {
+        "container_cpu_pct": 91.88,
+        "host_cpu_pct": 16.32,
+        "peak_memory_mb": 500.24,
+        "cgroup_nr_throttled": 217,
+        "cgroup_throttled_sec": 8.595133,
+        "throttling_rate_per_sec": 7.21
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c4_r2",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 4,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c4_r2_deeadeb8",
+      "transaction_count": 86913,
+      "stdout_transaction_count": 86913,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 2897.21,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.555,
+        "mean_ms": 1.3766,
+        "p50_ms": 1.074,
+        "p90_ms": 1.276,
+        "p95_ms": 1.855,
+        "p99_ms": 8.4107,
+        "p999_ms": 29.7095,
+        "max_ms": 129.496,
+        "std_ms": 2.2608,
+        "iqr_ms": 0.147
+      },
+      "spikes": {
+        "ge_10ms_count": 600,
+        "ge_10ms_pct": 0.69,
+        "ge_50ms_count": 23,
+        "ge_100ms_count": 4,
+        "median_inter_spike_interval_ms": 104.89,
+        "pct_matching_100ms_cfs_period": 31.22
+      },
+      "resources": {
+        "container_cpu_pct": 88.93,
+        "host_cpu_pct": 13.01,
+        "peak_memory_mb": 491.12,
+        "cgroup_nr_throttled": 169,
+        "cgroup_throttled_sec": 4.022651,
+        "throttling_rate_per_sec": 5.62
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c8_r0",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 8,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c8_r0_f095f2ba",
+      "transaction_count": 90383,
+      "stdout_transaction_count": 90383,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 3013.04,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.548,
+        "mean_ms": 2.6501,
+        "p50_ms": 1.159,
+        "p90_ms": 1.475,
+        "p95_ms": 4.5169,
+        "p99_ms": 55.8557,
+        "p999_ms": 60.0688,
+        "max_ms": 127.661,
+        "std_ms": 8.2863,
+        "iqr_ms": 0.183
+      },
+      "spikes": {
+        "ge_10ms_count": 2518,
+        "ge_10ms_pct": 2.786,
+        "ge_50ms_count": 1822,
+        "ge_100ms_count": 12,
+        "median_inter_spike_interval_ms": 11.55,
+        "pct_matching_100ms_cfs_period": 38.3
+      },
+      "resources": {
+        "container_cpu_pct": 97.19,
+        "host_cpu_pct": 15.45,
+        "peak_memory_mb": 493.82,
+        "cgroup_nr_throttled": 287,
+        "cgroup_throttled_sec": 43.264159,
+        "throttling_rate_per_sec": 9.54
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c8_r1",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 8,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c8_r1_750ed94e",
+      "transaction_count": 91764,
+      "stdout_transaction_count": 91764,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 3058.58,
+      "duration_sec": 30.0,
+      "latency": {
+        "min_ms": 0.542,
+        "mean_ms": 2.6103,
+        "p50_ms": 1.148,
+        "p90_ms": 1.444,
+        "p95_ms": 3.3725,
+        "p99_ms": 55.2097,
+        "p999_ms": 64.4338,
+        "max_ms": 196.826,
+        "std_ms": 8.4837,
+        "iqr_ms": 0.181
+      },
+      "spikes": {
+        "ge_10ms_count": 2496,
+        "ge_10ms_pct": 2.72,
+        "ge_50ms_count": 1767,
+        "ge_100ms_count": 39,
+        "median_inter_spike_interval_ms": 10.9,
+        "pct_matching_100ms_cfs_period": 40.56
+      },
+      "resources": {
+        "container_cpu_pct": 96.12,
+        "host_cpu_pct": 17.07,
+        "peak_memory_mb": 461.04,
+        "cgroup_nr_throttled": 285,
+        "cgroup_throttled_sec": 39.964839,
+        "throttling_rate_per_sec": 9.48
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c8_r2",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 8,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c8_r2_242f6e80",
+      "transaction_count": 93586,
+      "stdout_transaction_count": 93586,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 3119.93,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.554,
+        "mean_ms": 2.5593,
+        "p50_ms": 1.159,
+        "p90_ms": 1.445,
+        "p95_ms": 3.952,
+        "p99_ms": 54.6339,
+        "p999_ms": 59.2976,
+        "max_ms": 114.99,
+        "std_ms": 7.9738,
+        "iqr_ms": 0.173
+      },
+      "spikes": {
+        "ge_10ms_count": 2438,
+        "ge_10ms_pct": 2.605,
+        "ge_50ms_count": 1721,
+        "ge_100ms_count": 8,
+        "median_inter_spike_interval_ms": 17.69,
+        "pct_matching_100ms_cfs_period": 41.24
+      },
+      "resources": {
+        "container_cpu_pct": 97.55,
+        "host_cpu_pct": 14.49,
+        "peak_memory_mb": 445.68,
+        "cgroup_nr_throttled": 293,
+        "cgroup_throttled_sec": 42.652225,
+        "throttling_rate_per_sec": 9.74
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c16_r0",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 16,
+      "replication": 0,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c16_r0_7379c057",
+      "transaction_count": 99490,
+      "stdout_transaction_count": 99490,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 3316.76,
+      "duration_sec": 29.99,
+      "latency": {
+        "min_ms": 0.564,
+        "mean_ms": 4.8027,
+        "p50_ms": 1.289,
+        "p90_ms": 2.251,
+        "p95_ms": 11.9738,
+        "p99_ms": 75.1161,
+        "p999_ms": 78.3671,
+        "max_ms": 129.004,
+        "std_ms": 14.959,
+        "iqr_ms": 0.225
+      },
+      "spikes": {
+        "ge_10ms_count": 5051,
+        "ge_10ms_pct": 5.077,
+        "ge_50ms_count": 4446,
+        "ge_100ms_count": 25,
+        "median_inter_spike_interval_ms": 0.18,
+        "pct_matching_100ms_cfs_period": 21.76
+      },
+      "resources": {
+        "container_cpu_pct": 97.65,
+        "host_cpu_pct": 12.9,
+        "peak_memory_mb": 494.52,
+        "cgroup_nr_throttled": 297,
+        "cgroup_throttled_sec": 63.030289,
+        "throttling_rate_per_sec": 9.88
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c16_r1",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 16,
+      "replication": 1,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c16_r1_b8126f8e",
+      "transaction_count": 99548,
+      "stdout_transaction_count": 99548,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 3315.83,
+      "duration_sec": 30.02,
+      "latency": {
+        "min_ms": 0.551,
+        "mean_ms": 4.8136,
+        "p50_ms": 1.277,
+        "p90_ms": 2.24,
+        "p95_ms": 13.2201,
+        "p99_ms": 75.3502,
+        "p999_ms": 77.8569,
+        "max_ms": 265.879,
+        "std_ms": 15.193,
+        "iqr_ms": 0.239
+      },
+      "spikes": {
+        "ge_10ms_count": 5293,
+        "ge_10ms_pct": 5.317,
+        "ge_50ms_count": 4363,
+        "ge_100ms_count": 16,
+        "median_inter_spike_interval_ms": 0.16,
+        "pct_matching_100ms_cfs_period": 20.41
+      },
+      "resources": {
+        "container_cpu_pct": 97.5,
+        "host_cpu_pct": 13.23,
+        "peak_memory_mb": 513.46,
+        "cgroup_nr_throttled": 297,
+        "cgroup_throttled_sec": 56.947497,
+        "throttling_rate_per_sec": 9.87
+      }
+    },
+    {
+      "trial_key": "sf2_simple_write_ingest_c16_r2",
+      "workload_profile": "simple_write_ingest",
+      "concurrency": 16,
+      "replication": 2,
+      "experiment_id": "exp_pg_sf2_simple_write_ingest_c16_r2_1acd4368",
+      "transaction_count": 100426,
+      "stdout_transaction_count": 100426,
+      "tx_count_verified": true,
+      "failed_transactions": 0,
+      "achieved_tps": 3342.39,
+      "duration_sec": 30.04,
+      "latency": {
+        "min_ms": 0.549,
+        "mean_ms": 4.7754,
+        "p50_ms": 1.282,
+        "p90_ms": 2.25,
+        "p95_ms": 14.3715,
+        "p99_ms": 75.066,
+        "p999_ms": 77.7365,
+        "max_ms": 98.472,
+        "std_ms": 14.8261,
+        "iqr_ms": 0.235
+      },
+      "spikes": {
+        "ge_10ms_count": 5299,
+        "ge_10ms_pct": 5.277,
+        "ge_50ms_count": 4379,
+        "ge_100ms_count": 0,
+        "median_inter_spike_interval_ms": 0.17,
+        "pct_matching_100ms_cfs_period": 20.33
+      },
+      "resources": {
+        "container_cpu_pct": 98.26,
+        "host_cpu_pct": 13.41,
+        "peak_memory_mb": 546.02,
+        "cgroup_nr_throttled": 298,
+        "cgroup_throttled_sec": 62.068669,
+        "throttling_rate_per_sec": 9.9
+      }
+    }
+  ]
+}
