@@ -111,6 +111,7 @@ class DatabaseStateSnapshot:
         cpu_limit: str = "1.0",
         memory_limit: str = "1024m",
         image_digest: Optional[str] = None,
+        host_port: Optional[int] = None,
         timestamp_utc: Optional[str] = None,
     ):
         self.scale_factor = scale_factor
@@ -118,6 +119,7 @@ class DatabaseStateSnapshot:
         self.branches_count = branches_count
         self.tellers_count = tellers_count
         self.history_count = history_count
+        self.host_port = host_port
 
         # Default bounds for backward compatibility if omitted
         self.min_aid = 1 if min_aid is None and accounts_count > 0 else (min_aid or 0)
@@ -260,6 +262,7 @@ class DatabaseStateSnapshot:
                 "cpu_limit": self.cpu_limit,
                 "memory_limit": self.memory_limit,
                 "image_digest": self.image_digest,
+                "host_port": self.host_port,
             },
             "timestamp_utc": self.timestamp_utc,
         }
@@ -504,6 +507,7 @@ class TrialIsolationManager:
         container_name: str,
         scale_factor: int,
         timeout_seconds: int = 120,
+        publish_host_port: bool = False,
     ) -> Tuple[float, DatabaseStateSnapshot]:
         """
         Starts a fresh PostgreSQL container with timing flags enabled, initializes pgbench dataset
@@ -519,10 +523,14 @@ class TrialIsolationManager:
             "--memory", str(self.memory_limit),
             "-e", "POSTGRES_HOST_AUTH_METHOD=trust",
             "-e", "POSTGRES_DB=aadsbench",
+        ]
+        if publish_host_port:
+            start_cmd.extend(["-p", "127.0.0.1::5432"])
+        start_cmd.extend([
             self.default_image,
             "-c", "track_io_timing=on",
             "-c", "track_wal_io_timing=on",
-        ]
+        ])
 
         res_start = subprocess.run(start_cmd, capture_output=True, text=True, timeout=20)
         if res_start.returncode != 0:
@@ -544,6 +552,21 @@ class TrialIsolationManager:
             self.cleanup_container(container_name)
             raise RuntimeError(f"Container {container_name} failed pg_isready readiness check.")
 
+        # Resolve host port if published
+        host_port: Optional[int] = None
+        if publish_host_port:
+            port_res = subprocess.run(
+                ["docker", "port", container_name, "5432/tcp"],
+                capture_output=True, text=True, timeout=5,
+            )
+            if port_res.returncode == 0 and port_res.stdout.strip():
+                for line in port_res.stdout.splitlines():
+                    if ":" in line:
+                        p_str = line.strip().split(":")[-1]
+                        if p_str.isdigit():
+                            host_port = int(p_str)
+                            break
+
         # 3. Timed pgbench initialization
         t_init_start = time.monotonic()
         init_cmd = [
@@ -560,6 +583,8 @@ class TrialIsolationManager:
         # 4. Capture and verify baseline snapshot
         try:
             snapshot = self.capture_database_state(container_name, scale_factor)
+            if host_port is not None:
+                snapshot.host_port = host_port
             is_valid, violations = self.verify_baseline_state(snapshot, scale_factor)
             if not is_valid:
                 self.cleanup_container(container_name)
