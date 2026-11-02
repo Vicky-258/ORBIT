@@ -212,7 +212,7 @@ def main():
     start_wall = time.perf_counter()
 
     # We invoke docker_runner directly with checkpoint_callback and update authorization status
-    auth.status = AuthorizationStatus.EXECUTED
+    auth.status = AuthorizationStatus.EXHAUSTED
     registry.save_authorization(auth)
 
     try:

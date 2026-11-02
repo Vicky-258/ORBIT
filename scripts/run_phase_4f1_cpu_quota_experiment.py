@@ -258,7 +258,7 @@ def run_configuration(
     )
     wall_duration = round(time.perf_counter() - start_t, 2)
 
-    auth.status = AuthorizationStatus.EXECUTED
+    auth.status = AuthorizationStatus.EXHAUSTED
     registry.save_authorization(auth)
 
     # Read monitoring summaries
