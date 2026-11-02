@@ -1,0 +1,112 @@
+{
+  "phase": "4F.3.2",
+  "branch": "feat/phase-4f32-corrective-patches",
+  "baseline_commit_phase_4f3": "86bb5f1",
+  "baseline_commit_phase_4f31_audit": "1cd998d",
+  "timestamp_utc": "2026-11-02T09:49:00Z",
+  "overall_verdict": "READY_FOR_CONTROLLED_PILOT_AUTHORIZATION",
+  "summary": "Resolved all 7 methodology, instrumentation, and causal inference defects identified in the Phase 4F.3.1 offline engineering audit. Offline regression tests verified 26/26 isolation tests and 217/217 repository tests passing with zero regressions and zero registry mutation.",
+  "corrective_fixes": {
+    "FIX_01_STORAGE_CGROUP_BINDING": {
+      "status": "RESOLVED",
+      "severity_addressed": "HIGH",
+      "implementation": [
+        "Explicitly resolved cgroup directory via ContainerResourceMonitor.resolve_cgroup_dir() prior to taking storage snapshots.",
+        "Passed cg_dir explicitly to both pre_storage and post_storage take_snapshot calls in DockerBenchmarkRunner._benchmark_postgres_isolated.",
+        "Enforced explicit 'cgroup_io_stat' unavailable status when cg_dir is None or inaccessible, preventing empty metrics from being silently interpreted as zero I/O.",
+        "Separated container cgroup io.stat provenance from host /proc/diskstats provenance in StorageSnapshot."
+      ],
+      "regression_tests": ["test_storage_cgroup_dir_binding_and_unavailable_status"]
+    },
+    "FIX_02_POSTGRES_TIMING_INSTRUMENTATION": {
+      "status": "RESOLVED",
+      "severity_addressed": "HIGH",
+      "implementation": [
+        "Enabled mandatory PostgreSQL 16 timing flags (-c track_io_timing=on -c track_wal_io_timing=on) across normal docker_runner startup and TrialIsolationManager.initialize_fresh_container.",
+        "Added SHOW/current_setting verification query to PostgresMetricsCollector.take_snapshot.",
+        "Explicitly marked timing metrics as unavailable (timing_instrumentation_active=False) if timing flags are off, preventing zero timing values from being falsely reported as zero I/O."
+      ],
+      "regression_tests": [
+        "test_postgres_snapshot_parsing_and_timing_verification",
+        "test_postgres_snapshot_flags_disabled_timing",
+        "test_initialize_fresh_container_cleans_up_on_init_failure"
+      ]
+    },
+    "FIX_03_DETERMINISTIC_DATABASE_FINGERPRINTS": {
+      "status": "RESOLVED",
+      "severity_addressed": "MEDIUM",
+      "implementation": [
+        "Extended DatabaseStateSnapshot and TrialIsolationManager.verify_baseline_state to verify exact invariants beyond row counts: min/max IDs, zero balance invariants (min=0, max=0, sum=0 for accounts, branches, tellers), history table emptiness (count=0), and timing configuration settings.",
+        "Implemented deterministic SHA256 content fingerprinting (aads_composite_aggregate_sha256_v1) hashing table hash sums and exact structural bounds.",
+        "Classified pg_stat_user_tables.n_dead_tup as approximate diagnostic metadata, recording it in snapshot telemetry without treating it as an exact zero invariant.",
+        "Verified that modified rows with unchanged cardinality (e.g. offsetting balance shifts +100 and -100) are immediately detected and rejected."
+      ],
+      "regression_tests": [
+        "test_baseline_verification_passes_on_clean_snapshot",
+        "test_deterministic_fingerprint_detects_offsetting_balance_changes",
+        "test_dead_tuples_recorded_as_diagnostic_without_failing_baseline",
+        "test_database_state_snapshot_diff"
+      ]
+    },
+    "FIX_04_POSTGRES_SAMPLER_PERSISTENT_SESSION": {
+      "status": "RESOLVED",
+      "severity_addressed": "HIGH",
+      "implementation": [
+        "Replaced per-sample docker exec process forks with a persistent interactive psql coprocess session via subprocess.Popen in PostgresPeriodicSampler.",
+        "Employed '__END_SAMPLE__' delimiter over stdin/stdout pipes to stream samples without connection churn or fork jitter.",
+        "Added robust fallback to discrete queries at 500ms if coprocess creation fails or process terminates.",
+        "Added instrumentation telemetry tracking sampler_mode, sampling_interval_sec, successful_samples, missed_samples, mean_query_duration_ms, and monitoring_connection_count.",
+        "Ensured clean coprocess termination with '\\q' command and process join upon benchmark completion."
+      ],
+      "regression_tests": ["test_postgres_periodic_sampler_telemetry_and_cleanup"]
+    },
+    "FIX_05_STRICT_VALIDATED_EVIDENCE_REQUIREMENTS": {
+      "status": "RESOLVED",
+      "severity_addressed": "MEDIUM",
+      "implementation": [
+        "Upgraded PerformanceFinding Pydantic schema to require explicit control_experiment_id, treatment_experiment_id, manipulated_variable, expected_intervention, observed_intervention, comparable_baseline_confirmed=True, and outcome_metrics for VALIDATED classification.",
+        "Enforced strict validation rejecting identical IDs, missing interventions, unconfirmed baselines, or duplicate replications (_r0 vs _r1) masquerading as causal interventions.",
+        "Updated HistoricalSF2FindingsCatalog.get_corrected_findings() with complete structured intervention metadata for FINDING_4F_02."
+      ],
+      "regression_tests": [
+        "test_evidence_classification_levels_supported",
+        "test_guardrail_rejects_duplicate_replications_as_intervention",
+        "test_guardrail_rejects_unconfirmed_baseline_for_validated",
+        "test_historical_findings_catalog_corrected"
+      ]
+    },
+    "FIX_06_CONSERVATIVE_STORAGE_CLASSIFICATION": {
+      "status": "RESOLVED",
+      "severity_addressed": "MEDIUM",
+      "implementation": [
+        "Removed arbitrary 50% device busy time threshold as a universal storage-bound rule.",
+        "Introduced StoragePressureClassification taxonomy: INSUFFICIENT_STORAGE_EVIDENCE, NO_STORAGE_PRESSURE_OBSERVED, STORAGE_PRESSURE_SUSPECTED, STORAGE_PRESSURE_SUPPORTED.",
+        "Derived multi-queue NVMe metrics from /proc/diskstats: average queue depth (delta_weighted_io_ms / (dur * 1000)) and average request latency avg_await_ms (delta_io_time_ms / total_ops).",
+        "Required concurrent saturation evidence (busy time >= 70% AND queue depth >= 2.0 AND await >= 10ms) or sustained container write saturation (> 200 MB/s with queue depth >= 2.0) to assert STORAGE_PRESSURE_SUPPORTED."
+      ],
+      "regression_tests": ["test_conservative_storage_classification_rules"]
+    },
+    "FIX_07_CFS_CAUSAL_GUARDRAIL": {
+      "status": "RESOLVED",
+      "severity_addressed": "MEDIUM",
+      "implementation": [
+        "Removed boolean-only bypass (has_controlled_experiment_confirmation=True) in CFSCorrelationAnalyzer.",
+        "Implemented verify_controlled_intervention() requiring verifiable paired control and treatment experiment IDs, quota core manipulation (treatment > control), comparable baseline verification, and consistent measured outcome improvements.",
+        "Enforced that temporal alignment alone (even at >90% 100ms periodicity and synchronized client stalls) strictly classifies as STRONG_TEMPORAL_ASSOCIATION without verified intervention evidence."
+      ],
+      "regression_tests": [
+        "test_cfs_correlation_analyzer_strong_temporal_association",
+        "test_cfs_causal_classification_guardrail_with_intervention"
+      ]
+    }
+  },
+  "verification_results": {
+    "test_phase_4f3_isolation_instrumentation_passed": 26,
+    "total_repository_tests_passed": 217,
+    "total_repository_tests_failed": 0,
+    "registry_experiments_count": 235,
+    "registry_models_count": 24,
+    "synthetic_substitutions": 0,
+    "live_docker_benchmarks_executed": 0
+  }
+}

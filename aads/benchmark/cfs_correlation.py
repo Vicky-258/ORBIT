@@ -7,6 +7,7 @@ and high-frequency cgroup v2 cpu.stat measurements:
 - Analyzes simultaneous multi-client transaction stalls
 - Computes temporal alignment and overlap metrics
 - Strictly avoids dividing aggregate throttled_usec by client count
+- Guardrail: requires verifiable paired intervention evidence for CONTROLLED_CAUSAL_EVIDENCE (Phase 4F.3.2 FIX 07)
 - Classifies evidence into:
   * NO_DETECTABLE_ASSOCIATION
   * TEMPORAL_ASSOCIATION
@@ -16,6 +17,7 @@ and high-frequency cgroup v2 cpu.stat measurements:
 import json
 import logging
 import math
+import re
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
@@ -48,6 +50,58 @@ class TransactionRecord:
         self.transaction_no = transaction_no
         self.latency_ms = latency_ms
         self.epoch_timestamp_sec = epoch_timestamp_sec
+
+
+def verify_controlled_intervention(intervention: Optional[Dict[str, Any]]) -> Tuple[bool, str]:
+    """
+    Validates paired controlled experiment evidence for causal promotion.
+    Requires distinct control and treatment records, verifiable quota variation,
+    comparable baselines, and measurable response.
+    """
+    if not intervention or not isinstance(intervention, dict):
+        return False, "No controlled intervention evidence provided."
+
+    ctrl_id = str(intervention.get("control_experiment_id", "")).strip()
+    treat_id = str(intervention.get("treatment_experiment_id", "")).strip()
+    if not ctrl_id or not treat_id:
+        return False, "Missing control_experiment_id or treatment_experiment_id."
+    if ctrl_id == treat_id:
+        return False, f"Control and treatment IDs are identical ('{ctrl_id}')."
+
+    ctrl_rep = re.search(r'_(?:r|rep)\d+', ctrl_id)
+    treat_rep = re.search(r'_(?:r|rep)\d+', treat_id)
+    if ctrl_rep and treat_rep:
+        ctrl_prefix = re.sub(r'_(?:r|rep)\d+.*', '', ctrl_id)
+        treat_prefix = re.sub(r'_(?:r|rep)\d+.*', '', treat_id)
+        if ctrl_prefix == treat_prefix:
+            return False, f"Paired duplicate replications ('{ctrl_id}' vs '{treat_id}') do not constitute a controlled intervention."
+
+    ctrl_quota = intervention.get("control_quota_cores")
+    treat_quota = intervention.get("treatment_quota_cores")
+    if ctrl_quota is None or treat_quota is None:
+        return False, "Missing control_quota_cores or treatment_quota_cores in intervention."
+    try:
+        ctrl_q = float(ctrl_quota)
+        treat_q = float(treat_quota)
+        if treat_q <= ctrl_q:
+            return False, f"Treatment quota ({treat_q}) must differ from and exceed control quota ({ctrl_q})."
+    except (ValueError, TypeError):
+        return False, "Invalid numeric quota values in intervention."
+
+    if not intervention.get("comparable_baseline_confirmed", False):
+        return False, "Comparable baseline starting conditions were not confirmed."
+
+    ctrl_outcome = intervention.get("control_outcome") or {}
+    treat_outcome = intervention.get("treatment_outcome") or {}
+    if not ctrl_outcome or not treat_outcome:
+        return False, "Missing control_outcome or treatment_outcome metrics in intervention."
+
+    ctrl_tps = ctrl_outcome.get("tps") or ctrl_outcome.get("achieved_tps") or 0.0
+    treat_tps = treat_outcome.get("tps") or treat_outcome.get("achieved_tps") or 0.0
+    if treat_tps <= ctrl_tps and ctrl_tps > 0:
+        return False, f"Observed outcome does not demonstrate expected response: treatment TPS ({treat_tps}) did not exceed control TPS ({ctrl_tps})."
+
+    return True, "Controlled intervention verified: quota manipulated holding baseline parameters constant with demonstrated outcome response."
 
 
 class CFSCorrelationAnalyzer:
@@ -88,10 +142,13 @@ class CFSCorrelationAnalyzer:
         self,
         transactions: List[TransactionRecord],
         cgroup_samples: List[Dict[str, Any]],
+        controlled_intervention: Optional[Dict[str, Any]] = None,
         has_controlled_experiment_confirmation: bool = False,
     ) -> Dict[str, Any]:
         """
         Correlates transaction latency spikes against cgroup throttling telemetry.
+        Enforces strict causal guardrails: requires verifiable controlled intervention data
+        to assign CONTROLLED_CAUSAL_EVIDENCE (Phase 4F.3.2 FIX 07).
         """
         if not transactions:
             return {
@@ -116,11 +173,8 @@ class CFSCorrelationAnalyzer:
             }
 
         # 1. Cluster Spikes by Timestamp to detect simultaneous multi-client stalls
-        # Sort spikes by completion timestamp
         spikes_sorted = sorted(spikes, key=lambda x: x.epoch_timestamp_sec)
-        spike_times = [tx.epoch_timestamp_sec for tx in spikes_sorted]
 
-        # Group spikes that occur within 1ms of each other (simultaneous release from CFS freeze)
         clusters: List[List[TransactionRecord]] = []
         curr_cluster: List[TransactionRecord] = [spikes_sorted[0]]
 
@@ -145,7 +199,6 @@ class CFSCorrelationAnalyzer:
             float(np.median(inter_cluster_intervals_ms)) if inter_cluster_intervals_ms else 0.0
         )
 
-        # Count intervals matching the CFS period (e.g. 100ms +- tolerance)
         matching_period_count = sum(
             1 for iv in inter_cluster_intervals_ms
             if abs(iv - self.cfs_period_ms) <= self.tolerance_ms
@@ -156,7 +209,6 @@ class CFSCorrelationAnalyzer:
             else 0.0
         )
 
-        # Multi-client synchronization: count clusters containing multiple distinct clients
         distinct_clients_in_tx = len(set(tx.client_id for tx in transactions))
         synchronized_clusters = sum(
             1 for c in clusters
@@ -181,24 +233,32 @@ class CFSCorrelationAnalyzer:
                 s1 = cgroup_samples[-1].get("cgroup_nr_throttled", 0) or 0
                 throttling_events_total = max(0, s1 - s0)
 
-        # 4. Rigorous Association Classification
+        # 4. Rigorous Association Classification with Controlled Causal Guardrail (FIX 07)
+        intervention_valid, intervention_reason = verify_controlled_intervention(controlled_intervention)
+
+        if has_controlled_experiment_confirmation and not intervention_valid:
+            logger.debug(
+                f"CFSCorrelationAnalyzer: has_controlled_experiment_confirmation=True provided without valid "
+                f"controlled_intervention ({intervention_reason}). Retaining correlation-only classification."
+            )
+
         association_level = CFSAssociationLevel.NO_DETECTABLE_ASSOCIATION
         justification = ""
 
         if period_alignment_pct >= 90.0 and sync_cluster_pct >= 80.0:
-            if has_controlled_experiment_confirmation:
+            if intervention_valid:
                 association_level = CFSAssociationLevel.CONTROLLED_CAUSAL_EVIDENCE
                 justification = (
                     f"Strong temporal alignment ({period_alignment_pct:.1f}% matching 100ms period) and multi-client "
-                    f"synchronization ({sync_cluster_pct:.1f}%) combined with controlled variable manipulation "
-                    f"(CPU quota doubling) establishes demonstrated causal mechanism."
+                    f"synchronization ({sync_cluster_pct:.1f}%) combined with verified controlled variable manipulation "
+                    f"({intervention_reason}) establishes demonstrated causal mechanism."
                 )
             else:
                 association_level = CFSAssociationLevel.STRONG_TEMPORAL_ASSOCIATION
                 justification = (
                     f"Observed spikes align with 100ms CFS period ({period_alignment_pct:.1f}% match) and "
                     f"demonstrate simultaneous multi-client thread freezes ({sync_cluster_pct:.1f}% synchronized). "
-                    f"Establishes strong temporal association pending controlled quota variation."
+                    f"Establishes strong temporal association. Causal validation requires verified controlled quota manipulation: {intervention_reason}"
                 )
         elif period_alignment_pct >= 50.0 or (samples_with_throttling > 0 and spike_count > 0):
             association_level = CFSAssociationLevel.TEMPORAL_ASSOCIATION
@@ -228,6 +288,10 @@ class CFSCorrelationAnalyzer:
                 "cgroup_samples_count": len(cgroup_samples),
                 "samples_with_throttling": samples_with_throttling,
                 "delta_throttling_events": throttling_events_total,
+            },
+            "controlled_intervention_evaluation": {
+                "verified": intervention_valid,
+                "reason": intervention_reason,
             },
             "methodological_guards": {
                 "individual_client_waiting_time_inferred_from_aggregate": False,

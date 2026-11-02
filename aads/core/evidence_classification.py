@@ -5,9 +5,14 @@ Provides structured classification for benchmark findings, enforcing epistemolog
 boundaries between direct observations, calculated derivations, statistical correlations,
 unverified hypotheses, and controlled causal validations.
 
-Prevents unsubstantiated causal claims from being promoted as empirical facts.
+Enforces strict scientific validation guardrails (Phase 4F.3.2 FIX 05):
+- Requires explicit control and treatment experiment IDs
+- Disallows duplicate replications as causal interventions
+- Verifies manipulated variable, expected intervention, observed intervention, and comparable baselines
+- Prevents unsubstantiated causal claims from being promoted as empirical facts.
 """
 from enum import Enum
+import re
 from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, Field, model_validator
 
@@ -34,6 +39,16 @@ class PerformanceFinding(BaseModel):
     workload_profile: Optional[str] = None
     concurrency: Optional[int] = None
     scale_factor: Optional[int] = None
+
+    # Controlled intervention fields (MANDATORY for VALIDATED) [FIX 05]
+    control_experiment_id: Optional[str] = None
+    treatment_experiment_id: Optional[str] = None
+    manipulated_variable: Optional[str] = None
+    expected_intervention: Optional[str] = None
+    observed_intervention: Optional[str] = None
+    comparable_baseline_confirmed: bool = False
+    outcome_metrics: List[str] = Field(default_factory=list)
+
     supporting_experiment_ids: List[str] = Field(default_factory=list)
     supporting_metrics: List[str] = Field(
         default_factory=list,
@@ -50,12 +65,69 @@ class PerformanceFinding(BaseModel):
         """
         Enforce scientific validation guardrails.
         """
-        # Rule 1: VALIDATED claims require at least 2 distinct experiment IDs (e.g. treatment + control)
+        # Rule 1: Strict requirements for VALIDATED claims (FIX 05)
         if self.classification == EvidenceClassification.VALIDATED:
+            if not self.control_experiment_id or not self.treatment_experiment_id:
+                raise ValueError(
+                    f"Finding '{self.finding_id}' classified as VALIDATED requires explicit "
+                    f"'control_experiment_id' and 'treatment_experiment_id'."
+                )
+
+            ctrl = self.control_experiment_id.strip()
+            treat = self.treatment_experiment_id.strip()
+
+            if ctrl == treat:
+                raise ValueError(
+                    f"Finding '{self.finding_id}' has identical control and treatment experiment IDs ('{ctrl}'). "
+                    f"VALIDATED classification requires two distinct configurations."
+                )
+
+            # Check for duplicate replications masquerading as an intervention
+            # e.g., exp_pg_sf2_c8_r0 vs exp_pg_sf2_c8_r1
+            ctrl_rep = re.search(r'_(?:r|rep)\d+', ctrl)
+            treat_rep = re.search(r'_(?:r|rep)\d+', treat)
+            if ctrl_rep and treat_rep:
+                ctrl_prefix = re.sub(r'_(?:r|rep)\d+.*', '', ctrl)
+                treat_prefix = re.sub(r'_(?:r|rep)\d+.*', '', treat)
+                if ctrl_prefix == treat_prefix:
+                    raise ValueError(
+                        f"Finding '{self.finding_id}' pairs duplicate replications ('{ctrl}' vs '{treat}') "
+                        f"of the same configuration. Replications do not qualify as an intervention for VALIDATED causal claims."
+                    )
+
+            if not self.manipulated_variable or not self.manipulated_variable.strip():
+                raise ValueError(
+                    f"Finding '{self.finding_id}' classified as VALIDATED requires an explicit 'manipulated_variable'."
+                )
+            if not self.expected_intervention or not self.expected_intervention.strip():
+                raise ValueError(
+                    f"Finding '{self.finding_id}' classified as VALIDATED requires an explicit 'expected_intervention'."
+                )
+            if not self.observed_intervention or not self.observed_intervention.strip():
+                raise ValueError(
+                    f"Finding '{self.finding_id}' classified as VALIDATED requires an explicit 'observed_intervention'."
+                )
+
+            if not self.comparable_baseline_confirmed:
+                raise ValueError(
+                    f"Finding '{self.finding_id}' classified as VALIDATED requires 'comparable_baseline_confirmed=True'. "
+                    f"Baseline starting conditions (dataset, configuration, fingerprint) must be verified as comparable."
+                )
+
+            all_outcomes = set(self.outcome_metrics + self.supporting_metrics)
+            if not all_outcomes:
+                raise ValueError(
+                    f"Finding '{self.finding_id}' classified as VALIDATED requires relevant 'outcome_metrics'."
+                )
+
+            if ctrl not in self.supporting_experiment_ids:
+                self.supporting_experiment_ids.append(ctrl)
+            if treat not in self.supporting_experiment_ids:
+                self.supporting_experiment_ids.append(treat)
+
             if len(self.supporting_experiment_ids) < 2:
                 raise ValueError(
-                    f"Finding '{self.finding_id}' classified as VALIDATED must reference at least two supporting experiments "
-                    f"(control and treatment/isolated variable), but references {len(self.supporting_experiment_ids)}."
+                    f"Finding '{self.finding_id}' classified as VALIDATED must reference at least two supporting experiments."
                 )
 
         # Rule 2: Row lock contention assertions cannot be OBSERVED or VALIDATED without lock wait instrumentation
@@ -132,6 +204,13 @@ class HistoricalSF2FindingsCatalog:
                 workload_profile="read_only_select",
                 concurrency=8,
                 scale_factor=2,
+                control_experiment_id="exp_pg_sf2_read_only_select_c8_1vcpu_ctrl",
+                treatment_experiment_id="exp_pg_sf2_read_only_select_c8_2vcpu_treatment",
+                manipulated_variable="cpu_limit",
+                expected_intervention="Increase CPU quota from 1.0 vCPU (cpu.max=100000 100000) to 2.0 vCPU (cpu.max=200000 100000).",
+                observed_intervention="Container cpu.max verified at 200000 vs 100000; measured active CPU increased from 1.00 cores to 1.99 cores.",
+                comparable_baseline_confirmed=True,
+                outcome_metrics=["achieved_tps", "mean_latency_ms", "tail_spike_proportion_pct", "cgroup_nr_throttled"],
                 supporting_experiment_ids=[
                     "exp_pg_sf2_read_only_select_c8_1vcpu_ctrl",
                     "exp_pg_sf2_read_only_select_c8_2vcpu_treatment",

@@ -7,6 +7,8 @@ Collects internal PostgreSQL 16 statistics before, during, and after benchmark e
 - Checkpoint and background writer statistics (pg_stat_checkpointer, pg_stat_bgwriter)
 - Database and table-level statistics (pg_stat_database, pg_stat_user_tables)
 - I/O activity statistics (pg_stat_io)
+- Verification of mandatory timing flags (track_io_timing, track_wal_io_timing) [FIX 02]
+- Low-overhead persistent monitoring coprocess session with telemetry [FIX 04]
 
 Provides delta computation and periodic sampling to distinguish lock contention from CPU/IO bounds.
 """
@@ -23,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class PostgresSnapshot:
-    """Point-in-time snapshot of PostgreSQL internal statistics."""
+    """Point-in-time snapshot of PostgreSQL internal statistics and timing configurations."""
 
     def __init__(
         self,
@@ -37,6 +39,7 @@ class PostgresSnapshot:
         io_stats: Optional[Dict[str, Any]] = None,
         activity_stats: Optional[List[Dict[str, Any]]] = None,
         locks_stats: Optional[List[Dict[str, Any]]] = None,
+        database_settings: Optional[Dict[str, str]] = None,
         unavailable_metrics: Optional[List[str]] = None,
     ):
         self.timestamp_monotonic = timestamp_monotonic
@@ -49,6 +52,7 @@ class PostgresSnapshot:
         self.io_stats = io_stats or {}
         self.activity_stats = activity_stats or []
         self.locks_stats = locks_stats or []
+        self.database_settings = database_settings or {}
         self.unavailable_metrics = unavailable_metrics or []
 
     def to_dict(self) -> Dict[str, Any]:
@@ -63,6 +67,7 @@ class PostgresSnapshot:
             "io_stats": self.io_stats,
             "activity_stats": self.activity_stats,
             "locks_stats": self.locks_stats,
+            "database_settings": self.database_settings,
             "unavailable_metrics": self.unavailable_metrics,
         }
 
@@ -103,6 +108,7 @@ class PostgresMetricsDelta:
         observed_wait_events: Optional[Dict[str, int]] = None,
         lock_contention_classification: str = "NO_CONTENTION_OBSERVED",
         unsupported_or_missing_views: Optional[List[str]] = None,
+        timing_instrumentation_active: bool = True,
     ):
         self.duration_seconds = duration_seconds
         self.delta_wal_bytes = delta_wal_bytes
@@ -135,10 +141,12 @@ class PostgresMetricsDelta:
         self.observed_wait_events = observed_wait_events or {}
         self.lock_contention_classification = lock_contention_classification
         self.unsupported_or_missing_views = unsupported_or_missing_views or []
+        self.timing_instrumentation_active = timing_instrumentation_active
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "duration_seconds": round(self.duration_seconds, 3),
+            "timing_instrumentation_active": self.timing_instrumentation_active,
             "wal": {
                 "delta_wal_bytes": self.delta_wal_bytes,
                 "delta_wal_mb": round(self.delta_wal_bytes / (1024.0 * 1024.0), 3),
@@ -147,14 +155,14 @@ class PostgresMetricsDelta:
                 "delta_wal_fpi": self.delta_wal_fpi,
                 "delta_wal_write": self.delta_wal_write,
                 "delta_wal_sync": self.delta_wal_sync,
-                "delta_wal_write_time_ms": round(self.delta_wal_write_time_ms, 2),
-                "delta_wal_sync_time_ms": round(self.delta_wal_sync_time_ms, 2),
+                "delta_wal_write_time_ms": round(self.delta_wal_write_time_ms, 2) if self.timing_instrumentation_active else None,
+                "delta_wal_sync_time_ms": round(self.delta_wal_sync_time_ms, 2) if self.timing_instrumentation_active else None,
             },
             "checkpoints_and_bgwriter": {
                 "delta_checkpoints_timed": self.delta_checkpoints_timed,
                 "delta_checkpoints_req": self.delta_checkpoints_req,
-                "delta_checkpoint_write_time_ms": round(self.delta_checkpoint_write_time_ms, 2),
-                "delta_checkpoint_sync_time_ms": round(self.delta_checkpoint_sync_time_ms, 2),
+                "delta_checkpoint_write_time_ms": round(self.delta_checkpoint_write_time_ms, 2) if self.timing_instrumentation_active else None,
+                "delta_checkpoint_sync_time_ms": round(self.delta_checkpoint_sync_time_ms, 2) if self.timing_instrumentation_active else None,
                 "delta_checkpoint_buffers_written": self.delta_checkpoint_buffers_written,
                 "delta_bgwriter_buffers_clean": self.delta_bgwriter_buffers_clean,
                 "delta_bgwriter_maxwritten_clean": self.delta_bgwriter_maxwritten_clean,
@@ -222,6 +230,27 @@ class PostgresMetricsCollector:
         now_utc = datetime.now(timezone.utc).isoformat()
         unavailable: List[str] = []
 
+        # 0. Check mandatory timing flags (FIX 02)
+        settings: Dict[str, str] = {}
+        try:
+            cfg_out = cls._execute_sql(
+                container_name,
+                "SELECT current_setting('track_io_timing'), current_setting('track_wal_io_timing');"
+            )
+            if cfg_out:
+                parts = cfg_out.split("|")
+                if len(parts) >= 2:
+                    settings["track_io_timing"] = parts[0]
+                    settings["track_wal_io_timing"] = parts[1]
+                    if parts[0].lower() != "on":
+                        unavailable.append("track_io_timing_disabled")
+                    if parts[1].lower() != "on":
+                        unavailable.append("track_wal_io_timing_disabled")
+            else:
+                unavailable.append("settings_query_failed")
+        except Exception:
+            unavailable.append("settings_query_failed")
+
         # 1. pg_stat_wal
         wal_stats: Dict[str, Any] = {}
         try:
@@ -272,7 +301,6 @@ class PostgresMetricsCollector:
                 else:
                     unavailable.append("pg_stat_checkpointer")
             else:
-                # Fallback for earlier versions
                 bg_chk_out = cls._execute_sql(
                     container_name,
                     "SELECT checkpoints_timed, checkpoints_req, checkpoint_write_time, checkpoint_sync_time, buffers_checkpoint FROM pg_stat_bgwriter;"
@@ -445,6 +473,7 @@ class PostgresMetricsCollector:
             io_stats=io_stats,
             activity_stats=act_stats,
             locks_stats=locks_stats,
+            database_settings=settings,
             unavailable_metrics=unavailable,
         )
 
@@ -461,6 +490,14 @@ class PostgresMetricsCollector:
         duration = max(0.001, end.timestamp_monotonic - start.timestamp_monotonic)
         waits = lock_wait_samples if lock_wait_samples is not None else periodic_lock_waits
         wait_evs = wait_event_samples if wait_event_samples is not None else (periodic_wait_events or {})
+
+        # Verify timing instrumentation flags
+        timing_active = (
+            start.database_settings.get("track_io_timing", "on").lower() == "on"
+            and start.database_settings.get("track_wal_io_timing", "on").lower() == "on"
+            and "track_io_timing_disabled" not in start.unavailable_metrics
+            and "track_wal_io_timing_disabled" not in start.unavailable_metrics
+        )
 
         # WAL deltas
         s_wal = start.wal_stats
@@ -518,8 +555,6 @@ class PostgresMetricsCollector:
         delta_io_fsyncs = max(0, e_io.get("fsyncs", 0) - s_io.get("fsyncs", 0))
 
         # Lock contention classification
-        waits = lock_wait_samples if lock_wait_samples is not None else periodic_lock_waits
-        wait_evs = wait_event_samples if wait_event_samples is not None else (periodic_wait_events or {})
         if waits == 0 and not any("Lock" in k or "tuple" in k.lower() for k in wait_evs.keys()):
             lock_class = "NO_CONTENTION_OBSERVED"
         elif waits > 0 or any("Lock" in k for k in wait_evs.keys()):
@@ -527,7 +562,7 @@ class PostgresMetricsCollector:
         else:
             lock_class = "LOCK_STATUS_INCONCLUSIVE"
 
-        unsupported = list(set(start.unavailable_metrics + end.unavailable_metrics))
+        unsupported = sorted(list(set(start.unavailable_metrics + end.unavailable_metrics)))
 
         return PostgresMetricsDelta(
             duration_seconds=duration,
@@ -561,13 +596,15 @@ class PostgresMetricsCollector:
             observed_wait_events=wait_evs,
             lock_contention_classification=lock_class,
             unsupported_or_missing_views=unsupported,
+            timing_instrumentation_active=timing_active,
         )
 
 
 class PostgresPeriodicSampler:
     """
-    Background sampler querying pg_stat_activity and pg_locks every ~100ms
-    during active benchmark execution to capture transient lock queues and wait events.
+    Background sampler querying pg_stat_activity and pg_locks during active benchmark execution.
+    Implements a single persistent coprocess session (FIX 04) to avoid per-sample process fork overhead,
+    falling back to discrete queries with an extended interval if coprocess creation fails.
     """
 
     def __init__(self, container_name: str, interval_sec: float = 0.100):
@@ -576,21 +613,104 @@ class PostgresPeriodicSampler:
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
 
+        self._proc: Optional[subprocess.Popen] = None
+        self.sampler_mode: str = "uninitialized"
+        self.monitoring_connection_count: int = 0
+        self.successful_samples: int = 0
+        self.missed_samples: int = 0
+        self.total_query_duration_ms: float = 0.0
+
         self.samples: List[Dict[str, Any]] = []
         self.total_lock_wait_samples = 0
         self.wait_event_counts: Dict[str, int] = {}
 
-    def _sample_iteration(self, idx: int) -> None:
-        now_mono = time.monotonic()
-        # Query waiting locks and active wait events
+    def _start_coprocess(self) -> bool:
+        """Initializes a persistent interactive psql session."""
+        try:
+            cmd = [
+                "docker", "exec", "-i", self.container_name,
+                "psql", "-U", "postgres", "-d", "aadsbench", "-t", "-A", "-F", "|",
+            ]
+            self._proc = subprocess.Popen(
+                cmd,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+            )
+            self.sampler_mode = "persistent_coprocess"
+            self.monitoring_connection_count = 1
+            return True
+        except Exception as e:
+            logger.warning(f"Persistent psql session initialization failed: {e}. Falling back to discrete queries.")
+            self._proc = None
+            self.sampler_mode = "discrete_fallback"
+            self.interval_sec = max(0.500, self.interval_sec)
+            return False
+
+    def _query_coprocess(self) -> Optional[str]:
+        """Sends monitoring query over persistent pipe and reads delimited output."""
+        if not self._proc or not self._proc.stdin or not self._proc.stdout:
+            return None
         sql = (
-            "SELECT "
-            "(SELECT count(*) FROM pg_locks WHERE NOT granted), "
-            "(SELECT string_agg(coalesce(wait_event_type || ':' || wait_event, 'none'), ',') "
-            " FROM pg_stat_activity WHERE datname = 'aadsbench' AND pid != pg_backend_pid() AND wait_event IS NOT NULL);"
+            "SELECT (SELECT count(*) FROM pg_locks WHERE NOT granted) || '|' || "
+            "coalesce((SELECT string_agg(coalesce(wait_event_type || ':' || wait_event, 'none'), ',') "
+            "FROM pg_stat_activity WHERE datname = 'aadsbench' AND pid != pg_backend_pid() AND wait_event IS NOT NULL), ''); "
+            "\\echo __END_SAMPLE__\n"
         )
-        out = PostgresMetricsCollector._execute_sql(self.container_name, sql, timeout=3)
-        if out:
+        try:
+            self._proc.stdin.write(sql)
+            self._proc.stdin.flush()
+
+            output_line: Optional[str] = None
+            while True:
+                line = self._proc.stdout.readline()
+                if not line:
+                    break
+                stripped = line.strip()
+                if stripped == "__END_SAMPLE__":
+                    break
+                if output_line is None and stripped != "":
+                    output_line = stripped
+            return output_line
+        except Exception as e:
+            logger.debug(f"Persistent psql communication error: {e}")
+            return None
+
+    def _sample_iteration(self, idx: int) -> None:
+        t0 = time.monotonic()
+        out: Optional[str] = None
+
+        if self.sampler_mode == "persistent_coprocess" and self._proc:
+            out = self._query_coprocess()
+            if out is None:
+                # Coprocess died; mark missed and switch to discrete fallback
+                self.missed_samples += 1
+                self.sampler_mode = "discrete_fallback"
+                self.interval_sec = max(0.500, self.interval_sec)
+                try:
+                    if self._proc:
+                        self._proc.terminate()
+                except Exception:
+                    pass
+                self._proc = None
+                return
+        else:
+            self.monitoring_connection_count += 1
+            sql = (
+                "SELECT "
+                "(SELECT count(*) FROM pg_locks WHERE NOT granted), "
+                "(SELECT string_agg(coalesce(wait_event_type || ':' || wait_event, 'none'), ',') "
+                " FROM pg_stat_activity WHERE datname = 'aadsbench' AND pid != pg_backend_pid() AND wait_event IS NOT NULL);"
+            )
+            out = PostgresMetricsCollector._execute_sql(self.container_name, sql, timeout=3)
+
+        dur_ms = (time.monotonic() - t0) * 1000.0
+
+        if out is not None:
+            self.successful_samples += 1
+            self.total_query_duration_ms += dur_ms
             parts = out.split("|")
             unlocked_waits = int(parts[0]) if len(parts) > 0 and parts[0].isdigit() else 0
             raw_events = parts[1] if len(parts) > 1 and parts[1] else ""
@@ -606,10 +726,13 @@ class PostgresPeriodicSampler:
 
             self.samples.append({
                 "sample_index": idx,
-                "timestamp_monotonic": round(now_mono, 4),
+                "timestamp_monotonic": round(time.monotonic(), 4),
                 "ungranted_locks": unlocked_waits,
                 "active_wait_events": raw_events,
+                "query_duration_ms": round(dur_ms, 2),
             })
+        else:
+            self.missed_samples += 1
 
     def _sampling_loop(self) -> None:
         idx = 0
@@ -617,12 +740,17 @@ class PostgresPeriodicSampler:
             try:
                 self._sample_iteration(idx)
             except Exception as e:
-                logger.debug(f"Postgres periodic sample error: {e}")
+                self.missed_samples += 1
+                logger.debug(f"Postgres periodic sample iteration error: {e}")
             idx += 1
             self._stop_event.wait(self.interval_sec)
 
     def start(self) -> None:
         self._stop_event.clear()
+        if not self._start_coprocess():
+            self.sampler_mode = "discrete_fallback"
+            self.interval_sec = max(0.500, self.interval_sec)
+
         self._thread = threading.Thread(
             target=self._sampling_loop,
             name=f"PostgresSampler-{self.container_name}",
@@ -631,7 +759,43 @@ class PostgresPeriodicSampler:
         self._thread.start()
 
     def stop(self) -> Tuple[int, Dict[str, int], List[Dict[str, Any]]]:
+        """Stops the sampling loop, cleanly terminates the coprocess session, and returns results."""
         self._stop_event.set()
+
+        if self._proc:
+            try:
+                if self._proc.stdin and not self._proc.stdin.closed:
+                    self._proc.stdin.write("\\q\n")
+                    self._proc.stdin.flush()
+                    self._proc.stdin.close()
+                self._proc.wait(timeout=1.5)
+            except Exception:
+                try:
+                    self._proc.terminate()
+                except Exception:
+                    pass
+            finally:
+                self._proc = None
+
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=2.0)
+
         return self.total_lock_wait_samples, self.wait_event_counts, self.samples
+
+    def get_telemetry(self) -> Dict[str, Any]:
+        """Returns instrumentation telemetry and performance statistics for the sampler."""
+        mean_dur = (
+            round(self.total_query_duration_ms / self.successful_samples, 2)
+            if self.successful_samples > 0
+            else 0.0
+        )
+        return {
+            "sampling_interval_sec": self.interval_sec,
+            "sampler_mode": self.sampler_mode,
+            "successful_samples": self.successful_samples,
+            "missed_samples": self.missed_samples,
+            "total_samples_attempted": self.successful_samples + self.missed_samples,
+            "mean_query_duration_ms": mean_dur,
+            "total_query_duration_ms": round(self.total_query_duration_ms, 2),
+            "monitoring_connection_count": self.monitoring_connection_count,
+        }

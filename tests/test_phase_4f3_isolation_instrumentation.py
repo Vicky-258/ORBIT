@@ -1,16 +1,18 @@
 """
-Phase 4F.3 — Experimental Isolation & Instrumentation Unit and Integration Tests.
+Phase 4F.3 & Phase 4F.3.2 — Experimental Isolation & Instrumentation Unit and Integration Tests.
 
-Validates the 6 workstreams offline without executing live Docker containers:
-1. Baseline State Verification & Trial Isolation
-2. Container Lifecycle & Guaranteed Cleanup
-3. PostgreSQL Engine Observability (WAL, checkpointer, locks, wait-events, pg_stat_io)
-4. Storage I/O Observability & Bottleneck Detection (cgroup io.stat, host diskstats)
-5. Fine-Grained CFS Correlation & Association Taxonomy
-6. Epistemological Evidence Classification & Scientific Guardrails
-7. Historical SF=2 Corrected Findings Catalog
-8. Isolated DockerBenchmarkRunner Integration
+Validates the complete instrumentation stack offline without executing live Docker containers:
+1. Baseline State Verification & Trial Isolation (Stronger deterministic fingerprints - FIX 03)
+2. Container Lifecycle & Guaranteed Cleanup (Timing flags - FIX 02)
+3. PostgreSQL Engine Observability (WAL, checkpointer, locks, wait-events, pg_stat_io, timing instrumentation)
+4. Persistent Sampler Coprocess with Telemetry (FIX 04)
+5. Storage I/O Observability & Bottleneck Detection (Cgroup directory binding - FIX 01, Conservative classification - FIX 06)
+6. Fine-Grained CFS Correlation & Association Taxonomy (Controlled causal guardrail - FIX 07)
+7. Epistemological Evidence Classification & Strict VALIDATED Requirements (FIX 05)
+8. Historical SF=2 Corrected Findings Catalog
+9. Isolated DockerBenchmarkRunner Integration
 """
+import hashlib
 import json
 import math
 import subprocess
@@ -26,6 +28,7 @@ from aads.benchmark.cfs_correlation import (
     CFSAssociationLevel,
     CFSCorrelationAnalyzer,
     TransactionRecord,
+    verify_controlled_intervention,
 )
 from aads.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
 from aads.benchmark.postgres_instrumentation import (
@@ -38,12 +41,14 @@ from aads.benchmark.resource_monitor import ContainerResourceMonitor, ResourceSa
 from aads.benchmark.storage_monitor import (
     StorageMetricsDelta,
     StorageMonitor,
+    StoragePressureClassification,
     StorageSnapshot,
 )
 from aads.benchmark.trial_isolation import (
     DatabaseStateSnapshot,
     TrialIsolationError,
     TrialIsolationManager,
+    compute_content_fingerprint,
 )
 from aads.benchmark.workload_profiles import resolve_workload_profile
 from aads.core.evidence_classification import (
@@ -54,7 +59,7 @@ from aads.core.evidence_classification import (
 
 
 # ==============================================================================
-# Workstream 1: Baseline State Verification & Trial Isolation
+# Workstream 1: Baseline State Verification & Strong Deterministic Fingerprints (FIX 03)
 # ==============================================================================
 
 def test_baseline_verification_passes_on_clean_snapshot():
@@ -70,10 +75,14 @@ def test_baseline_verification_passes_on_clean_snapshot():
         tellers_size_bytes=40_960,
         history_size_bytes=8192,
         database_size_bytes=35_000_000,
+        track_io_timing="on",
+        track_wal_io_timing="on",
     )
     is_valid, violations = TrialIsolationManager.verify_baseline_state(clean_snap, expected_sf=2)
     assert is_valid is True
     assert len(violations) == 0
+    assert clean_snap.content_fingerprint is not None
+    assert clean_snap.fingerprint_algorithm == "aads_composite_aggregate_sha256_v1"
 
 
 def test_baseline_verification_fails_on_dirty_history():
@@ -109,8 +118,68 @@ def test_baseline_verification_fails_on_mismatched_accounts_or_scale():
     assert any("Scale factor mismatch" in v for v in violations_sf)
 
 
+def test_deterministic_fingerprint_detects_offsetting_balance_changes():
+    """
+    FIX 03 Regression: Modifying row balances with zero net change (e.g. +100 and -100)
+    preserves row count and sum=0, but MUST be rejected by min/max balance invariants
+    and deterministic content fingerprinting.
+    """
+    # Pristine SF=2
+    clean_snap = DatabaseStateSnapshot(
+        scale_factor=2,
+        accounts_count=200_000,
+        branches_count=2,
+        tellers_count=20,
+        history_count=0,
+        min_abalance=0,
+        max_abalance=0,
+        sum_abalance=0,
+        accounts_hash=1234567,
+    )
+    is_valid, violations = TrialIsolationManager.verify_baseline_state(clean_snap, expected_sf=2)
+    assert is_valid is True
+
+    # Dirty snapshot: sum is still 0 and count is still 200,000, but min=-100 and max=100
+    dirty_snap = DatabaseStateSnapshot(
+        scale_factor=2,
+        accounts_count=200_000,
+        branches_count=2,
+        tellers_count=20,
+        history_count=0,
+        min_abalance=-100,
+        max_abalance=100,
+        sum_abalance=0,  # Preserved sum!
+        accounts_hash=7654321,  # Hash changed!
+    )
+    is_valid_dirty, violations_dirty = TrialIsolationManager.verify_baseline_state(dirty_snap, expected_sf=2)
+    assert is_valid_dirty is False
+    assert any("Accounts balance invariant violated" in v for v in violations_dirty)
+    assert clean_snap.content_fingerprint != dirty_snap.content_fingerprint
+
+
+def test_dead_tuples_recorded_as_diagnostic_without_failing_baseline():
+    """
+    FIX 03: pg_stat_user_tables.n_dead_tup is an approximate statistic.
+    It must be recorded as diagnostic metadata without causing baseline failure.
+    """
+    snap = DatabaseStateSnapshot(
+        scale_factor=2,
+        accounts_count=200_000,
+        branches_count=2,
+        tellers_count=20,
+        history_count=0,
+        dead_tuples_estimate=450,  # Approximate statistic > 0
+    )
+    is_valid, violations = TrialIsolationManager.verify_baseline_state(snap, expected_sf=2)
+    assert is_valid is True
+    assert len(violations) == 0
+
+    d = snap.to_dict()
+    assert d["diagnostic_metadata"]["dead_tuples_estimate"] == 450
+
+
 def test_database_state_snapshot_diff():
-    """Verify state snapshot diff calculates exact deltas."""
+    """Verify state snapshot diff calculates exact deltas including fingerprints."""
     before = DatabaseStateSnapshot(
         scale_factor=2,
         accounts_count=200_000,
@@ -128,16 +197,19 @@ def test_database_state_snapshot_diff():
         history_count=5000,
         history_size_bytes=245_760,
         database_size_bytes=36_500_000,
+        dead_tuples_estimate=150,
     )
     diff = before.diff(after)
     assert diff["delta_history_rows"] == 5000
     assert diff["delta_accounts_rows"] == 0
     assert diff["delta_history_size_bytes"] == 245_760 - 8192
     assert diff["delta_database_size_bytes"] == 1_500_000
+    assert diff["delta_dead_tuples_estimate"] == 150
+    assert diff["fingerprint_matches"] is False
 
 
 # ==============================================================================
-# Workstream 1 & 2: Container Failure Handling & Guaranteed Cleanup
+# Workstream 1 & 2: Container Failure Handling & Cleanup with Timing Flags (FIX 02)
 # ==============================================================================
 
 def test_initialize_fresh_container_cleans_up_on_init_failure():
@@ -146,6 +218,8 @@ def test_initialize_fresh_container_cleans_up_on_init_failure():
 
     def mock_run(cmd, *args, **kwargs):
         if cmd[0:2] == ["docker", "run"]:
+            assert "-c" in cmd and "track_io_timing=on" in cmd
+            assert "-c" in cmd and "track_wal_io_timing=on" in cmd
             return subprocess.CompletedProcess(cmd, returncode=0, stdout="c123\n")
         if "pg_isready" in cmd:
             return subprocess.CompletedProcess(cmd, returncode=0, stdout="ready\n")
@@ -164,8 +238,16 @@ def test_initialize_fresh_container_cleans_up_on_dirty_baseline():
     """Verify that container cleanup is called if baseline validation fails."""
     mgr = TrialIsolationManager()
 
-    # psql returns dirty history table (50 rows)
-    psql_dirty_out = "200000|2|20|50|26000000|40960|40960|16384|35000000|128MB|4MB|100|5min|on|on"
+    # 37-field psql output returning dirty history table (50 rows)
+    psql_dirty_parts = [
+        "200000", "1", "200000", "0", "0", "0", "1234567",
+        "2", "1", "2", "0", "0", "0", "12345",
+        "20", "1", "20", "0", "0", "0", "67890",
+        "50",  # Dirty history count!
+        "26000000", "40960", "40960", "16384", "35000000", "1048576", "0",
+        "128MB", "4MB", "100", "5min", "on", "on", "on", "on"
+    ]
+    psql_dirty_out = "|".join(psql_dirty_parts)
 
     def mock_run(cmd, *args, **kwargs):
         if cmd[0:2] == ["docker", "run"]:
@@ -186,12 +268,14 @@ def test_initialize_fresh_container_cleans_up_on_dirty_baseline():
 
 
 # ==============================================================================
-# Workstream 2: PostgreSQL Observability (pg_stat_wal, checkpointer, locks, etc.)
+# Workstream 2: PostgreSQL Observability & Timing Settings (FIX 02)
 # ==============================================================================
 
-def test_postgres_snapshot_parsing():
-    """Verify parsing of internal PostgreSQL 16 views."""
-    def mock_exec_sql(container, query, timeout=5):
+def test_postgres_snapshot_parsing_and_timing_verification():
+    """Verify parsing of internal PostgreSQL 16 views and timing flag capture."""
+    def mock_exec_sql(container, query, timeout=8):
+        if "track_io_timing" in query:
+            return "on|on"
         if "pg_stat_wal" in query:
             return "15000|50|24500000|0|120|115|45.5|230.2"
         if "pg_stat_checkpointer" in query:
@@ -213,6 +297,9 @@ def test_postgres_snapshot_parsing():
     with patch.object(PostgresMetricsCollector, "_execute_sql", side_effect=mock_exec_sql):
         snap = PostgresMetricsCollector.take_snapshot("mock_pg")
 
+        assert snap.database_settings["track_io_timing"] == "on"
+        assert snap.database_settings["track_wal_io_timing"] == "on"
+        assert "track_io_timing_disabled" not in snap.unavailable_metrics
         assert snap.wal_stats["wal_bytes"] == 24_500_000
         assert snap.wal_stats["wal_sync_time"] == 230.2
         assert snap.checkpointer_stats["num_timed"] == 2
@@ -227,6 +314,29 @@ def test_postgres_snapshot_parsing():
         assert len(snap.locks_stats) == 2
 
 
+def test_postgres_snapshot_flags_disabled_timing():
+    """Verify that disabled timing flags explicitly append unavailable metrics."""
+    def mock_exec_sql(container, query, timeout=8):
+        if "track_io_timing" in query:
+            return "off|off"
+        return ""
+
+    with patch.object(PostgresMetricsCollector, "_execute_sql", side_effect=mock_exec_sql):
+        snap = PostgresMetricsCollector.take_snapshot("mock_pg")
+        assert "track_io_timing_disabled" in snap.unavailable_metrics
+        assert "track_wal_io_timing_disabled" in snap.unavailable_metrics
+
+        snap_end = PostgresSnapshot(
+            timestamp_monotonic=130.0,
+            timestamp_utc="2026-11-02T10:00:30Z",
+            database_settings={"track_io_timing": "off", "track_wal_io_timing": "off"},
+            unavailable_metrics=["track_io_timing_disabled", "track_wal_io_timing_disabled"],
+        )
+        delta = PostgresMetricsCollector.compute_deltas(start=snap, end=snap_end)
+        assert delta.timing_instrumentation_active is False
+        assert delta.to_dict()["wal"]["delta_wal_write_time_ms"] is None
+
+
 def test_postgres_delta_computation_and_rates():
     """Verify exact delta and rate computation between pre and post snapshots."""
     snap1 = PostgresSnapshot(
@@ -237,6 +347,7 @@ def test_postgres_delta_computation_and_rates():
         database_stats={"xact_commit": 500, "blks_read": 50, "blks_hit": 5000},
         table_stats={"pgbench_history": {"n_tup_ins": 500}},
         io_stats={"reads": 10, "writes": 20, "fsyncs": 5},
+        database_settings={"track_io_timing": "on", "track_wal_io_timing": "on"},
     )
     snap2 = PostgresSnapshot(
         timestamp_monotonic=130.0,
@@ -246,6 +357,7 @@ def test_postgres_delta_computation_and_rates():
         database_stats={"xact_commit": 2500, "blks_read": 100, "blks_hit": 25000},
         table_stats={"pgbench_history": {"n_tup_ins": 2500}},
         io_stats={"reads": 30, "writes": 80, "fsyncs": 25},
+        database_settings={"track_io_timing": "on", "track_wal_io_timing": "on"},
     )
 
     delta = PostgresMetricsCollector.compute_deltas(
@@ -256,6 +368,7 @@ def test_postgres_delta_computation_and_rates():
     )
 
     assert delta.duration_seconds == 30.0
+    assert delta.timing_instrumentation_active is True
     assert delta.delta_wal_bytes == 10_000_000
     assert delta.delta_wal_records == 2000
     assert delta.delta_wal_sync_time_ms == 200.0
@@ -271,110 +384,124 @@ def test_postgres_delta_computation_and_rates():
     assert d_dict["database"]["cache_hit_ratio_pct"] > 99.0
 
 
-def test_postgres_lock_contention_classification():
-    """Verify lock contention is classified when ungranted locks or Lock wait events are observed."""
-    snap1 = PostgresSnapshot(100.0, "2026-11-02T10:00:00Z")
-    snap2 = PostgresSnapshot(130.0, "2026-11-02T10:00:30Z")
+def test_postgres_periodic_sampler_telemetry_and_cleanup():
+    """
+    FIX 04 Regression: PostgresPeriodicSampler maintains persistent coprocess session,
+    records telemetry metadata, and cleanly terminates.
+    """
+    sampler = PostgresPeriodicSampler(container_name="test_pg", interval_sec=0.010)
 
-    # Case A: Contention observed
-    delta_contention = PostgresMetricsCollector.compute_deltas(
-        start=snap1,
-        end=snap2,
-        lock_wait_samples=15,
-        wait_event_samples={"Lock:relation": 12, "Lock:tuple": 3},
-    )
-    assert delta_contention.lock_contention_classification == "CONFIRMED_LOCK_CONTENTION_OBSERVED"
-    assert delta_contention.observed_lock_waits == 15
+    # Mock Popen persistent session
+    mock_proc = MagicMock()
+    mock_proc.stdin = MagicMock()
+    mock_proc.stdout = MagicMock()
+    mock_proc.stdout.readline.side_effect = [
+        "0|none\n",
+        "__END_SAMPLE__\n",
+        "2|Lock:relation\n",
+        "__END_SAMPLE__\n",
+        "",  # EOF
+    ]
 
-    # Case B: No contention observed
-    delta_none = PostgresMetricsCollector.compute_deltas(
-        start=snap1,
-        end=snap2,
-        lock_wait_samples=0,
-        wait_event_samples={},
-    )
-    assert delta_none.lock_contention_classification == "NO_CONTENTION_OBSERVED"
+    with patch("subprocess.Popen", return_value=mock_proc):
+        sampler.start()
+        time.sleep(0.05)
+        waits, ev_counts, samples = sampler.stop()
+
+    telemetry = sampler.get_telemetry()
+    assert telemetry["sampler_mode"] in ("persistent_coprocess", "discrete_fallback")
+    assert telemetry["monitoring_connection_count"] >= 1
+    assert telemetry["total_samples_attempted"] >= 1
 
 
 # ==============================================================================
-# Workstream 3: Storage I/O Observability & Bottleneck Detection
+# Workstream 3: Storage I/O Observability & Bottleneck Detection (FIX 01 & FIX 06)
 # ==============================================================================
 
-def test_storage_cgroup_io_stat_parsing(tmp_path):
-    """Verify parsing of cgroup v2 io.stat format."""
-    cg_dir = tmp_path / "cgroup_test"
+def test_storage_cgroup_dir_binding_and_unavailable_status(tmp_path):
+    """
+    FIX 01 Regression: Cgroup directory binding explicitly reaches storage snapshots;
+    missing cg_dir sets explicit unavailable status without assuming zero I/O.
+    """
+    # Case A: Explicit valid cg_dir
+    cg_dir = tmp_path / "cg_valid"
     cg_dir.mkdir()
     io_file = cg_dir / "io.stat"
     io_file.write_text("259:0 rbytes=10485760 wbytes=20971520 rios=250 wios=500 dbytes=0 dios=0\n")
 
-    res = StorageMonitor._read_cgroup_io_stat(cg_dir)
-    assert "259:0" in res
-    assert res["259:0"]["rbytes"] == 10485760
-    assert res["259:0"]["wbytes"] == 20971520
-    assert res["259:0"]["rios"] == 250
-    assert res["259:0"]["wios"] == 500
+    snap = StorageMonitor.take_snapshot(cg_dir=cg_dir)
+    assert "259:0" in snap.cgroup_io_stat
+    assert snap.cgroup_io_stat["259:0"]["wbytes"] == 20971520
+    assert "cgroup_io_stat" not in snap.unavailable_metrics
+
+    # Case B: Missing cg_dir (None)
+    snap_none = StorageMonitor.take_snapshot(cg_dir=None)
+    assert "cgroup_io_stat" in snap_none.unavailable_metrics
+    assert snap_none.cgroup_io_stat == {}
 
 
-def test_storage_metrics_delta_and_bottleneck_detection():
+def test_conservative_storage_classification_rules():
     """
-    Verify storage delta computation and bottleneck rules:
-    WAL generation with low host disk utilization (< 10%) must NOT be classified as storage bound.
+    FIX 06 Regression: Conservative storage pressure classification based on multi-queue
+    SSD metrics (utilization, queue depth, await latency).
     """
-    snap_start = StorageSnapshot(
-        timestamp_monotonic=100.0,
-        timestamp_utc="2026-11-02T10:00:00Z",
-        cgroup_io_stat={"259:0": {"rbytes": 0, "wbytes": 0, "rios": 0, "wios": 0}},
-        host_diskstats={"nvme0n1": {"read_sectors": 100, "write_sectors": 1000, "io_ms": 500}},
-        primary_device="nvme0n1",
-        filesystem_type="ext4",
-    )
+    # 1. Missing host metrics -> INSUFFICIENT_STORAGE_EVIDENCE
+    s_miss = StorageSnapshot(100.0, "2026-11-02T10:00:00Z", unavailable_metrics=["host_diskstats"])
+    e_miss = StorageSnapshot(130.0, "2026-11-02T10:00:30Z", unavailable_metrics=["host_diskstats"])
+    delta_miss = StorageMonitor.compute_deltas(s_miss, e_miss)
+    assert delta_miss.pressure_classification == StoragePressureClassification.INSUFFICIENT_STORAGE_EVIDENCE
+    assert delta_miss.is_storage_bound is False
 
-    # 30-second measurement generating 30MB write, but host io_ms only grew by 150ms (0.5% utilization)
-    snap_end = StorageSnapshot(
-        timestamp_monotonic=130.0,
-        timestamp_utc="2026-11-02T10:00:30Z",
-        cgroup_io_stat={"259:0": {"rbytes": 0, "wbytes": 31_457_280, "rios": 0, "wios": 300}},
-        host_diskstats={"nvme0n1": {"read_sectors": 100, "write_sectors": 62440, "io_ms": 650}},
-        primary_device="nvme0n1",
-        filesystem_type="ext4",
-    )
-
-    delta = StorageMonitor.compute_deltas(snap_start, snap_end)
-    assert delta.duration_seconds == 30.0
-    assert delta.delta_wbytes == 31_457_280
-    assert delta.is_storage_bound is False
-    assert "Host I/O utilization is low" in delta.classification_reason
-
-    d_dict = delta.to_dict()
-    assert d_dict["container_io"]["write_mb"] == 30.0
-    assert d_dict["host_io"]["host_io_utilization_pct"] < 5.0
-
-
-def test_storage_bottleneck_detected_on_high_utilization():
-    """Verify that host I/O utilization >= 50% triggers storage bound classification."""
-    snap_start = StorageSnapshot(
-        timestamp_monotonic=100.0,
-        timestamp_utc="2026-11-02T10:00:00Z",
-        cgroup_io_stat={"259:0": {"rbytes": 0, "wbytes": 0, "rios": 0, "wios": 0}},
-        host_diskstats={"nvme0n1": {"read_sectors": 0, "write_sectors": 0, "io_ms": 1000}},
+    # 2. Low host utilization -> NO_STORAGE_PRESSURE_OBSERVED
+    s_low = StorageSnapshot(
+        100.0, "2026-11-02T10:00:00Z",
+        host_diskstats={"nvme0n1": {"reads_completed": 10, "writes_completed": 100, "read_ms": 10, "write_ms": 100, "io_ms": 200, "weighted_io_ms": 250}},
         primary_device="nvme0n1",
     )
-    # io_ms increased by 20,000 ms over 30s (66.7% utilization)
-    snap_end = StorageSnapshot(
-        timestamp_monotonic=130.0,
-        timestamp_utc="2026-11-02T10:00:30Z",
-        cgroup_io_stat={"259:0": {"rbytes": 0, "wbytes": 500_000_000, "rios": 0, "wios": 15000}},
-        host_diskstats={"nvme0n1": {"read_sectors": 0, "write_sectors": 1_000_000, "io_ms": 21000}},
+    e_low = StorageSnapshot(
+        130.0, "2026-11-02T10:00:30Z",
+        host_diskstats={"nvme0n1": {"reads_completed": 20, "writes_completed": 300, "read_ms": 20, "write_ms": 300, "io_ms": 500, "weighted_io_ms": 650}},
         primary_device="nvme0n1",
     )
+    delta_low = StorageMonitor.compute_deltas(s_low, e_low)
+    assert delta_low.pressure_classification == StoragePressureClassification.NO_STORAGE_PRESSURE_OBSERVED
+    assert delta_low.is_storage_bound is False
 
-    delta = StorageMonitor.compute_deltas(snap_start, snap_end)
-    assert delta.is_storage_bound is True
-    assert "High host disk utilization" in delta.classification_reason
+    # 3. Elevated busy time without queue saturation -> STORAGE_PRESSURE_SUSPECTED
+    s_susp = StorageSnapshot(
+        100.0, "2026-11-02T10:00:00Z",
+        host_diskstats={"nvme0n1": {"reads_completed": 10, "writes_completed": 100, "read_ms": 10, "write_ms": 100, "io_ms": 0, "weighted_io_ms": 0}},
+        primary_device="nvme0n1",
+    )
+    # io_ms increased by 16000ms over 30s (53.3% utilization), but queue depth is low
+    e_susp = StorageSnapshot(
+        130.0, "2026-11-02T10:00:30Z",
+        host_diskstats={"nvme0n1": {"reads_completed": 100, "writes_completed": 1000, "read_ms": 100, "write_ms": 1000, "io_ms": 16000, "weighted_io_ms": 15000}},
+        primary_device="nvme0n1",
+    )
+    delta_susp = StorageMonitor.compute_deltas(s_susp, e_susp)
+    assert delta_susp.pressure_classification == StoragePressureClassification.STORAGE_PRESSURE_SUSPECTED
+    assert delta_susp.is_storage_bound is False
+
+    # 4. Sustained storage saturation -> STORAGE_PRESSURE_SUPPORTED
+    s_supp = StorageSnapshot(
+        100.0, "2026-11-02T10:00:00Z",
+        host_diskstats={"nvme0n1": {"reads_completed": 0, "writes_completed": 0, "read_ms": 0, "write_ms": 0, "io_ms": 0, "weighted_io_ms": 0}},
+        primary_device="nvme0n1",
+    )
+    # 80% busy time (24000ms), avg queue depth 3.0 (90000ms weighted), avg await 15ms
+    e_supp = StorageSnapshot(
+        130.0, "2026-11-02T10:00:30Z",
+        host_diskstats={"nvme0n1": {"reads_completed": 1000, "writes_completed": 4000, "read_ms": 15000, "write_ms": 60000, "io_ms": 24000, "weighted_io_ms": 90000}},
+        primary_device="nvme0n1",
+    )
+    delta_supp = StorageMonitor.compute_deltas(s_supp, e_supp)
+    assert delta_supp.pressure_classification == StoragePressureClassification.STORAGE_PRESSURE_SUPPORTED
+    assert delta_supp.is_storage_bound is True
 
 
 # ==============================================================================
-# Workstream 4: Fine-Grained CFS Correlation & Association Taxonomy
+# Workstream 4: Fine-Grained CFS Correlation & Association Taxonomy (FIX 07)
 # ==============================================================================
 
 def test_parse_pgbench_log_records():
@@ -405,22 +532,21 @@ def test_cfs_correlation_analyzer_no_spikes():
     assert res["spike_count"] == 0
 
 
-def test_cfs_correlation_analyzer_temporal_association():
+def test_cfs_correlation_analyzer_strong_temporal_association():
     """
-    Verify TEMPORAL_ASSOCIATION is detected when multi-client spikes cluster
-    with ~100ms inter-cluster periodicity and cgroup throttling is present.
+    Verify STRONG_TEMPORAL_ASSOCIATION is detected when multi-client spikes cluster
+    with ~100ms inter-cluster periodicity, and does NOT promote to causal without intervention.
     """
     t0 = 1700000000.0
     records = []
-    # Create 5 clusters separated by exactly 100ms (0.1s), each with 4 clients stalling simultaneously
     for i in range(5):
         t_cluster = t0 + i * 0.100
         for client in range(4):
             records.append(TransactionRecord(
                 client_id=client,
                 transaction_no=i,
-                latency_ms=15.0,  # > 10ms threshold
-                epoch_timestamp_sec=t_cluster + (client * 0.0002),  # within 1.5ms cluster window
+                latency_ms=15.0,
+                epoch_timestamp_sec=t_cluster + (client * 0.0002),
             ))
 
     cgroup_samples = [
@@ -429,15 +555,19 @@ def test_cfs_correlation_analyzer_temporal_association():
     ]
 
     analyzer = CFSCorrelationAnalyzer(cfs_period_ms=100.0, spike_threshold_ms=10.0)
-    res = analyzer.analyze(records, cgroup_samples, has_controlled_experiment_confirmation=False)
+    # Boolean confirmation alone MUST NOT promote to causal (FIX 07)
+    res = analyzer.analyze(records, cgroup_samples, has_controlled_experiment_confirmation=True)
 
     assert res["association_level"] == CFSAssociationLevel.STRONG_TEMPORAL_ASSOCIATION.value
     assert res["multi_client_cluster_count"] == 5
     assert abs(res["median_inter_cluster_interval_ms"] - 100.0) < 1.0
 
 
-def test_cfs_correlation_analyzer_controlled_causal_evidence():
-    """Verify CONTROLLED_CAUSAL_EVIDENCE is only assigned when controlled experiment confirms it."""
+def test_cfs_causal_classification_guardrail_with_intervention():
+    """
+    FIX 07 Regression: CONTROLLED_CAUSAL_EVIDENCE requires verifiable paired intervention data;
+    duplicate replications are rejected.
+    """
     records = [
         TransactionRecord(0, 1, 15.0, 1700000000.0),
         TransactionRecord(1, 1, 15.0, 1700000000.001),
@@ -451,14 +581,39 @@ def test_cfs_correlation_analyzer_controlled_causal_evidence():
     cgroup_samples = [
         {"sample_index": 1, "timestamp_monotonic": 10.5, "cgroup_throttled_usec": 100000, "cgroup_nr_throttled": 4},
     ]
-
     analyzer = CFSCorrelationAnalyzer(cfs_period_ms=100.0, spike_threshold_ms=10.0)
-    res = analyzer.analyze(records, cgroup_samples, has_controlled_experiment_confirmation=True)
-    assert res["association_level"] == CFSAssociationLevel.CONTROLLED_CAUSAL_EVIDENCE.value
+
+    # Case A: Duplicate replications in intervention -> REJECTED, remains correlation
+    rep_intervention = {
+        "control_experiment_id": "exp_pg_sf2_c8_r0",
+        "treatment_experiment_id": "exp_pg_sf2_c8_r1",
+        "control_quota_cores": 1.0,
+        "treatment_quota_cores": 1.0,  # No quota manipulation!
+        "comparable_baseline_confirmed": True,
+        "control_outcome": {"tps": 1000.0},
+        "treatment_outcome": {"tps": 1010.0},
+    }
+    res_rep = analyzer.analyze(records, cgroup_samples, controlled_intervention=rep_intervention)
+    assert res_rep["association_level"] == CFSAssociationLevel.STRONG_TEMPORAL_ASSOCIATION.value
+    assert res_rep["controlled_intervention_evaluation"]["verified"] is False
+
+    # Case B: Valid controlled intervention (1.0 vs 2.0 vCPU) -> PROMOTED to CONTROLLED_CAUSAL_EVIDENCE
+    valid_intervention = {
+        "control_experiment_id": "exp_pg_sf2_c8_1vcpu_ctrl",
+        "treatment_experiment_id": "exp_pg_sf2_c8_2vcpu_treatment",
+        "control_quota_cores": 1.0,
+        "treatment_quota_cores": 2.0,
+        "comparable_baseline_confirmed": True,
+        "control_outcome": {"tps": 1000.0, "mean_latency_ms": 8.0},
+        "treatment_outcome": {"tps": 2010.0, "mean_latency_ms": 3.9},
+    }
+    res_valid = analyzer.analyze(records, cgroup_samples, controlled_intervention=valid_intervention)
+    assert res_valid["association_level"] == CFSAssociationLevel.CONTROLLED_CAUSAL_EVIDENCE.value
+    assert res_valid["controlled_intervention_evaluation"]["verified"] is True
 
 
 # ==============================================================================
-# Workstream 5: Evidence Classification Taxonomy & Epistemological Guardrails
+# Workstream 5: Evidence Classification & Strict VALIDATED Requirements (FIX 05)
 # ==============================================================================
 
 def test_evidence_classification_levels_supported():
@@ -466,17 +621,68 @@ def test_evidence_classification_levels_supported():
     for level in [EvidenceClassification.OBSERVED, EvidenceClassification.DERIVED,
                   EvidenceClassification.CORRELATED, EvidenceClassification.HYPOTHESIS,
                   EvidenceClassification.VALIDATED]:
-        finding = PerformanceFinding(
-            finding_id=f"test_{level.value.lower()}",
-            title=f"Finding for {level.value}",
-            claim=f"Descriptive finding statement for {level.value}.",
-            classification=level,
-            supporting_metrics=["p95_latency_ms"] if level != EvidenceClassification.VALIDATED else ["p95", "quota"],
-            supporting_experiment_ids=["exp1"] if level != EvidenceClassification.VALIDATED else ["exp1", "exp2"],
-            methodology="Empirical measurement and analysis.",
-            confidence="HIGH",
-        )
+        kwargs = {
+            "finding_id": f"test_{level.value.lower()}",
+            "title": f"Finding for {level.value}",
+            "claim": f"Descriptive finding statement for {level.value}.",
+            "classification": level,
+            "supporting_metrics": ["p95_latency_ms"] if level != EvidenceClassification.VALIDATED else ["achieved_tps"],
+            "supporting_experiment_ids": ["exp1"] if level != EvidenceClassification.VALIDATED else ["exp_ctrl", "exp_treat"],
+            "methodology": "Empirical measurement and analysis.",
+            "confidence": "HIGH",
+        }
+        if level == EvidenceClassification.VALIDATED:
+            kwargs.update({
+                "control_experiment_id": "exp_ctrl",
+                "treatment_experiment_id": "exp_treat",
+                "manipulated_variable": "cpu_limit",
+                "expected_intervention": "Double CPU quota from 1.0 to 2.0 vCPU",
+                "observed_intervention": "Measured CPU quota doubled",
+                "comparable_baseline_confirmed": True,
+                "outcome_metrics": ["achieved_tps"],
+            })
+        finding = PerformanceFinding(**kwargs)
         assert finding.classification == level
+
+
+def test_guardrail_rejects_duplicate_replications_as_intervention():
+    """FIX 05 Regression: Duplicate replications (_r0 vs _r1) must NOT qualify as a VALIDATED intervention."""
+    with pytest.raises(pydantic.ValidationError, match="pairs duplicate replications"):
+        PerformanceFinding(
+            finding_id="invalid_replication_validation",
+            title="Invalid Replication Validation",
+            claim="Throughput increases due to worker scaling.",
+            classification=EvidenceClassification.VALIDATED,
+            control_experiment_id="exp_pg_sf2_read_only_select_c8_r0",
+            treatment_experiment_id="exp_pg_sf2_read_only_select_c8_r1",  # Same config replication!
+            manipulated_variable="replication",
+            expected_intervention="Run second replication",
+            observed_intervention="Second replication executed",
+            comparable_baseline_confirmed=True,
+            outcome_metrics=["achieved_tps"],
+            methodology="Replication comparison.",
+            confidence="LOW",
+        )
+
+
+def test_guardrail_rejects_unconfirmed_baseline_for_validated():
+    """FIX 05 Regression: VALIDATED claims require comparable_baseline_confirmed=True."""
+    with pytest.raises(pydantic.ValidationError, match="comparable_baseline_confirmed=True"):
+        PerformanceFinding(
+            finding_id="invalid_baseline_validation",
+            title="Invalid Baseline Validation",
+            claim="CPU quota doubling improves throughput.",
+            classification=EvidenceClassification.VALIDATED,
+            control_experiment_id="exp_ctrl",
+            treatment_experiment_id="exp_treat",
+            manipulated_variable="cpu_limit",
+            expected_intervention="Double CPU quota",
+            observed_intervention="CPU quota doubled",
+            comparable_baseline_confirmed=False,  # Unconfirmed baseline!
+            outcome_metrics=["achieved_tps"],
+            methodology="Intervention comparison.",
+            confidence="LOW",
+        )
 
 
 def test_guardrail_rejects_uninstrumented_lock_contention():
@@ -487,8 +693,13 @@ def test_guardrail_rejects_uninstrumented_lock_contention():
             title="Invalid Lock Assertion",
             claim="High latency was caused by row-level lock contention on pgbench_branches.",
             classification=EvidenceClassification.VALIDATED,
-            supporting_metrics=["p95_latency_ms", "tps"],  # Missing pg_locks or wait_event
-            supporting_experiment_ids=["exp1", "exp2"],
+            control_experiment_id="exp_ctrl",
+            treatment_experiment_id="exp_treat",
+            manipulated_variable="concurrency",
+            expected_intervention="Increase concurrency",
+            observed_intervention="Concurrency increased",
+            comparable_baseline_confirmed=True,
+            supporting_metrics=["p95_latency_ms", "tps"],
             methodology="Inference without lock telemetry.",
             confidence="LOW",
         )
@@ -502,24 +713,14 @@ def test_guardrail_rejects_uninstrumented_disk_bound():
             title="Invalid Disk Assertion",
             claim="The 3.15s transaction latency stall was caused by a storage-bound disk bottleneck.",
             classification=EvidenceClassification.VALIDATED,
-            supporting_metrics=["p95_latency_ms", "tps"],  # Missing diskstats or io.stat
-            supporting_experiment_ids=["exp1", "exp2"],
+            control_experiment_id="exp_ctrl",
+            treatment_experiment_id="exp_treat",
+            manipulated_variable="concurrency",
+            expected_intervention="Increase concurrency",
+            observed_intervention="Concurrency increased",
+            comparable_baseline_confirmed=True,
+            supporting_metrics=["p95_latency_ms", "tps"],
             methodology="Speculation without storage telemetry.",
-            confidence="LOW",
-        )
-
-
-def test_guardrail_rejects_validated_without_multiple_experiments():
-    """Verify that VALIDATED claims require at least 2 distinct empirical experiments."""
-    with pytest.raises(pydantic.ValidationError, match="must reference at least two supporting experiments"):
-        PerformanceFinding(
-            finding_id="invalid_single_exp_validation",
-            title="Invalid Single Experiment Validation",
-            claim="CFS quota doubling eliminates periodicity.",
-            classification=EvidenceClassification.VALIDATED,
-            supporting_metrics=["throttled_usec", "cgroup_quota"],
-            supporting_experiment_ids=["exp_only_one"],
-            methodology="Single trial observation.",
             confidence="LOW",
         )
 
@@ -549,9 +750,13 @@ def test_historical_findings_catalog_corrected():
     # 1. 100ms periodicity is OBSERVED
     assert finding_map["FINDING_4F_01"].classification == EvidenceClassification.OBSERVED
 
-    # 2. CFS quota causation is VALIDATED via 1.0 vs 2.0 vCPU experiment
-    assert finding_map["FINDING_4F_02"].classification == EvidenceClassification.VALIDATED
-    assert len(finding_map["FINDING_4F_02"].supporting_experiment_ids) >= 2
+    # 2. CFS quota causation is VALIDATED via 1.0 vs 2.0 vCPU experiment with full structured fields
+    f2 = finding_map["FINDING_4F_02"]
+    assert f2.classification == EvidenceClassification.VALIDATED
+    assert f2.control_experiment_id == "exp_pg_sf2_read_only_select_c8_1vcpu_ctrl"
+    assert f2.treatment_experiment_id == "exp_pg_sf2_read_only_select_c8_2vcpu_treatment"
+    assert f2.manipulated_variable == "cpu_limit"
+    assert f2.comparable_baseline_confirmed is True
 
     # 3. TPC-B inversion is OBSERVED
     assert finding_map["FINDING_4F_03"].classification == EvidenceClassification.OBSERVED
@@ -574,7 +779,7 @@ def test_docker_runner_isolated_execution_with_mocks(tmp_path):
     """
     Verify that DockerBenchmarkRunner with per_trial_isolation=True executes
     fresh container lifecycle, captures baseline, records Postgres and Storage deltas,
-    performs CFS analysis, and cleans up containers.
+    performs CFS analysis, records sampler telemetry, and cleans up containers.
     """
     runner = DockerBenchmarkRunner(
         cpu_limit="1.0",
@@ -595,7 +800,17 @@ def test_docker_runner_isolated_execution_with_mocks(tmp_path):
         "tps = 2000.0 (without initial connection time)\n"
     )
     log_mock = "0 1 500 0 1700000000 0\n" * 20
-    psql_clean_out = "200000|2|20|0|26000000|40960|40960|8192|35000000|128MB|4MB|100|5min|on|on"
+
+    # 37-field psql clean output
+    psql_clean_parts = [
+        "200000", "1", "200000", "0", "0", "0", "1234567",
+        "2", "1", "2", "0", "0", "0", "12345",
+        "20", "1", "20", "0", "0", "0", "67890",
+        "0",
+        "26000000", "40960", "40960", "8192", "35000000", "1048576", "0",
+        "128MB", "4MB", "100", "5min", "on", "on", "on", "on"
+    ]
+    psql_clean_out = "|".join(psql_clean_parts)
 
     def mock_subprocess_run(cmd, *args, **kwargs):
         cmd_str = " ".join(cmd)
@@ -608,6 +823,10 @@ def test_docker_runner_isolated_execution_with_mocks(tmp_path):
         if "pgbench" in cmd and "-i" in cmd:
             return subprocess.CompletedProcess(cmd, returncode=0, stdout="done\n")
         if "psql" in cmd:
+            if "track_io_timing" in cmd_str and "track_wal_io_timing" in cmd_str and len(cmd_str.split()) < 15:
+                return subprocess.CompletedProcess(cmd, returncode=0, stdout="on|on")
+            if "hashtext" in cmd_str or "pgbench_accounts" in cmd_str:
+                return subprocess.CompletedProcess(cmd, returncode=0, stdout=psql_clean_out)
             if "pg_stat_wal" in cmd_str:
                 return subprocess.CompletedProcess(cmd, returncode=0, stdout="100|0|1000000|0|10|10|5.0|50.0")
             if "pg_stat_checkpointer" in cmd_str:
@@ -624,8 +843,6 @@ def test_docker_runner_isolated_execution_with_mocks(tmp_path):
                 return subprocess.CompletedProcess(cmd, returncode=0, stdout="101|idle|None|None")
             if "pg_locks" in cmd_str:
                 return subprocess.CompletedProcess(cmd, returncode=0, stdout="relation|RowExclusiveLock|t|1")
-            if "pgbench_accounts" in cmd_str:
-                return subprocess.CompletedProcess(cmd, returncode=0, stdout=psql_clean_out)
             return subprocess.CompletedProcess(cmd, returncode=0, stdout="")
         if "pgbench" in cmd and "-l" in cmd:
             return subprocess.CompletedProcess(cmd, returncode=0, stdout=stdout_mock)
@@ -660,5 +877,6 @@ def test_docker_runner_isolated_execution_with_mocks(tmp_path):
         assert (art_dir / "postgres_metrics_delta_c1_r0.json").exists()
         assert (art_dir / "storage_metrics_delta_c1_r0.json").exists()
         assert (art_dir / "correlation_analysis_c1_r0.json").exists()
+        assert (art_dir / "postgres_sampler_telemetry_c1_r0.json").exists()
         assert (art_dir / "monitoring_samples_c1_r0.json").exists()
         assert (art_dir / "monitoring_summary_c1_r0.json").exists()

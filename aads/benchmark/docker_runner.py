@@ -384,6 +384,8 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                     "-e", "POSTGRES_PASSWORD=aadsbenchpass",
                     "-e", "POSTGRES_DB=aadsbench",
                     image,
+                    "-c", "track_io_timing=on",
+                    "-c", "track_wal_io_timing=on",
                 ]
                 res_start = subprocess.run(start_cmd, capture_output=True, text=True, timeout=15)
                 if res_start.returncode != 0:
@@ -808,13 +810,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                                 except Exception:
                                     pass
 
-                            # 2. Take pre-trial PostgreSQL snapshot
-                            pre_pg = PostgresMetricsCollector.take_snapshot(container_name)
-
-                            # 3. Take pre-trial Storage snapshot
-                            pre_storage = StorageMonitor.take_snapshot()
-
-                            # 4. Start active fine-grained continuous monitors
+                            # 2. Start active fine-grained continuous monitors and resolve cgroup dir
                             cfs_interval = fine_grained_cfs_interval or 0.020
                             monitor = ContainerResourceMonitor(
                                 container_name=container_name,
@@ -822,6 +818,14 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                                 execution_id=execution_id or f"exec_{uuid.uuid4().hex[:10]}",
                                 experiment_id=rep_exp_id,
                             )
+                            cg_dir = monitor.resolve_cgroup_dir()
+
+                            # 3. Take pre-trial PostgreSQL snapshot
+                            pre_pg = PostgresMetricsCollector.take_snapshot(container_name)
+
+                            # 4. Take pre-trial Storage snapshot with explicitly resolved cgroup directory (FIX 01)
+                            pre_storage = StorageMonitor.take_snapshot(cg_dir=cg_dir)
+
                             monitor.start()
 
                             pg_interval = pg_sample_interval or 0.100
@@ -901,8 +905,9 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                                 wait_event_samples=wait_counts,
                             )
 
-                            post_storage = StorageMonitor.take_snapshot()
+                            post_storage = StorageMonitor.take_snapshot(cg_dir=cg_dir)
                             storage_delta = StorageMonitor.compute_deltas(start=pre_storage, end=post_storage)
+                            sampler_telemetry = pg_sampler.get_telemetry()
 
                             post_db_state = None
                             db_diff = {}
@@ -934,6 +939,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                                 (art_dir / f"postgres_snapshot_post_{trial_prefix}.json").write_text(json.dumps(post_pg.to_dict(), indent=2))
                                 (art_dir / f"postgres_metrics_delta_{trial_prefix}.json").write_text(json.dumps(pg_delta.to_dict(), indent=2))
                                 (art_dir / f"postgres_lock_samples_{trial_prefix}.json").write_text(json.dumps(lock_samples, indent=2))
+                                (art_dir / f"postgres_sampler_telemetry_{trial_prefix}.json").write_text(json.dumps(sampler_telemetry, indent=2))
                                 (art_dir / f"storage_snapshot_pre_{trial_prefix}.json").write_text(json.dumps(pre_storage.to_dict(), indent=2))
                                 (art_dir / f"storage_snapshot_post_{trial_prefix}.json").write_text(json.dumps(post_storage.to_dict(), indent=2))
                                 (art_dir / f"storage_metrics_delta_{trial_prefix}.json").write_text(json.dumps(storage_delta.to_dict(), indent=2))
