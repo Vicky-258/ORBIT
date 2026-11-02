@@ -1,0 +1,10 @@
+{
+  "total_transactions": 40303,
+  "spike_threshold_ms": 10.0,
+  "spike_count": 5308,
+  "spike_percentage": 13.17,
+  "median_inter_spike_interval_ms": 16.59,
+  "pct_spikes_matching_100ms_cfs_period": 1.7,
+  "throttling_samples_detected": 61,
+  "evidence_supported": false
+}

@@ -1,0 +1,32 @@
+{
+  "proposal_id": "prop_postgres_campaign_4f1_c62ba2d7",
+  "authorization_id": "auth_postgres_campaign_4f1_c62ba2d7",
+  "execution_id": "exec_4f1_c62ba2d7",
+  "status": "SUCCESS",
+  "target_component": "postgresql_db",
+  "version": "16-alpine",
+  "scale_factors": [
+    2
+  ],
+  "workload_profiles": [
+    "read_only_select",
+    "balanced_oltp_tpcb",
+    "simple_write_ingest"
+  ],
+  "concurrencies": [
+    1,
+    4,
+    8,
+    16
+  ],
+  "replications": 3,
+  "duration_seconds": 30,
+  "warmup_seconds": 10,
+  "total_records_count": 48,
+  "individual_records_count": 36,
+  "pooled_records_count": 12,
+  "wall_clock_duration_seconds": 1135.4,
+  "artifacts_directory": "/mnt/v_drive/Codes/AADS/artifacts/benchmarks/phase_4f1_sf2",
+  "saved_artifacts_count": 255,
+  "timestamp_utc": "2026-11-02T05:41:48.146885+00:00"
+}

@@ -1,0 +1,5 @@
+{
+  "total_transactions": 1248323,
+  "spike_count": 0,
+  "correlation_evidence": "No latency spikes exceeding threshold were observed."
+}

@@ -242,7 +242,7 @@ def main():
     print("\n" + "=" * 90)
     print("PHASE 4F.1 EMPIRICAL CAMPAIGN RESULTS (POOLED CONFIGURATION SUMMARY)")
     print("=" * 90)
-    header = f"{'SF':<4} {'Workload Profile':<21} {'Conc':<5} {'TPS':<9} {'Avg (ms)':<9} {'p50 (ms)':<9} {'p90 (ms)':<9} {'p95 (ms)':<9} {'p99 (ms)':<9} {'CPU %':<7} {'Mem MB':<7}"
+    header = f"{'SF':<4} {'Workload Profile':<21} {'Conc':<5} {'TPS':<9} {'Avg (ms)':<9} {'p50 (ms)':<9} {'p95 (ms)':<9} {'p99 (ms)':<9} {'CPU %':<7} {'Mem MB':<7}"
     print(header)
     print("-" * len(header))
 
@@ -255,7 +255,6 @@ def main():
             f"{r.achieved_rps:<9.1f} "
             f"{round(r.concurrency / r.achieved_rps * 1000, 2) if r.achieved_rps > 0 else 0.0:<9.2f} "
             f"{r.p50_ms:<9.3f} "
-            f"{r.p90_ms:<9.3f} "
             f"{r.p95_ms:<9.3f} "
             f"{r.p99_ms:<9.3f} "
             f"{r.cpu_pct:<7.1f} "
