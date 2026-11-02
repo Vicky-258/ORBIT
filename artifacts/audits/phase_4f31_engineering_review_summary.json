@@ -1,0 +1,103 @@
+{
+  "audit_id": "PHASE_4F31_FINAL_ENGINEERING_REVIEW",
+  "review_date": "2026-11-02T14:30:00Z",
+  "branch": "feat/phase-4f31-final-review",
+  "baseline_commit": "86bb5f1",
+  "status": "COMPLETED",
+  "verdict": "CONDITIONAL_NOT_READY",
+  "verdict_reason": "Identified 3 high-severity implementation defects (omitted cgroup directory in storage monitor, un-enabled track_wal_io_timing, and 100ms docker exec process forking contention) that must be patched before launching the 6-trial pilot.",
+  "review_sections": {
+    "review_1_database_baseline_fingerprints": {
+      "target_file": "aads/benchmark/trial_isolation.py",
+      "verifies_actual_contents": false,
+      "verifies_row_counts_only": true,
+      "checks_sequence_values": false,
+      "checks_table_index_sizes": false,
+      "checks_postgres_configuration": false,
+      "identical_count_different_content_vulnerability": true,
+      "recommended_fingerprint": "Aggregate balance and ID bounds check: sum(abalance)==0, min(aid)==1, max(aid)==100000*SF, sum(bbalance)==0, sum(tbalance)==0, n_dead_tup==0"
+    },
+    "review_2_storage_classification": {
+      "target_file": "aads/benchmark/storage_monitor.py",
+      "utilization_formula": "(host_io_ms / (duration_seconds * 1000.0)) * 100.0",
+      "evaluates_queue_depth": false,
+      "evaluates_await_latency": false,
+      "threshold_50_pct_universal": false,
+      "detected_defects": [
+        "StorageMonitor.take_snapshot() in docker_runner.py is invoked without passing cg_dir, resulting in empty container cgroup io.stat in live runs",
+        "Primary device detection uses hardcoded heuristic (0n1, sda, vda) which can latch onto incorrect disk if Docker data is on secondary mount",
+        "Counter wraparound in /proc/diskstats is unhandled"
+      ],
+      "recommended_rules": "Classify STORAGE_BOUND only when device busy time is high AND request queue depth (weighted_io_ms / duration_ms) or await latency is elevated"
+    },
+    "review_3_cfs_correlation": {
+      "target_files": [
+        "aads/benchmark/cfs_correlation.py",
+        "aads/benchmark/resource_monitor.py"
+      ],
+      "timestamp_consistency": "pgbench uses UNIX epoch seconds; resource_monitor uses monotonic seconds. Inter-cluster intervals are calculated strictly from pgbench epoch timestamps.",
+      "period_boundary_type": "Temporal periodicity (recurrence interval matching 100ms), not absolute phase alignment to kernel CFS epoch",
+      "vulnerability": "CONTROLLED_CAUSAL_EVIDENCE can be assigned if caller passes has_controlled_experiment_confirmation=True without automated multi-experiment verification",
+      "rule_enforced": "A temporal match alone must never produce a causal conclusion"
+    },
+    "review_4_evidence_classification": {
+      "target_file": "aads/core/evidence_classification.py",
+      "supported_classifications": [
+        "OBSERVED",
+        "DERIVED",
+        "CORRELATED",
+        "HYPOTHESIS",
+        "VALIDATED"
+      ],
+      "detected_defect": "VALIDATED rule only checks len(supporting_experiment_ids) >= 2, allowing duplicate replications of the same configuration to pass as a validated controlled experiment",
+      "recommended_fix": "Require explicit control_experiment_id, treatment_experiment_id, and single manipulated_variable in PerformanceFinding model"
+    },
+    "review_5_postgres_permissions_and_monitoring": {
+      "target_file": "aads/benchmark/postgres_instrumentation.py",
+      "pg16_compatibility": "Fully compatible (supports pg_stat_checkpointer and pg_stat_io with fallback)",
+      "required_settings": [
+        "track_io_timing = on",
+        "track_wal_io_timing = on"
+      ],
+      "missing_settings_impact": "In vanilla PostgreSQL, track_wal_io_timing defaults to off, causing wal_write_time and wal_sync_time to silently record 0.0 ms",
+      "missing_metrics_representation": "Unavailable views are captured in unavailable_metrics list"
+    },
+    "review_6_monitoring_overhead": {
+      "estimates": {
+        "cfs_10ms_sampling": "<0.3% of 1 host CPU core (kernfs read in memory)",
+        "storage_boundary_snapshots": "0.0% during active benchmark (boundary only)",
+        "database_fingerprinting": "0.0% during active benchmark (boundary only, ~15ms at SF=2)",
+        "postgres_100ms_sampling": "3% - 8% of container CPU (spawns 10 docker exec and psql backend processes/second)"
+      },
+      "contention_risk": "HIGH: PostgresPeriodicSampler at 100ms creates excessive process forking and connection churn in 1.0 vCPU container",
+      "recommended_pilot_design": "2x2 factorial pilot (uninstrumented, CFS only, Postgres sampler only, fully instrumented) measuring TPS and p95 delta"
+    }
+  },
+  "proposed_minimal_fixes": [
+    {
+      "id": "FIX_01",
+      "component": "docker_runner.py",
+      "description": "Pass resolved cgroup_dir to StorageMonitor.take_snapshot(cg_dir)"
+    },
+    {
+      "id": "FIX_02",
+      "component": "docker_runner.py & trial_isolation.py",
+      "description": "Add -c track_io_timing=on -c track_wal_io_timing=on to PostgreSQL container startup flags"
+    },
+    {
+      "id": "FIX_03",
+      "component": "trial_isolation.py",
+      "description": "Add aggregate balance checksum (sum(abalance)==0, sum(bbalance)==0, sum(tbalance)==0) and n_dead_tup==0 to baseline verification"
+    },
+    {
+      "id": "FIX_04",
+      "component": "docker_runner.py",
+      "description": "Adjust default pg_sample_interval from 0.100s to 0.500s to eliminate process-forking overhead"
+    },
+    {
+      "id": "FIX_05",
+      "component": "evidence_classification.py",
+      "description": "Require explicit control_experiment_id, treatment_experiment_id, and manipulated_variable for VALIDATED classification"
+    }
+  ]
+}
