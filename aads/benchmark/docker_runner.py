@@ -295,6 +295,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
         preserve_individual_replications: bool = True,
         execution_id: Optional[str] = None,
         checkpoint_callback: Optional[Any] = None,
+        on_container_ready: Optional[Any] = None,
         **kwargs,
     ) -> List[ExperimentRecord]:
         target_scale_factors = scale_factors if (scale_factors and len(scale_factors) > 0) else [scale_factor]
@@ -357,6 +358,12 @@ class DockerBenchmarkRunner(BenchmarkRunner):
 
                 if not ready:
                     raise RuntimeError("PostgreSQL container failed to become ready in time.")
+
+                if on_container_ready and callable(on_container_ready):
+                    try:
+                        on_container_ready(container_name, art_dir)
+                    except Exception:
+                        pass
 
                 # 3. Initialize test dataset for scale factor sf
                 init_timeout = max(60, sf * 4)
