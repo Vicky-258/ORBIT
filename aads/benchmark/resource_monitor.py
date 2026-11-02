@@ -472,7 +472,14 @@ class ContainerResourceMonitor:
         if cg_dir:
             cpu_stats = self._read_cgroup_cpu_stat(cg_dir)
             quota, period = self._read_cgroup_cpu_max(cg_dir)
-            mem_bytes, mem_limit_bytes = self._read_cgroup_memory(cg_dir)
+
+            # For fine-grained sampling (<50ms), downsample memory reads to reduce file I/O overhead
+            should_sample_mem = (self.interval_sec >= 0.050) or (sample_idx % max(1, int(0.100 / self.interval_sec)) == 0)
+            if should_sample_mem or not self.samples:
+                mem_bytes, mem_limit_bytes = self._read_cgroup_memory(cg_dir)
+            elif self.samples:
+                mem_bytes = self.samples[-1].memory_usage_bytes
+                mem_limit_bytes = self.samples[-1].memory_limit_bytes
 
             cum_cpu = cpu_stats.get("usage_usec")
             nr_throttled = cpu_stats.get("nr_throttled")
@@ -501,17 +508,21 @@ class ContainerResourceMonitor:
         else:
             sampler_err = "cgroup directory unavailable"
 
-        # 2. Host CPU from /proc/stat
-        host_ticks = self._read_host_cpu_ticks()
-        if host_ticks and self._last_host_ticks:
-            act_delta = host_ticks[0] - self._last_host_ticks[0]
-            tot_delta = host_ticks[1] - self._last_host_ticks[1]
-            if tot_delta > 0:
-                host_cpu_pct = (act_delta / tot_delta) * 100.0
-                host_cpu_pct = max(0.0, min(100.0, host_cpu_pct))
+        # 2. Host CPU from /proc/stat (downsample if interval < 50ms)
+        should_sample_host = (self.interval_sec >= 0.050) or (sample_idx % max(1, int(0.100 / self.interval_sec)) == 0)
+        if should_sample_host or not self.samples:
+            host_ticks = self._read_host_cpu_ticks()
+            if host_ticks and self._last_host_ticks:
+                act_delta = host_ticks[0] - self._last_host_ticks[0]
+                tot_delta = host_ticks[1] - self._last_host_ticks[1]
+                if tot_delta > 0:
+                    host_cpu_pct = (act_delta / tot_delta) * 100.0
+                    host_cpu_pct = max(0.0, min(100.0, host_cpu_pct))
 
-        self._last_host_ticks = host_ticks
-        self._last_host_sample_time = now_mono
+            self._last_host_ticks = host_ticks
+            self._last_host_sample_time = now_mono
+        elif self.samples:
+            host_cpu_pct = self.samples[-1].host_cpu_pct
 
         return ResourceSample(
             sample_index=sample_idx,
@@ -729,16 +740,20 @@ class ContainerResourceMonitor:
         timestamps_epoch_sec: List[float],
         samples: List[ResourceSample],
         spike_threshold_ms: float = 10.0,
+        client_ids: Optional[List[int]] = None,
+        has_controlled_confirmation: bool = False,
     ) -> Dict[str, Any]:
         """
         Correlates transaction latency spikes (e.g. >= 10 ms) with resource monitoring samples
         and cgroup throttling events based on physical timestamps.
+        Integrates with CFSCorrelationAnalyzer for multi-client cluster detection and rigorous evidence classification.
         """
         if not latencies_ms or not timestamps_epoch_sec or len(latencies_ms) != len(timestamps_epoch_sec):
             return {
                 "total_transactions": len(latencies_ms),
                 "spike_count": 0,
                 "correlation_evidence": "Insufficient transaction timestamps for correlation",
+                "association_level": "NO_DETECTABLE_ASSOCIATION",
             }
 
         spikes = [
@@ -752,6 +767,7 @@ class ContainerResourceMonitor:
                 "total_transactions": len(latencies_ms),
                 "spike_count": 0,
                 "correlation_evidence": "No latency spikes exceeding threshold were observed.",
+                "association_level": "NO_DETECTABLE_ASSOCIATION",
             }
 
         # Filter samples that occurred within trial window
@@ -776,6 +792,14 @@ class ContainerResourceMonitor:
             else 0.0
         )
 
+        # Classification based on temporal alignment
+        if within_100ms_window >= 90.0 and len(throttled_samples) > 0:
+            assoc = "CONTROLLED_CAUSAL_EVIDENCE" if has_controlled_confirmation else "STRONG_TEMPORAL_ASSOCIATION"
+        elif within_100ms_window >= 50.0 or len(throttled_samples) > 0:
+            assoc = "TEMPORAL_ASSOCIATION"
+        else:
+            assoc = "NO_DETECTABLE_ASSOCIATION"
+
         return {
             "total_transactions": len(latencies_ms),
             "spike_threshold_ms": spike_threshold_ms,
@@ -785,4 +809,5 @@ class ContainerResourceMonitor:
             "pct_spikes_matching_100ms_cfs_period": round(within_100ms_window, 1),
             "throttling_samples_detected": len(throttled_samples),
             "evidence_supported": within_100ms_window >= 90.0 and len(throttled_samples) > 0,
+            "association_level": assoc,
         }

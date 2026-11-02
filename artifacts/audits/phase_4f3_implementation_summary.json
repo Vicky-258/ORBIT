@@ -1,0 +1,189 @@
+{
+  "phase": "4F.3",
+  "phase_title": "Experimental Isolation & Instrumentation",
+  "branch": "feat/phase-4f3-isolation-instrumentation",
+  "baseline_commit": "d9e9adb",
+  "status": "COMPLETED_OFFLINE_VALIDATION",
+  "execution_mode": "ENGINEERING_AND_OFFLINE_VALIDATION",
+  "safety_checks": {
+    "large_campaign_executed": false,
+    "empirical_trials_executed": 0,
+    "models_promoted": 0,
+    "models_recalibrated": 0,
+    "active_models_preserved_count": 24,
+    "historical_artifacts_overwritten": false
+  },
+  "workstreams": {
+    "workstream_1_trial_isolation": {
+      "module": "aads/benchmark/trial_isolation.py",
+      "components": [
+        "DatabaseStateSnapshot",
+        "TrialIsolationManager",
+        "TrialIsolationError"
+      ],
+      "capabilities": [
+        "Fresh isolated PostgreSQL container per trial lifecycle",
+        "Timed dataset initialization (init_duration recorded separately from benchmark duration)",
+        "Deterministic baseline verification: accounts == 100,000 * SF, branches == SF, tellers == 10 * SF, history == 0",
+        "Strict failure on dirty state (raises TrialIsolationError)",
+        "Guaranteed container removal on success, failure, or timeout"
+      ]
+    },
+    "workstream_2_postgres_observability": {
+      "module": "aads/benchmark/postgres_instrumentation.py",
+      "components": [
+        "PostgresSnapshot",
+        "PostgresMetricsDelta",
+        "PostgresMetricsCollector",
+        "PostgresPeriodicSampler"
+      ],
+      "monitored_internal_views": [
+        "pg_stat_wal",
+        "pg_stat_checkpointer",
+        "pg_stat_bgwriter",
+        "pg_stat_database",
+        "pg_stat_user_tables",
+        "pg_stat_io",
+        "pg_stat_activity",
+        "pg_locks"
+      ],
+      "capabilities": [
+        "Pre- and post-trial snapshot deltas",
+        "WAL bytes, records, full page images (FPI), and fsync wait times",
+        "Timed vs requested checkpoint execution and sync durations",
+        "Active 100ms periodic sampling of ungranted locks and wait events",
+        "Objective classification: NO_CONTENTION_OBSERVED vs CONFIRMED_LOCK_CONTENTION_OBSERVED"
+      ]
+    },
+    "workstream_3_storage_io_observability": {
+      "module": "aads/benchmark/storage_monitor.py",
+      "components": [
+        "StorageSnapshot",
+        "StorageMetricsDelta",
+        "StorageMonitor"
+      ],
+      "monitored_sources": [
+        "/sys/fs/cgroup/io.stat",
+        "/proc/diskstats",
+        "/proc/mounts"
+      ],
+      "capabilities": [
+        "Container-level cgroup v2 rbytes, wbytes, rios, wios deltas",
+        "Host primary disk sector transfers and active I/O time",
+        "Strict separation of logical WAL generation from physical disk saturation",
+        "Objective bottleneck classification: only flagged storage-bound if host I/O utilization >= 50% or physical write queueing occurs"
+      ]
+    },
+    "workstream_4_fine_grained_cfs_instrumentation": {
+      "modules": [
+        "aads/benchmark/resource_monitor.py",
+        "aads/benchmark/cfs_correlation.py"
+      ],
+      "components": [
+        "ContainerResourceMonitor (optimized for 10-20ms sampling)",
+        "CFSCorrelationAnalyzer",
+        "CFSAssociationLevel",
+        "TransactionRecord"
+      ],
+      "association_taxonomy": [
+        "NO_DETECTABLE_ASSOCIATION",
+        "TEMPORAL_ASSOCIATION",
+        "STRONG_TEMPORAL_ASSOCIATION",
+        "CONTROLLED_CAUSAL_EVIDENCE"
+      ],
+      "methodological_guards": [
+        "Rejects dividing aggregate throttled_usec by client count",
+        "Clusters simultaneous multi-client transaction stalls within 1.5ms release windows",
+        "Requires controlled quota variation (1.0 vs 2.0 vCPU) before asserting causal mechanism"
+      ]
+    },
+    "workstream_5_evidence_classification": {
+      "module": "aads/core/evidence_classification.py",
+      "components": [
+        "EvidenceClassification",
+        "PerformanceFinding",
+        "HistoricalSF2FindingsCatalog"
+      ],
+      "epistemological_levels": [
+        "OBSERVED",
+        "DERIVED",
+        "CORRELATED",
+        "HYPOTHESIS",
+        "VALIDATED"
+      ],
+      "pydantic_guardrails": [
+        "VALIDATED findings require >= 2 independent supporting experiments",
+        "Lock contention cannot be asserted as causal without instrumented lock/wait metrics",
+        "Storage bottlenecks cannot be asserted as causal without instrumented I/O metrics",
+        "OBSERVED findings are strictly descriptive and cannot contain causal language"
+      ],
+      "corrected_historical_findings": [
+        {
+          "finding_id": "FINDING_4F_01",
+          "title": "100ms Read-Only Tail Latency Periodicity",
+          "classification": "OBSERVED"
+        },
+        {
+          "finding_id": "FINDING_4F_02",
+          "title": "CFS CPU Quota Throttling as Causal Driver of Read-Only Tail Skew",
+          "classification": "VALIDATED"
+        },
+        {
+          "finding_id": "FINDING_4F_03",
+          "title": "TPC-B Throughput Inversion at Higher Concurrencies",
+          "classification": "OBSERVED"
+        },
+        {
+          "finding_id": "FINDING_4F_04",
+          "title": "Row Lock Serialization on Branch and Teller Tables",
+          "classification": "HYPOTHESIS"
+        },
+        {
+          "finding_id": "FINDING_4F_05",
+          "title": "Simultaneous 3.15s 4-Client Transaction Stall in TPC-B c=4 Rep 1",
+          "classification": "OBSERVED"
+        },
+        {
+          "finding_id": "FINDING_4F_06",
+          "title": "Single-Client Write Throughput Bound by Synchronous WAL Commit",
+          "classification": "HYPOTHESIS"
+        }
+      ]
+    },
+    "workstream_6_validation_and_tests": {
+      "test_file": "tests/test_phase_4f3_isolation_instrumentation.py",
+      "total_phase_4f3_tests": 23,
+      "passed_phase_4f3_tests": 23,
+      "repository_total_tests": 214,
+      "repository_passed_tests": 214,
+      "backward_compatibility_verified": true
+    }
+  },
+  "runner_integration": {
+    "module": "aads/benchmark/docker_runner.py",
+    "class": "DockerBenchmarkRunner",
+    "new_methods": [
+      "_benchmark_postgres_isolated"
+    ],
+    "new_parameters": [
+      "per_trial_isolation",
+      "fine_grained_cfs_interval",
+      "pg_sample_interval"
+    ],
+    "persisted_artifacts": [
+      "baseline_state_{trial_prefix}.json",
+      "post_state_{trial_prefix}.json",
+      "database_state_diff_{trial_prefix}.json",
+      "postgres_snapshot_pre_{trial_prefix}.json",
+      "postgres_snapshot_post_{trial_prefix}.json",
+      "postgres_metrics_delta_{trial_prefix}.json",
+      "postgres_lock_samples_{trial_prefix}.json",
+      "storage_snapshot_pre_{trial_prefix}.json",
+      "storage_snapshot_post_{trial_prefix}.json",
+      "storage_metrics_delta_{trial_prefix}.json",
+      "monitoring_samples_{trial_prefix}.json",
+      "monitoring_summary_{trial_prefix}.json",
+      "correlation_analysis_{trial_prefix}.json"
+    ]
+  }
+}
