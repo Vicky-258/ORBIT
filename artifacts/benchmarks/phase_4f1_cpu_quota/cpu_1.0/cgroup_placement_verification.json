@@ -1,0 +1,51 @@
+{
+  "container_name": "aads-pgbench-53800430",
+  "timestamp_utc": "2026-11-02T03:08:18.618579+00:00",
+  "cgroup_version": "v2",
+  "processes": [
+    {
+      "host_pid": 7434,
+      "comm": "postgres",
+      "args": "postgres",
+      "cgroup": "0::/system.slice/docker-31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308.scope"
+    },
+    {
+      "host_pid": 7650,
+      "comm": "postgres",
+      "args": "postgres: checkpointer",
+      "cgroup": "0::/system.slice/docker-31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308.scope"
+    },
+    {
+      "host_pid": 7651,
+      "comm": "postgres",
+      "args": "postgres: background writer",
+      "cgroup": "0::/system.slice/docker-31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308.scope"
+    },
+    {
+      "host_pid": 7653,
+      "comm": "postgres",
+      "args": "postgres: walwriter",
+      "cgroup": "0::/system.slice/docker-31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308.scope"
+    },
+    {
+      "host_pid": 7654,
+      "comm": "postgres",
+      "args": "postgres: autovacuum launcher",
+      "cgroup": "0::/system.slice/docker-31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308.scope"
+    },
+    {
+      "host_pid": 7655,
+      "comm": "postgres",
+      "args": "postgres: logical replication launcher",
+      "cgroup": "0::/system.slice/docker-31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308.scope"
+    }
+  ],
+  "cgroup_path_host": "/sys/fs/cgroup/system.slice/docker-31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308.scope",
+  "cpu_max": "100000 100000",
+  "memory_max": "1073741824",
+  "placement_verified": true,
+  "shared_cgroup": true,
+  "container_id": "31f797f4a6c491e0e98ccb6b32cf1d7c48a6dcf6f8463ce16cdbba0bc9cf4308",
+  "docker_exec_cgroup": "0::/",
+  "container_init_cgroup": "0::/"
+}
