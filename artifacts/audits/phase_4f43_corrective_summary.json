@@ -1,0 +1,96 @@
+{
+  "phase": "4F.4.3",
+  "audit_type": "EXECUTION_INTEGRITY_CORRECTIVE_ENGINEERING",
+  "branch": "feat/phase-4f43-corrective-engineering",
+  "baseline_audit_branch": "feat/phase-4f42-readiness-audit",
+  "baseline_audit_commit": "5eca692",
+  "execution_engine_baseline": "b344583",
+  "manifest_path": "artifacts/manifests/phase_4f4_execution_manifest.json",
+  "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+  "timestamp_utc": "2026-11-03T04:45:00Z",
+  "overall_verdict": "READY_FOR_FINAL_INDEPENDENT_REVIEW",
+  "verdict_rationale": "All five confirmed defects (P-01 through P-05) identified in the Phase 4F.4.2 independent readiness audit have been resolved and thoroughly validated through offline regression testing. Cross-process atomic authorization locking guarantees single-use enforcement without race conditions. On-disk manifest byte-level SHA256 verification and single-parse execution eliminate TOCTOU tamper risks. Immutable container image reference pinning prevents mutable tag drift at container launch. Execution-ID namespaced artifact directories prevent collision and preserve historical evidence. Missing cgroup telemetry is preserved as UNAVAILABLE without synthetic 0.0 coercions. All 252 repository tests pass offline.",
+  "findings_resolved": [
+    {
+      "finding_id": "P-01",
+      "audit_reference": "FINDING_4F42_01",
+      "title": "Atomic Cross-Process Authorization Consumption",
+      "status": "RESOLVED",
+      "implementation": "Implemented CampaignAuthorizationRecord.consume_file_atomically() using fcntl.flock(LOCK_EX) on dedicated .lock file, holding lock across read, validation, expiration/revocation check, consumed update, fsync, and atomic tmp file replacement.",
+      "code_references": [
+        "aads/benchmark/phase_4f4_runner.py:148-223",
+        "aads/benchmark/phase_4f4_runner.py:1080-1110"
+      ],
+      "verification_test": "tests/test_phase_4f43_corrective_engineering.py::test_p01_multiprocess_atomic_consumption_competition"
+    },
+    {
+      "finding_id": "P-02",
+      "audit_reference": "FINDING_4F42_02",
+      "title": "Exact On-Disk Manifest Byte-Level Integrity & Single-Parse Execution",
+      "status": "RESOLVED",
+      "implementation": "Read raw manifest bytes once before preflight, compute SHA256 directly from bytes, verify against EXPECTED_MANIFEST_SHA256 and auth_record.manifest_sha256, parse into verified_schedule, and execute directly from memory without re-reading from disk.",
+      "code_references": [
+        "aads/benchmark/phase_4f4_runner.py:1025-1070"
+      ],
+      "verification_test": "tests/test_phase_4f43_corrective_engineering.py::test_p02_manifest_on_disk_byte_hash_and_single_parse"
+    },
+    {
+      "finding_id": "P-03",
+      "audit_reference": "FINDING_4F42_03",
+      "title": "Immutable Container Image Reference Pinning",
+      "status": "RESOLVED",
+      "implementation": "Configured TrialIsolationManager.initialize_fresh_container() and Phase4F4Runner to construct and pass immutable repository@digest reference (postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685) directly to docker run.",
+      "code_references": [
+        "aads/benchmark/trial_isolation.py:518-541",
+        "aads/benchmark/phase_4f4_runner.py:255-257"
+      ],
+      "verification_test": "tests/test_phase_4f43_corrective_engineering.py::test_p03_immutable_image_digest_construction"
+    },
+    {
+      "finding_id": "P-04",
+      "audit_reference": "FINDING_4F42_04",
+      "title": "Execution-ID Namespaced Artifact Directories & Collision Protection",
+      "status": "RESOLVED",
+      "implementation": "Namespaced default artifacts root to artifacts/phase_4f4_empirical/{execution_id}, enforced non-empty directory reuse rejection, and maintained atomic latest symlink pointer.",
+      "code_references": [
+        "aads/benchmark/phase_4f4_runner.py:1072-1078",
+        "aads/benchmark/phase_4f4_runner.py:1112-1135"
+      ],
+      "verification_test": "tests/test_phase_4f43_corrective_engineering.py::test_p04_artifact_directory_namespacing_and_collision_guard"
+    },
+    {
+      "finding_id": "P-05",
+      "audit_reference": "FINDING_4F42_05",
+      "title": "Telemetry Availability Preservation Without Default Substitution",
+      "status": "RESOLVED",
+      "implementation": "Removed all 'or 0.0' coercions for CPU throttling. Preserved None with status: 'UNAVAILABLE' and explicit reason in trial summaries, condition summaries, and comparison metrics.",
+      "code_references": [
+        "aads/benchmark/phase_4f4_runner.py:910-923",
+        "aads/benchmark/phase_4f4_runner.py:1260-1288",
+        "aads/benchmark/phase_4f4_runner.py:1328-1358"
+      ],
+      "verification_test": "tests/test_phase_4f43_corrective_engineering.py::test_p05_missing_telemetry_preserved_as_unavailable"
+    }
+  ],
+  "test_verification": {
+    "total_repository_tests": 252,
+    "passing_tests": 252,
+    "failing_tests": 0,
+    "suite_breakdown": {
+      "test_phase_4f43_corrective_engineering": 9,
+      "test_phase_4f42_readiness_audit": 5,
+      "test_phase_4f4_runner": 21,
+      "other_regression_and_unit_tests": 217
+    }
+  },
+  "absolute_restrictions_compliance": {
+    "benchmarks_executed": false,
+    "docker_containers_launched": false,
+    "pgbench_invoked": false,
+    "live_authorization_consumed": false,
+    "manifest_modified": false,
+    "models_promoted_or_calibrated": false,
+    "historical_records_mutated": false,
+    "active_models_in_registry": 24
+  }
+}

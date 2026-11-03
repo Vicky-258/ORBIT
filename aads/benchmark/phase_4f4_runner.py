@@ -4,16 +4,20 @@ Phase 4F.4 — Final 12-Trial Execution Engine & Manifest Orchestrator.
 Implements the frozen 12-trial empirical campaign comparing PostgreSQL 16 performance
 under 1.0 vCPU vs 2.0 vCPU quotas across read_only_select and balanced_oltp_tpcb workloads.
 
-Strict methodology & safety invariants:
+Strict methodology & safety invariants (Phase 4F.4.1 + Phase 4F.4.3 Corrective Engineering):
 - Frozen deterministic randomized sequence (seed 4104)
-- Strong authorization binding with validated CampaignAuthorizationRecord (FIX 01)
-- Actual benchmark client process cgroup isolation verification (FIX 02)
-- Strict metric provenance without fabricated fallbacks and tx log count reconciliation (FIX 03)
-- Effective resource and image verification before warm-up (FIX 04)
-- Complete lifecycle cleanup across monitors, samplers, and containers (FIX 05)
+- Cross-process atomic authorization consumption using fcntl.flock(LOCK_EX) and durable fsync (P-01)
+- Exact on-disk manifest integrity: byte-level SHA256 verification and single-parse execution (P-02)
+- Immutable container image reference using repository@digest pinning (P-03)
+- Execution-ID namespaced artifact directories preventing evidence collision/overwrites (P-04)
+- Strict telemetry availability: missing CPU throttling is never defaulted to 0.0 (P-05)
+- Actual host-side pgbench process cgroup isolation verification (/proc/<pid>/cgroup) (FIX 02)
+- Complete per-trial lifecycle cleanup across monitors, samplers, and containers (FIX 05)
 - Durable failure evidence and incremental campaign state persistence (FIX 06)
 - Strict campaign completion validation (FIX 07)
 """
+import fcntl
+import hashlib
 import json
 import logging
 import math
@@ -60,6 +64,7 @@ logger = logging.getLogger(__name__)
 EXPECTED_MANIFEST_SHA256 = "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6"
 EXPECTED_EXECUTION_SCOPE = "PHASE_4F4_12_TRIAL_EMPIRICAL_CAMPAIGN"
 EXPECTED_PHASE = "4F.4"
+DEFAULT_MANIFEST_PATH = Path("/home/vicky/v_drive/Codes/AADS/artifacts/manifests/phase_4f4_execution_manifest.json")
 
 # Frozen randomized sequence with seed 4104 (Section 4 of Manifest)
 FROZEN_12_TRIAL_SCHEDULE: List[Dict[str, Any]] = [
@@ -82,6 +87,7 @@ class CampaignAuthorizationRecord(BaseModel):
     """
     Strong authorization record for Phase 4F.4 empirical execution.
     Enforces atomic, single-use binding to manifest, proposal, phase, scope, and operator.
+    Cross-process concurrency safety is guaranteed via fcntl.flock(LOCK_EX) (P-01).
     """
     phase: str = Field(default=EXPECTED_PHASE)
     proposal_id: str
@@ -139,18 +145,93 @@ class CampaignAuthorizationRecord(BaseModel):
                     f"Authorization '{self.authorization_id}' EXPIRED at {self.expires_at_utc} (current: {now_iso})."
                 )
 
+    @classmethod
+    def consume_file_atomically(
+        cls,
+        auth_path: Path,
+        execution_id: str,
+        expected_manifest_sha256: str = EXPECTED_MANIFEST_SHA256,
+        expected_proposal_id: Optional[str] = None,
+        expected_phase: str = EXPECTED_PHASE,
+        expected_scope: str = EXPECTED_EXECUTION_SCOPE,
+    ) -> "CampaignAuthorizationRecord":
+        """
+        Cross-process atomic check-and-consume sequence using fcntl.flock(LOCK_EX).
+        Holds exclusive lock across the complete read, validation, expiration/revocation,
+        consumed-state update, and durable fsync sequence (P-01).
+        """
+        auth_path = Path(auth_path).resolve()
+        if not auth_path.exists():
+            raise FileNotFoundError(f"Authorization file not found: {auth_path}")
+
+        # Dedicated stable lock path
+        lock_path = auth_path.with_suffix(auth_path.suffix + ".lock")
+        lock_fd = os.open(str(lock_path), os.O_CREAT | os.O_RDWR, 0o600)
+        try:
+            # Block until exclusive lock is acquired across all processes
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+            try:
+                raw_text = auth_path.read_text(encoding="utf-8")
+                data = json.loads(raw_text)
+                record = cls(**data)
+
+                # Validate under lock
+                record.validate_for_execution(
+                    expected_manifest_sha256=expected_manifest_sha256,
+                    expected_proposal_id=expected_proposal_id,
+                    expected_phase=expected_phase,
+                    expected_scope=expected_scope,
+                )
+
+                # Update consumed state
+                record.consumed = True
+                record.consumed_at_utc = datetime.now(timezone.utc).isoformat()
+                record.consumed_by_execution_id = execution_id
+
+                # Write durably to disk before releasing lock
+                temp_file = auth_path.with_suffix(".tmp")
+                with open(temp_file, "w", encoding="utf-8") as f:
+                    f.write(record.model_dump_json(indent=2))
+                    f.flush()
+                    os.fsync(f.fileno())
+                temp_file.replace(auth_path)
+
+                # Fsync parent directory to ensure directory entry is flushed
+                parent_fd = os.open(str(auth_path.parent), os.O_RDONLY)
+                try:
+                    os.fsync(parent_fd)
+                finally:
+                    os.close(parent_fd)
+
+                return record
+            finally:
+                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        finally:
+            os.close(lock_fd)
+
     def consume(self, execution_id: str, file_path: Optional[Path] = None) -> None:
+        """Instance consumption method; delegates to consume_file_atomically when backed by file."""
         if self.consumed:
             raise ValueError(f"Authorization '{self.authorization_id}' already consumed.")
+        if file_path:
+            p = Path(file_path).resolve()
+            if p.exists():
+                consumed_rec = self.consume_file_atomically(
+                    auth_path=p,
+                    execution_id=execution_id,
+                    expected_manifest_sha256=self.manifest_sha256,
+                    expected_proposal_id=self.proposal_id,
+                    expected_phase=self.phase,
+                    expected_scope=self.execution_scope,
+                )
+                self.consumed = consumed_rec.consumed
+                self.consumed_at_utc = consumed_rec.consumed_at_utc
+                self.consumed_by_execution_id = consumed_rec.consumed_by_execution_id
+                return
+
         self.consumed = True
         self.consumed_at_utc = datetime.now(timezone.utc).isoformat()
         self.consumed_by_execution_id = execution_id
-        if file_path:
-            p = Path(file_path)
-            if p.exists():
-                tmp = p.with_suffix(".tmp")
-                tmp.write_text(self.model_dump_json(indent=2))
-                tmp.replace(p)
 
 
 class Phase4F4Runner:
@@ -170,6 +251,7 @@ class Phase4F4Runner:
     ):
         self.pinned_image = pinned_image
         self.pinned_digest = pinned_digest
+        self.pinned_image_reference = f"{pinned_image.split(':')[0]}@{pinned_digest}"
         self.scale_factor = scale_factor
         self.memory_limit = memory_limit
         self.concurrency = concurrency
@@ -251,7 +333,7 @@ class Phase4F4Runner:
                 )
                 if res_img.returncode == 0:
                     for line in res_img.stdout.splitlines():
-                        if "postgres:16-alpine" in line and self.pinned_digest in line:
+                        if "postgres" in line and self.pinned_digest in line:
                             image_ok = True
                             break
                     if not image_ok:
@@ -539,7 +621,7 @@ class Phase4F4Runner:
         redacted_bench_cmd = ""
 
         try:
-            # 1. Container Initialization
+            # 1. Container Initialization using immutable digest reference (P-03)
             current_stage = "CONTAINER_INIT"
             init_duration, baseline_snapshot = mgr.initialize_fresh_container(
                 container_name=container_name,
@@ -729,7 +811,7 @@ class Phase4F4Runner:
                 cgroup_samples=[s.to_dict() for s in samples],
             )
 
-            # 10. Strict Metric Extraction & Reconciliation (FIX 03)
+            # 10. Strict Metric Extraction & Reconciliation (FIX 03 & P-05)
             current_stage = "METRIC_VALIDATION"
             tps = bench_summary.get("tps")
             total_tx = bench_summary.get("total_transactions")
@@ -798,6 +880,10 @@ class Phase4F4Runner:
             (trial_art_dir / "database_state_diff.json").write_text(json.dumps(db_diff, indent=2))
             (trial_art_dir / "metric_provenance.json").write_text(json.dumps(metric_provenance, indent=2))
 
+            # P-05: Preserve throttling telemetry missingness without 0.0 substitution
+            mon_throttled_sec = mon_summary.throttled_time_seconds if mon_summary else None
+            mon_throttling_events = mon_summary.throttling_events_count if mon_summary else None
+
             result_record = {
                 "sequence": seq,
                 "trial_id": trial_id,
@@ -810,6 +896,8 @@ class Phase4F4Runner:
                 "host_port": host_port,
                 "client_placement": "host",
                 "client_isolation": isolation_record,
+                "pinned_image_reference": self.pinned_image_reference,
+                "pinned_digest": self.pinned_digest,
                 "bench_command": redacted_bench_cmd,
                 "tps": tps,
                 "total_transactions": total_tx,
@@ -825,8 +913,13 @@ class Phase4F4Runner:
                 "metric_provenance": metric_provenance,
                 "cgroup_cpu": {
                     "mean_cpu_pct": mon_summary.mean_container_cpu_pct if mon_summary else None,
-                    "throttling_events": mon_summary.throttling_events_count if mon_summary else None,
-                    "throttled_sec": mon_summary.throttled_time_seconds if mon_summary else None,
+                    "throttling_events": mon_throttling_events,
+                    "throttled_sec": mon_throttled_sec,
+                    "throttling_status": "AVAILABLE" if (mon_summary and mon_throttled_sec is not None) else "UNAVAILABLE",
+                    "throttling_reason": (
+                        None if (mon_summary and mon_throttled_sec is not None)
+                        else "cgroup v2 cpu.stat throttled_usec telemetry missing or unreadable"
+                    ),
                 },
                 "storage": storage_delta.to_dict(),
                 "postgres_deltas": pg_delta.to_dict(),
@@ -912,13 +1005,16 @@ class Phase4F4Runner:
     def execute_campaign(
         self,
         authorization: Union[CampaignAuthorizationRecord, Dict[str, Any], Path, str],
+        manifest_path: Optional[Union[Path, str]] = None,
         artifacts_root: Optional[Path] = None,
         on_trial_complete: Optional[Callable[[Dict[str, Any]], None]] = None,
         expected_proposal_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Executes the complete Phase 4F.4 12-trial campaign under operator authorization.
-        Strict fail-closed: rejects missing, expired, reused, or mismatched authorization (FIX 01).
+        Strict fail-closed: rejects missing, expired, reused, or mismatched authorization (FIX 01 / P-01).
+        Verifies exact on-disk manifest bytes SHA256 before preflight and executes directly from verified object (P-02).
+        Namespaces default artifact directories by execution ID, rejecting duplicate runs (P-04).
         """
         if isinstance(authorization, bool) or authorization is None:
             raise RuntimeError(
@@ -926,37 +1022,121 @@ class Phase4F4Runner:
                 "A validated CampaignAuthorizationRecord is required; Boolean authorization is rejected."
             )
 
-        auth_path: Optional[Path] = None
+        # 1. Exact on-disk manifest integrity (P-02)
+        m_file = Path(manifest_path or DEFAULT_MANIFEST_PATH).resolve()
+        if not m_file.exists():
+            raise FileNotFoundError(f"Execution manifest file not found on disk: {m_file}")
+
+        manifest_raw_bytes = m_file.read_bytes()
+        computed_manifest_sha256 = hashlib.sha256(manifest_raw_bytes).hexdigest()
+
+        if computed_manifest_sha256.lower() != EXPECTED_MANIFEST_SHA256.lower():
+            raise ValueError(
+                f"On-disk manifest SHA256 mismatch: computed '{computed_manifest_sha256}', "
+                f"expected baseline '{EXPECTED_MANIFEST_SHA256}'."
+            )
+
+        try:
+            manifest_data = json.loads(manifest_raw_bytes.decode("utf-8"))
+        except Exception as e:
+            raise ValueError(f"Execution manifest on disk is invalid JSON: {e}") from e
+
+        if manifest_data.get("phase") != EXPECTED_PHASE:
+            raise ValueError(f"Manifest phase mismatch: expected '{EXPECTED_PHASE}', got '{manifest_data.get('phase')}'.")
+
+        manifest_schedule_raw = manifest_data.get("trial_schedule")
+        if not isinstance(manifest_schedule_raw, list) or len(manifest_schedule_raw) != 12:
+            raise ValueError(
+                f"Manifest trial_schedule must contain exactly 12 items, found "
+                f"{len(manifest_schedule_raw) if isinstance(manifest_schedule_raw, list) else 'invalid'}."
+            )
+
+        verified_schedule: List[Dict[str, Any]] = []
+        for item in manifest_schedule_raw:
+            verified_schedule.append({
+                "seq": item["sequence"],
+                "trial_id": item["trial_id"],
+                "profile": item["workload"],
+                "cpu_limit": str(item["cpu_quota_cores"]),
+                "rep": item["replication"],
+            })
+
+        for i, (v_item, f_item) in enumerate(zip(verified_schedule, FROZEN_12_TRIAL_SCHEDULE)):
+            if v_item != f_item:
+                raise ValueError(f"Manifest trial {i+1} ({v_item}) does not match frozen schedule specification ({f_item}).")
+
+        # 2. Pre-validate artifacts_root if explicitly provided (P-04)
+        if artifacts_root is not None:
+            explicit_root = Path(artifacts_root).resolve()
+            if explicit_root.exists() and any(explicit_root.iterdir()):
+                raise RuntimeError(
+                    f"Artifact directory already exists and is non-empty: {explicit_root}. "
+                    "Reusing artifact directories is prohibited to preserve empirical evidence integrity."
+                )
+
+        # 3. Execution ID generation and atomic authorization consumption (P-01)
+        now_utc = datetime.now(timezone.utc)
+        execution_id = f"exec_p4f4_{now_utc.strftime('%Y%m%d_%H%M%S')}_{now_utc.microsecond:06d}_{os.getpid()}"
+
         if isinstance(authorization, (str, Path)):
-            auth_path = Path(authorization)
-            if not auth_path.exists():
-                raise RuntimeError(f"Authorization file not found: {auth_path}")
-            auth_data = json.loads(auth_path.read_text())
-            auth_record = CampaignAuthorizationRecord(**auth_data)
+            auth_path = Path(authorization).resolve()
+            auth_record = CampaignAuthorizationRecord.consume_file_atomically(
+                auth_path=auth_path,
+                execution_id=execution_id,
+                expected_manifest_sha256=computed_manifest_sha256,
+                expected_proposal_id=expected_proposal_id,
+                expected_phase=EXPECTED_PHASE,
+                expected_scope=EXPECTED_EXECUTION_SCOPE,
+            )
         elif isinstance(authorization, dict):
             auth_record = CampaignAuthorizationRecord(**authorization)
+            auth_record.validate_for_execution(
+                expected_manifest_sha256=computed_manifest_sha256,
+                expected_proposal_id=expected_proposal_id,
+                expected_phase=EXPECTED_PHASE,
+                expected_scope=EXPECTED_EXECUTION_SCOPE,
+            )
+            auth_record.consume(execution_id=execution_id)
         elif isinstance(authorization, CampaignAuthorizationRecord):
             auth_record = authorization
+            auth_record.validate_for_execution(
+                expected_manifest_sha256=computed_manifest_sha256,
+                expected_proposal_id=expected_proposal_id,
+                expected_phase=EXPECTED_PHASE,
+                expected_scope=EXPECTED_EXECUTION_SCOPE,
+            )
+            auth_record.consume(execution_id=execution_id)
         else:
             raise RuntimeError(f"Invalid authorization type: {type(authorization).__name__}")
 
-        # Validate authorization fields
-        auth_record.validate_for_execution(
-            expected_manifest_sha256=EXPECTED_MANIFEST_SHA256,
-            expected_proposal_id=expected_proposal_id,
-            expected_phase=EXPECTED_PHASE,
-            expected_scope=EXPECTED_EXECUTION_SCOPE,
-        )
+        # 4. Unique artifact root setup (P-04)
+        if artifacts_root is None:
+            base_root = Path("/home/vicky/v_drive/Codes/AADS/artifacts/phase_4f4_empirical")
+            root = (base_root / execution_id).resolve()
+            if root.exists():
+                raise RuntimeError(f"Duplicate execution ID: campaign directory already exists at {root}")
+            root.mkdir(parents=True, exist_ok=False)
 
-        root = artifacts_root or Path("/home/vicky/v_drive/Codes/AADS/artifacts/phase_4f4_empirical")
-        root.mkdir(parents=True, exist_ok=True)
-        execution_id = f"exec_p4f4_{time.strftime('%Y%m%d_%H%M%S')}"
+            # Maintain latest pointer without replacing historical directories
+            try:
+                latest_link = base_root / "latest"
+                tmp_link = base_root / f".latest_tmp_{execution_id}"
+                if tmp_link.exists() or tmp_link.is_symlink():
+                    tmp_link.unlink()
+                tmp_link.symlink_to(execution_id)
+                tmp_link.replace(latest_link)
+            except Exception as e:
+                logger.debug(f"Failed to update latest symlink: {e}")
+        else:
+            root = Path(artifacts_root).resolve()
+            root.mkdir(parents=True, exist_ok=True)
 
-        # Atomically consume authorization
-        auth_record.consume(execution_id=execution_id, file_path=auth_path)
+        # Preserve verified manifest bytes and consumed authorization evidence
+        (root / "verified_manifest.json").write_bytes(manifest_raw_bytes)
+        (root / "verified_manifest_sha256.txt").write_text(computed_manifest_sha256)
         (root / "consumed_authorization.json").write_text(auth_record.model_dump_json(indent=2))
 
-        # 1. Preflight checks
+        # 4. Preflight checks
         preflight = self.verify_prerequisites()
         (root / "preflight_verification.json").write_text(json.dumps(preflight, indent=2))
         if not preflight["prerequisites_met"]:
@@ -964,8 +1144,8 @@ class Phase4F4Runner:
 
         trial_results: List[Dict[str, Any]] = []
 
-        # 2. Execute trials in exact frozen sequence, persisting campaign state incrementally (FIX 06)
-        for trial_def in FROZEN_12_TRIAL_SCHEDULE:
+        # 5. Execute trials in exact verified sequence, persisting campaign state incrementally
+        for trial_def in verified_schedule:
             logger.info(f"Executing sequence {trial_def['seq']}/12: Trial {trial_def['trial_id']} ({trial_def['profile']}, {trial_def['cpu_limit']} vCPU, Rep {trial_def['rep']})")
             trial_res = self.execute_single_trial(
                 trial_def=trial_def,
@@ -979,16 +1159,16 @@ class Phase4F4Runner:
                 root=root,
                 execution_id=execution_id,
                 trial_records=trial_results,
-                frozen_schedule=FROZEN_12_TRIAL_SCHEDULE,
+                frozen_schedule=verified_schedule,
             )
 
             if on_trial_complete and callable(on_trial_complete):
                 on_trial_complete(trial_res)
 
-        # FIX 07: Strict campaign completion validation
+        # 6. Strict campaign completion validation (FIX 07)
         completion_issues: List[str] = []
-        if len(FROZEN_12_TRIAL_SCHEDULE) != 12:
-            completion_issues.append(f"Manifest schedule does not have 12 trials: {len(FROZEN_12_TRIAL_SCHEDULE)}")
+        if len(verified_schedule) != 12:
+            completion_issues.append(f"Manifest schedule does not have 12 trials: {len(verified_schedule)}")
         if len(trial_results) != 12:
             completion_issues.append(f"Expected 12 executed trials, got {len(trial_results)}")
 
@@ -1021,13 +1201,14 @@ class Phase4F4Runner:
                 "total_trials": len(trial_results),
                 "successful_trials": sum(1 for t in trial_results if t.get("status") == "SUCCESS"),
                 "failed_trials": len(failed_trials),
-                "schedule": FROZEN_12_TRIAL_SCHEDULE,
+                "schedule": verified_schedule,
                 "conditions": None,
                 "comparisons": None,
                 "provenance": {
                     "host_metadata": preflight["host_metadata"],
                     "pinned_image": self.pinned_image,
                     "pinned_digest": self.pinned_digest,
+                    "pinned_image_reference": self.pinned_image_reference,
                     "scale_factor": self.scale_factor,
                     "clients": self.concurrency,
                     "threads": self.threads,
@@ -1040,7 +1221,35 @@ class Phase4F4Runner:
             (root / "campaign_summary.json").write_text(json.dumps(partial_summary, indent=2))
             raise RuntimeError(f"Phase 4F.4 Campaign Execution Failed: {'; '.join(completion_issues)}")
 
-        # 3. Aggregate condition comparisons (Only when ALL 12 trials are SUCCESS)
+        # 7. Aggregate condition comparisons (Only when ALL 12 trials are SUCCESS)
+        campaign_summary = self.aggregate_campaign_results(
+            trial_results=trial_results,
+            verified_schedule=verified_schedule,
+            execution_id=execution_id,
+            host_metadata=preflight.get("host_metadata"),
+        )
+
+        (root / "campaign_summary.json").write_text(json.dumps(campaign_summary, indent=2))
+        return campaign_summary
+
+    def aggregate_campaign_results(
+        self,
+        trial_results: List[Dict[str, Any]],
+        verified_schedule: List[Dict[str, Any]],
+        execution_id: str = "exec_test",
+        host_metadata: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Aggregates condition comparisons across all 12 successful trials.
+        Strictly preserves missing telemetry (None) as UNAVAILABLE without 0.0 substitution (P-05).
+        """
+        conditions: Dict[str, List[Dict[str, Any]]] = {
+            "ro_1cpu": [t for t in trial_results if t.get("status") == "SUCCESS" and t.get("workload_profile") == "read_only_select" and t.get("cpu_quota_cores") == 1.0],
+            "ro_2cpu": [t for t in trial_results if t.get("status") == "SUCCESS" and t.get("workload_profile") == "read_only_select" and t.get("cpu_quota_cores") == 2.0],
+            "tpcb_1cpu": [t for t in trial_results if t.get("status") == "SUCCESS" and t.get("workload_profile") == "balanced_oltp_tpcb" and t.get("cpu_quota_cores") == 1.0],
+            "tpcb_2cpu": [t for t in trial_results if t.get("status") == "SUCCESS" and t.get("workload_profile") == "balanced_oltp_tpcb" and t.get("cpu_quota_cores") == 2.0],
+        }
+
         condition_summaries: Dict[str, Any] = {}
         for cond_name, trials in conditions.items():
             tps_vals = [t["tps"] for t in trials]
@@ -1048,64 +1257,105 @@ class Phase4F4Runner:
             p95_vals = [t["p95_ms"] for t in trials]
             p99_vals = [t["p99_ms"] for t in trials]
             p999_vals = [t["p999_ms"] for t in trials]
-            cpu_vals = [t["cgroup_cpu"]["mean_cpu_pct"] for t in trials if t["cgroup_cpu"]["mean_cpu_pct"] is not None]
-            throt_sec_vals = [t["cgroup_cpu"]["throttled_sec"] or 0.0 for t in trials]
+            cpu_vals = [t["cgroup_cpu"]["mean_cpu_pct"] for t in trials if t.get("cgroup_cpu", {}).get("mean_cpu_pct") is not None]
+
+            # P-05: Strict missing telemetry handling without 0.0 substitution
+            available_throt_sec = [
+                t["cgroup_cpu"]["throttled_sec"]
+                for t in trials
+                if t.get("cgroup_cpu", {}).get("throttled_sec") is not None
+            ]
+            if len(available_throt_sec) == len(trials):
+                throt_summary: Dict[str, Any] = {
+                    "status": "AVAILABLE",
+                    "values": available_throt_sec,
+                    "mean": round(float(np.mean(available_throt_sec)), 3),
+                    "median": round(float(np.median(available_throt_sec)), 3),
+                }
+            elif len(available_throt_sec) > 0:
+                throt_summary = {
+                    "status": "PARTIALLY_AVAILABLE",
+                    "values": [t.get("cgroup_cpu", {}).get("throttled_sec") for t in trials],
+                    "available_replications": len(available_throt_sec),
+                    "total_replications": len(trials),
+                    "mean": round(float(np.mean(available_throt_sec)), 3),
+                    "median": round(float(np.median(available_throt_sec)), 3),
+                }
+            else:
+                throt_summary = {
+                    "status": "UNAVAILABLE",
+                    "values": [None] * len(trials),
+                    "reason": "cgroup v2 cpu.stat throttled_usec missing across all replications",
+                    "mean": None,
+                    "median": None,
+                }
 
             condition_summaries[cond_name] = {
                 "trial_count": len(trials),
                 "replications": [t["trial_id"] for t in trials],
                 "tps": {
                     "values": tps_vals,
-                    "mean": round(float(np.mean(tps_vals)), 1),
-                    "median": round(float(np.median(tps_vals)), 1),
-                    "std": round(float(np.std(tps_vals)), 2),
+                    "mean": round(float(np.mean(tps_vals)), 1) if tps_vals else None,
+                    "median": round(float(np.median(tps_vals)), 1) if tps_vals else None,
+                    "std": round(float(np.std(tps_vals)), 2) if tps_vals else None,
                 },
                 "latency_mean_ms": {
                     "values": lat_vals,
-                    "mean": round(float(np.mean(lat_vals)), 3),
-                    "median": round(float(np.median(lat_vals)), 3),
-                    "std": round(float(np.std(lat_vals)), 3),
+                    "mean": round(float(np.mean(lat_vals)), 3) if lat_vals else None,
+                    "median": round(float(np.median(lat_vals)), 3) if lat_vals else None,
+                    "std": round(float(np.std(lat_vals)), 3) if lat_vals else None,
                 },
                 "p95_ms": {
                     "values": p95_vals,
-                    "mean": round(float(np.mean(p95_vals)), 3),
-                    "median": round(float(np.median(p95_vals)), 3),
+                    "mean": round(float(np.mean(p95_vals)), 3) if p95_vals else None,
+                    "median": round(float(np.median(p95_vals)), 3) if p95_vals else None,
                 },
                 "p99_ms": {
                     "values": p99_vals,
-                    "mean": round(float(np.mean(p99_vals)), 3),
-                    "median": round(float(np.median(p99_vals)), 3),
+                    "mean": round(float(np.mean(p99_vals)), 3) if p99_vals else None,
+                    "median": round(float(np.median(p99_vals)), 3) if p99_vals else None,
                 },
                 "p999_ms": {
                     "values": p999_vals,
-                    "mean": round(float(np.mean(p999_vals)), 3),
-                    "median": round(float(np.median(p999_vals)), 3),
+                    "mean": round(float(np.mean(p999_vals)), 3) if p999_vals else None,
+                    "median": round(float(np.median(p999_vals)), 3) if p999_vals else None,
                 },
                 "cpu_utilization_pct": {
                     "values": cpu_vals,
                     "mean": round(float(np.mean(cpu_vals)), 1) if cpu_vals else None,
                 },
-                "throttled_seconds": {
-                    "values": throt_sec_vals,
-                    "mean": round(float(np.mean(throt_sec_vals)), 3),
-                },
+                "throttled_seconds": throt_summary,
             }
 
-        # Compute quota impact comparisons (1.0 vs 2.0 vCPU)
+        # Compute quota impact comparisons (1.0 vs 2.0 vCPU) with missingness preservation (P-05)
+        ro_1_throt = condition_summaries["ro_1cpu"]["throttled_seconds"]
+        ro_2_throt = condition_summaries["ro_2cpu"]["throttled_seconds"]
+        if ro_1_throt.get("status") == "AVAILABLE" and ro_2_throt.get("status") == "AVAILABLE":
+            ro_throt_reduction: Optional[float] = round(ro_1_throt["mean"] - ro_2_throt["mean"], 3)
+        else:
+            ro_throt_reduction = None
+
+        tpcb_1_throt = condition_summaries["tpcb_1cpu"]["throttled_seconds"]
+        tpcb_2_throt = condition_summaries["tpcb_2cpu"]["throttled_seconds"]
+        if tpcb_1_throt.get("status") == "AVAILABLE" and tpcb_2_throt.get("status") == "AVAILABLE":
+            tpcb_throt_reduction: Optional[float] = round(tpcb_1_throt["mean"] - tpcb_2_throt["mean"], 3)
+        else:
+            tpcb_throt_reduction = None
+
         comparisons = {
             "read_only_select": {
                 "tps_delta": round(condition_summaries["ro_2cpu"]["tps"]["mean"] - condition_summaries["ro_1cpu"]["tps"]["mean"], 1),
                 "tps_pct_change": round(((condition_summaries["ro_2cpu"]["tps"]["mean"] - condition_summaries["ro_1cpu"]["tps"]["mean"]) / condition_summaries["ro_1cpu"]["tps"]["mean"]) * 100.0, 2),
                 "mean_latency_delta_ms": round(condition_summaries["ro_2cpu"]["latency_mean_ms"]["mean"] - condition_summaries["ro_1cpu"]["latency_mean_ms"]["mean"], 3),
                 "mean_latency_pct_change": round(((condition_summaries["ro_2cpu"]["latency_mean_ms"]["mean"] - condition_summaries["ro_1cpu"]["latency_mean_ms"]["mean"]) / condition_summaries["ro_1cpu"]["latency_mean_ms"]["mean"]) * 100.0, 2),
-                "throttled_time_reduction_sec": round(condition_summaries["ro_1cpu"]["throttled_seconds"]["mean"] - condition_summaries["ro_2cpu"]["throttled_seconds"]["mean"], 3),
+                "throttled_time_reduction_sec": ro_throt_reduction,
             },
             "balanced_oltp_tpcb": {
                 "tps_delta": round(condition_summaries["tpcb_2cpu"]["tps"]["mean"] - condition_summaries["tpcb_1cpu"]["tps"]["mean"], 1),
                 "tps_pct_change": round(((condition_summaries["tpcb_2cpu"]["tps"]["mean"] - condition_summaries["tpcb_1cpu"]["tps"]["mean"]) / condition_summaries["tpcb_1cpu"]["tps"]["mean"]) * 100.0, 2),
                 "mean_latency_delta_ms": round(condition_summaries["tpcb_2cpu"]["latency_mean_ms"]["mean"] - condition_summaries["tpcb_1cpu"]["latency_mean_ms"]["mean"], 3),
                 "mean_latency_pct_change": round(((condition_summaries["tpcb_2cpu"]["latency_mean_ms"]["mean"] - condition_summaries["tpcb_1cpu"]["latency_mean_ms"]["mean"]) / condition_summaries["tpcb_1cpu"]["latency_mean_ms"]["mean"]) * 100.0, 2),
-                "throttled_time_reduction_sec": round(condition_summaries["tpcb_1cpu"]["throttled_seconds"]["mean"] - condition_summaries["tpcb_2cpu"]["throttled_seconds"]["mean"], 3),
+                "throttled_time_reduction_sec": tpcb_throt_reduction,
             },
         }
 
@@ -1113,15 +1363,16 @@ class Phase4F4Runner:
             "execution_id": execution_id,
             "manifest_status": "COMPLETED",
             "total_trials": len(trial_results),
-            "successful_trials": sum(1 for t in trial_results if t["status"] == "SUCCESS"),
+            "successful_trials": sum(1 for t in trial_results if t.get("status") == "SUCCESS"),
             "failed_trials": 0,
-            "schedule": FROZEN_12_TRIAL_SCHEDULE,
+            "schedule": verified_schedule,
             "conditions": condition_summaries,
             "comparisons": comparisons,
             "provenance": {
-                "host_metadata": preflight["host_metadata"],
+                "host_metadata": host_metadata or {},
                 "pinned_image": self.pinned_image,
                 "pinned_digest": self.pinned_digest,
+                "pinned_image_reference": self.pinned_image_reference,
                 "scale_factor": self.scale_factor,
                 "clients": self.concurrency,
                 "threads": self.threads,
@@ -1131,6 +1382,4 @@ class Phase4F4Runner:
             },
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         }
-
-        (root / "campaign_summary.json").write_text(json.dumps(campaign_summary, indent=2))
         return campaign_summary

@@ -515,7 +515,15 @@ class TrialIsolationManager:
         Returns:
             Tuple of (initialization_duration_seconds, initial_baseline_snapshot)
         """
-        # 1. Start fresh container with timing instrumentation enabled (FIX 02)
+        # 1. Start fresh container with timing instrumentation enabled using immutable digest reference (P-03)
+        if "@" in self.default_image:
+            immutable_image_ref = self.default_image
+        elif self.pinned_image_digest:
+            repo_base = self.default_image.split(":")[0]
+            immutable_image_ref = f"{repo_base}@{self.pinned_image_digest}"
+        else:
+            immutable_image_ref = self.default_image
+
         start_cmd = [
             "docker", "run", "-d",
             "--name", container_name,
@@ -527,7 +535,7 @@ class TrialIsolationManager:
         if publish_host_port:
             start_cmd.extend(["-p", "127.0.0.1::5432"])
         start_cmd.extend([
-            self.default_image,
+            immutable_image_ref,
             "-c", "track_io_timing=on",
             "-c", "track_wal_io_timing=on",
         ])
