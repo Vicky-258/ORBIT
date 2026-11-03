@@ -1,0 +1,914 @@
+[
+  {
+    "trial_id": "ro_1cpu_r1",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 496,
+      "start_timestamp_utc": "2026-11-03T05:35:15.900275+00:00",
+      "end_timestamp_utc": "2026-11-03T05:35:25.981564+00:00",
+      "duration_seconds": 10.081,
+      "cpu_time_consumed_seconds": 10.11,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 100.28,
+      "mean_container_cpu_pct": 100.18,
+      "peak_container_cpu_pct": 448.34,
+      "mean_memory_mb": 165.62,
+      "peak_memory_mb": 166.38,
+      "cgroup_cfs": {
+        "nr_periods": 101,
+        "nr_throttled": 101,
+        "throttled_usec": 32580929,
+        "throttled_seconds": 32.581,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1472,
+      "start_timestamp_utc": "2026-11-03T05:35:26.001965+00:00",
+      "end_timestamp_utc": "2026-11-03T05:35:55.962435+00:00",
+      "duration_seconds": 29.96,
+      "cpu_time_consumed_seconds": 29.9,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 99.8,
+      "mean_container_cpu_pct": 100.11,
+      "peak_container_cpu_pct": 475.27,
+      "mean_memory_mb": 165.82,
+      "peak_memory_mb": 177.27,
+      "cgroup_cfs": {
+        "nr_periods": 299,
+        "nr_throttled": 299,
+        "throttled_usec": 96076924,
+        "throttled_seconds": 96.077,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1968,
+      "start_timestamp_utc": "2026-11-03T05:35:15.900275+00:00",
+      "end_timestamp_utc": "2026-11-03T05:35:55.962435+00:00",
+      "duration_seconds": 40.062,
+      "cpu_time_consumed_seconds": 40.08,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 100.05,
+      "mean_container_cpu_pct": 100.13,
+      "peak_container_cpu_pct": 475.27,
+      "mean_memory_mb": 165.77,
+      "peak_memory_mb": 177.27,
+      "cgroup_cfs": {
+        "nr_periods": 400,
+        "nr_throttled": 400,
+        "throttled_usec": 128657853,
+        "throttled_seconds": 128.658,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "ro_1cpu_r2",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 496,
+      "start_timestamp_utc": "2026-11-03T05:41:55.823574+00:00",
+      "end_timestamp_utc": "2026-11-03T05:42:05.916871+00:00",
+      "duration_seconds": 10.093,
+      "cpu_time_consumed_seconds": 10.121,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 100.27,
+      "mean_container_cpu_pct": 100.24,
+      "peak_container_cpu_pct": 444.01,
+      "mean_memory_mb": 165.24,
+      "peak_memory_mb": 166.02,
+      "cgroup_cfs": {
+        "nr_periods": 101,
+        "nr_throttled": 101,
+        "throttled_usec": 32915132,
+        "throttled_seconds": 32.915,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1471,
+      "start_timestamp_utc": "2026-11-03T05:42:05.937461+00:00",
+      "end_timestamp_utc": "2026-11-03T05:42:35.893470+00:00",
+      "duration_seconds": 29.956,
+      "cpu_time_consumed_seconds": 29.897,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 99.8,
+      "mean_container_cpu_pct": 100.07,
+      "peak_container_cpu_pct": 424.14,
+      "mean_memory_mb": 165.45,
+      "peak_memory_mb": 177.02,
+      "cgroup_cfs": {
+        "nr_periods": 299,
+        "nr_throttled": 299,
+        "throttled_usec": 93716547,
+        "throttled_seconds": 93.717,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1967,
+      "start_timestamp_utc": "2026-11-03T05:41:55.823574+00:00",
+      "end_timestamp_utc": "2026-11-03T05:42:35.893470+00:00",
+      "duration_seconds": 40.07,
+      "cpu_time_consumed_seconds": 40.078,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 100.02,
+      "mean_container_cpu_pct": 100.11,
+      "peak_container_cpu_pct": 444.01,
+      "mean_memory_mb": 165.4,
+      "peak_memory_mb": 177.02,
+      "cgroup_cfs": {
+        "nr_periods": 400,
+        "nr_throttled": 400,
+        "throttled_usec": 126631679,
+        "throttled_seconds": 126.632,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "ro_1cpu_r3",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 496,
+      "start_timestamp_utc": "2026-11-03T05:39:43.506744+00:00",
+      "end_timestamp_utc": "2026-11-03T05:39:53.590696+00:00",
+      "duration_seconds": 10.084,
+      "cpu_time_consumed_seconds": 10.108,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 100.24,
+      "mean_container_cpu_pct": 100.13,
+      "peak_container_cpu_pct": 447.67,
+      "mean_memory_mb": 190.24,
+      "peak_memory_mb": 191.03,
+      "cgroup_cfs": {
+        "nr_periods": 101,
+        "nr_throttled": 101,
+        "throttled_usec": 31512179,
+        "throttled_seconds": 31.512,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1472,
+      "start_timestamp_utc": "2026-11-03T05:39:53.611076+00:00",
+      "end_timestamp_utc": "2026-11-03T05:40:23.580897+00:00",
+      "duration_seconds": 29.97,
+      "cpu_time_consumed_seconds": 29.942,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 99.91,
+      "mean_container_cpu_pct": 100.22,
+      "peak_container_cpu_pct": 438.18,
+      "mean_memory_mb": 190.46,
+      "peak_memory_mb": 200.51,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 300,
+        "throttled_usec": 92954260,
+        "throttled_seconds": 92.954,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1968,
+      "start_timestamp_utc": "2026-11-03T05:39:43.506744+00:00",
+      "end_timestamp_utc": "2026-11-03T05:40:23.580897+00:00",
+      "duration_seconds": 40.074,
+      "cpu_time_consumed_seconds": 40.116,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 100.11,
+      "mean_container_cpu_pct": 100.19,
+      "peak_container_cpu_pct": 447.67,
+      "mean_memory_mb": 190.4,
+      "peak_memory_mb": 200.51,
+      "cgroup_cfs": {
+        "nr_periods": 401,
+        "nr_throttled": 401,
+        "throttled_usec": 124466439,
+        "throttled_seconds": 124.466,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r1",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 493,
+      "start_timestamp_utc": "2026-11-03T05:34:30.800351+00:00",
+      "end_timestamp_utc": "2026-11-03T05:34:40.830588+00:00",
+      "duration_seconds": 10.03,
+      "cpu_time_consumed_seconds": 20.115,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 100.27,
+      "mean_container_cpu_pct": 200.22,
+      "peak_container_cpu_pct": 472.14,
+      "mean_memory_mb": 217.03,
+      "peak_memory_mb": 217.78,
+      "cgroup_cfs": {
+        "nr_periods": 100,
+        "nr_throttled": 100,
+        "throttled_usec": 21855886,
+        "throttled_seconds": 21.856,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1472,
+      "start_timestamp_utc": "2026-11-03T05:34:40.850861+00:00",
+      "end_timestamp_utc": "2026-11-03T05:35:10.825142+00:00",
+      "duration_seconds": 29.974,
+      "cpu_time_consumed_seconds": 59.947,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 100.0,
+      "mean_container_cpu_pct": 200.15,
+      "peak_container_cpu_pct": 453.44,
+      "mean_memory_mb": 217.17,
+      "peak_memory_mb": 226.36,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 300,
+        "throttled_usec": 63741210,
+        "throttled_seconds": 63.741,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1965,
+      "start_timestamp_utc": "2026-11-03T05:34:30.800351+00:00",
+      "end_timestamp_utc": "2026-11-03T05:35:10.825142+00:00",
+      "duration_seconds": 40.025,
+      "cpu_time_consumed_seconds": 80.135,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 100.11,
+      "mean_container_cpu_pct": 200.17,
+      "peak_container_cpu_pct": 472.14,
+      "mean_memory_mb": 217.13,
+      "peak_memory_mb": 226.36,
+      "cgroup_cfs": {
+        "nr_periods": 400,
+        "nr_throttled": 400,
+        "throttled_usec": 85597096,
+        "throttled_seconds": 85.597,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r2",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 494,
+      "start_timestamp_utc": "2026-11-03T05:36:44.958779+00:00",
+      "end_timestamp_utc": "2026-11-03T05:36:55.002355+00:00",
+      "duration_seconds": 10.044,
+      "cpu_time_consumed_seconds": 20.109,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 100.11,
+      "mean_container_cpu_pct": 201.27,
+      "peak_container_cpu_pct": 708.04,
+      "mean_memory_mb": 190.79,
+      "peak_memory_mb": 194.57,
+      "cgroup_cfs": {
+        "nr_periods": 101,
+        "nr_throttled": 100,
+        "throttled_usec": 22901127,
+        "throttled_seconds": 22.901,
+        "throttling_frequency_pct": 99.01
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1472,
+      "start_timestamp_utc": "2026-11-03T05:36:55.022643+00:00",
+      "end_timestamp_utc": "2026-11-03T05:37:25.002824+00:00",
+      "duration_seconds": 29.98,
+      "cpu_time_consumed_seconds": 59.954,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 99.99,
+      "mean_container_cpu_pct": 200.04,
+      "peak_container_cpu_pct": 474.27,
+      "mean_memory_mb": 190.93,
+      "peak_memory_mb": 202.83,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 300,
+        "throttled_usec": 64051663,
+        "throttled_seconds": 64.052,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1966,
+      "start_timestamp_utc": "2026-11-03T05:36:44.958779+00:00",
+      "end_timestamp_utc": "2026-11-03T05:37:25.002824+00:00",
+      "duration_seconds": 40.044,
+      "cpu_time_consumed_seconds": 80.108,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 100.03,
+      "mean_container_cpu_pct": 200.35,
+      "peak_container_cpu_pct": 708.04,
+      "mean_memory_mb": 190.9,
+      "peak_memory_mb": 202.83,
+      "cgroup_cfs": {
+        "nr_periods": 401,
+        "nr_throttled": 400,
+        "throttled_usec": 86952790,
+        "throttled_seconds": 86.953,
+        "throttling_frequency_pct": 99.75
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r3",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 494,
+      "start_timestamp_utc": "2026-11-03T05:38:57.949523+00:00",
+      "end_timestamp_utc": "2026-11-03T05:39:07.989033+00:00",
+      "duration_seconds": 10.04,
+      "cpu_time_consumed_seconds": 20.139,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 100.3,
+      "mean_container_cpu_pct": 200.27,
+      "peak_container_cpu_pct": 440.62,
+      "mean_memory_mb": 165.5,
+      "peak_memory_mb": 166.21,
+      "cgroup_cfs": {
+        "nr_periods": 100,
+        "nr_throttled": 100,
+        "throttled_usec": 21465373,
+        "throttled_seconds": 21.465,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1470,
+      "start_timestamp_utc": "2026-11-03T05:39:08.009353+00:00",
+      "end_timestamp_utc": "2026-11-03T05:39:37.971128+00:00",
+      "duration_seconds": 29.962,
+      "cpu_time_consumed_seconds": 59.901,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 99.96,
+      "mean_container_cpu_pct": 199.99,
+      "peak_container_cpu_pct": 478.9,
+      "mean_memory_mb": 165.66,
+      "peak_memory_mb": 175.32,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 300,
+        "throttled_usec": 63434755,
+        "throttled_seconds": 63.435,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1964,
+      "start_timestamp_utc": "2026-11-03T05:38:57.949523+00:00",
+      "end_timestamp_utc": "2026-11-03T05:39:37.971128+00:00",
+      "duration_seconds": 40.022,
+      "cpu_time_consumed_seconds": 80.103,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 100.07,
+      "mean_container_cpu_pct": 200.06,
+      "peak_container_cpu_pct": 478.9,
+      "mean_memory_mb": 165.62,
+      "peak_memory_mb": 175.32,
+      "cgroup_cfs": {
+        "nr_periods": 400,
+        "nr_throttled": 400,
+        "throttled_usec": 84900128,
+        "throttled_seconds": 84.9,
+        "throttling_frequency_pct": 100.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r1",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 495,
+      "start_timestamp_utc": "2026-11-03T05:38:14.132089+00:00",
+      "end_timestamp_utc": "2026-11-03T05:38:24.189752+00:00",
+      "duration_seconds": 10.058,
+      "cpu_time_consumed_seconds": 9.73,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 96.74,
+      "mean_container_cpu_pct": 96.55,
+      "peak_container_cpu_pct": 275.72,
+      "mean_memory_mb": 164.98,
+      "peak_memory_mb": 166.48,
+      "cgroup_cfs": {
+        "nr_periods": 101,
+        "nr_throttled": 67,
+        "throttled_usec": 776169,
+        "throttled_seconds": 0.776,
+        "throttling_frequency_pct": 66.34
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1474,
+      "start_timestamp_utc": "2026-11-03T05:38:24.210042+00:00",
+      "end_timestamp_utc": "2026-11-03T05:38:54.176783+00:00",
+      "duration_seconds": 29.967,
+      "cpu_time_consumed_seconds": 26.643,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 88.91,
+      "mean_container_cpu_pct": 88.96,
+      "peak_container_cpu_pct": 211.46,
+      "mean_memory_mb": 178.41,
+      "peak_memory_mb": 196.15,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 153,
+        "throttled_usec": 2164385,
+        "throttled_seconds": 2.164,
+        "throttling_frequency_pct": 51.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1969,
+      "start_timestamp_utc": "2026-11-03T05:38:14.132089+00:00",
+      "end_timestamp_utc": "2026-11-03T05:38:54.176783+00:00",
+      "duration_seconds": 40.045,
+      "cpu_time_consumed_seconds": 36.404,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 90.91,
+      "mean_container_cpu_pct": 90.87,
+      "peak_container_cpu_pct": 275.72,
+      "mean_memory_mb": 175.03,
+      "peak_memory_mb": 196.15,
+      "cgroup_cfs": {
+        "nr_periods": 401,
+        "nr_throttled": 220,
+        "throttled_usec": 2940554,
+        "throttled_seconds": 2.941,
+        "throttling_frequency_pct": 54.86
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r2",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 496,
+      "start_timestamp_utc": "2026-11-03T05:41:12.022321+00:00",
+      "end_timestamp_utc": "2026-11-03T05:41:22.084205+00:00",
+      "duration_seconds": 10.062,
+      "cpu_time_consumed_seconds": 7.6,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 75.54,
+      "mean_container_cpu_pct": 75.39,
+      "peak_container_cpu_pct": 272.47,
+      "mean_memory_mb": 164.69,
+      "peak_memory_mb": 165.77,
+      "cgroup_cfs": {
+        "nr_periods": 101,
+        "nr_throttled": 42,
+        "throttled_usec": 595075,
+        "throttled_seconds": 0.595,
+        "throttling_frequency_pct": 41.58
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1475,
+      "start_timestamp_utc": "2026-11-03T05:41:22.104547+00:00",
+      "end_timestamp_utc": "2026-11-03T05:41:52.089390+00:00",
+      "duration_seconds": 29.985,
+      "cpu_time_consumed_seconds": 24.917,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 83.1,
+      "mean_container_cpu_pct": 83.1,
+      "peak_container_cpu_pct": 206.36,
+      "mean_memory_mb": 175.66,
+      "peak_memory_mb": 192.38,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 166,
+        "throttled_usec": 3239434,
+        "throttled_seconds": 3.239,
+        "throttling_frequency_pct": 55.33
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1971,
+      "start_timestamp_utc": "2026-11-03T05:41:12.022321+00:00",
+      "end_timestamp_utc": "2026-11-03T05:41:52.089390+00:00",
+      "duration_seconds": 40.067,
+      "cpu_time_consumed_seconds": 32.528,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 81.18,
+      "mean_container_cpu_pct": 81.16,
+      "peak_container_cpu_pct": 272.47,
+      "mean_memory_mb": 172.9,
+      "peak_memory_mb": 192.38,
+      "cgroup_cfs": {
+        "nr_periods": 401,
+        "nr_throttled": 208,
+        "throttled_usec": 3834509,
+        "throttled_seconds": 3.835,
+        "throttling_frequency_pct": 51.87
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r3",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 494,
+      "start_timestamp_utc": "2026-11-03T05:40:28.129753+00:00",
+      "end_timestamp_utc": "2026-11-03T05:40:38.150050+00:00",
+      "duration_seconds": 10.02,
+      "cpu_time_consumed_seconds": 10.023,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 100.03,
+      "mean_container_cpu_pct": 99.82,
+      "peak_container_cpu_pct": 257.63,
+      "mean_memory_mb": 164.94,
+      "peak_memory_mb": 169.44,
+      "cgroup_cfs": {
+        "nr_periods": 100,
+        "nr_throttled": 93,
+        "throttled_usec": 1310691,
+        "throttled_seconds": 1.311,
+        "throttling_frequency_pct": 93.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1475,
+      "start_timestamp_utc": "2026-11-03T05:40:38.170342+00:00",
+      "end_timestamp_utc": "2026-11-03T05:41:08.149989+00:00",
+      "duration_seconds": 29.98,
+      "cpu_time_consumed_seconds": 27.188,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 90.69,
+      "mean_container_cpu_pct": 90.73,
+      "peak_container_cpu_pct": 222.01,
+      "mean_memory_mb": 179.75,
+      "peak_memory_mb": 194.98,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 193,
+        "throttled_usec": 2331409,
+        "throttled_seconds": 2.331,
+        "throttling_frequency_pct": 64.33
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1969,
+      "start_timestamp_utc": "2026-11-03T05:40:28.129753+00:00",
+      "end_timestamp_utc": "2026-11-03T05:41:08.149989+00:00",
+      "duration_seconds": 40.02,
+      "cpu_time_consumed_seconds": 37.242,
+      "cpu_quota_cores": 1.0,
+      "cpu_quota_utilization_pct": 93.06,
+      "mean_container_cpu_pct": 93.01,
+      "peak_container_cpu_pct": 257.63,
+      "mean_memory_mb": 176.04,
+      "peak_memory_mb": 194.98,
+      "cgroup_cfs": {
+        "nr_periods": 400,
+        "nr_throttled": 286,
+        "throttled_usec": 3642100,
+        "throttled_seconds": 3.642,
+        "throttling_frequency_pct": 71.5
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r1",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 495,
+      "start_timestamp_utc": "2026-11-03T05:36:00.414311+00:00",
+      "end_timestamp_utc": "2026-11-03T05:36:10.459888+00:00",
+      "duration_seconds": 10.046,
+      "cpu_time_consumed_seconds": 11.052,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 55.01,
+      "mean_container_cpu_pct": 109.79,
+      "peak_container_cpu_pct": 287.46,
+      "mean_memory_mb": 163.12,
+      "peak_memory_mb": 167.11,
+      "cgroup_cfs": {
+        "nr_periods": 100,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1475,
+      "start_timestamp_utc": "2026-11-03T05:36:10.480258+00:00",
+      "end_timestamp_utc": "2026-11-03T05:36:40.441438+00:00",
+      "duration_seconds": 29.961,
+      "cpu_time_consumed_seconds": 30.442,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 50.8,
+      "mean_container_cpu_pct": 101.61,
+      "peak_container_cpu_pct": 142.0,
+      "mean_memory_mb": 178.68,
+      "peak_memory_mb": 199.91,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1970,
+      "start_timestamp_utc": "2026-11-03T05:36:00.414311+00:00",
+      "end_timestamp_utc": "2026-11-03T05:36:40.441438+00:00",
+      "duration_seconds": 40.027,
+      "cpu_time_consumed_seconds": 41.516,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 51.86,
+      "mean_container_cpu_pct": 103.67,
+      "peak_container_cpu_pct": 287.46,
+      "mean_memory_mb": 174.77,
+      "peak_memory_mb": 199.91,
+      "cgroup_cfs": {
+        "nr_periods": 400,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r2",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 494,
+      "start_timestamp_utc": "2026-11-03T05:37:30.449999+00:00",
+      "end_timestamp_utc": "2026-11-03T05:37:40.472658+00:00",
+      "duration_seconds": 10.023,
+      "cpu_time_consumed_seconds": 10.821,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 53.98,
+      "mean_container_cpu_pct": 107.75,
+      "peak_container_cpu_pct": 256.38,
+      "mean_memory_mb": 168.23,
+      "peak_memory_mb": 170.02,
+      "cgroup_cfs": {
+        "nr_periods": 100,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1475,
+      "start_timestamp_utc": "2026-11-03T05:37:40.492910+00:00",
+      "end_timestamp_utc": "2026-11-03T05:38:10.480828+00:00",
+      "duration_seconds": 29.988,
+      "cpu_time_consumed_seconds": 30.809,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 51.37,
+      "mean_container_cpu_pct": 102.8,
+      "peak_container_cpu_pct": 217.49,
+      "mean_memory_mb": 184.14,
+      "peak_memory_mb": 205.35,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1969,
+      "start_timestamp_utc": "2026-11-03T05:37:30.449999+00:00",
+      "end_timestamp_utc": "2026-11-03T05:38:10.480828+00:00",
+      "duration_seconds": 40.031,
+      "cpu_time_consumed_seconds": 41.665,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 52.04,
+      "mean_container_cpu_pct": 104.04,
+      "peak_container_cpu_pct": 256.38,
+      "mean_memory_mb": 180.15,
+      "peak_memory_mb": 205.35,
+      "cgroup_cfs": {
+        "nr_periods": 400,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r3",
+    "clock_alignment": {
+      "shared_clock": "Linux host real-time / monotonic clock",
+      "alignment_procedure": "Raw pgbench transaction logs record microsecond gettimeofday() epoch timestamps; resource monitor records UTC ISO8601 wall timestamps and CLOCK_MONOTONIC. Synchronization is achieved by matching UTC epoch timestamps.",
+      "alignment_precision_ms": 20.0
+    },
+    "warmup_window": {
+      "sample_count": 494,
+      "start_timestamp_utc": "2026-11-03T05:42:40.369753+00:00",
+      "end_timestamp_utc": "2026-11-03T05:42:50.401975+00:00",
+      "duration_seconds": 10.032,
+      "cpu_time_consumed_seconds": 10.577,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 52.72,
+      "mean_container_cpu_pct": 105.22,
+      "peak_container_cpu_pct": 292.32,
+      "mean_memory_mb": 179.45,
+      "peak_memory_mb": 180.95,
+      "cgroup_cfs": {
+        "nr_periods": 101,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "measurement_window": {
+      "sample_count": 1475,
+      "start_timestamp_utc": "2026-11-03T05:42:50.422295+00:00",
+      "end_timestamp_utc": "2026-11-03T05:43:20.396326+00:00",
+      "duration_seconds": 29.974,
+      "cpu_time_consumed_seconds": 30.466,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 50.82,
+      "mean_container_cpu_pct": 101.69,
+      "peak_container_cpu_pct": 215.17,
+      "mean_memory_mb": 195.61,
+      "peak_memory_mb": 216.95,
+      "cgroup_cfs": {
+        "nr_periods": 300,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "full_trial_window": {
+      "sample_count": 1969,
+      "start_timestamp_utc": "2026-11-03T05:42:40.369753+00:00",
+      "end_timestamp_utc": "2026-11-03T05:43:20.396326+00:00",
+      "duration_seconds": 40.027,
+      "cpu_time_consumed_seconds": 41.08,
+      "cpu_quota_cores": 2.0,
+      "cpu_quota_utilization_pct": 51.32,
+      "mean_container_cpu_pct": 102.58,
+      "peak_container_cpu_pct": 292.32,
+      "mean_memory_mb": 191.55,
+      "peak_memory_mb": 216.95,
+      "cgroup_cfs": {
+        "nr_periods": 401,
+        "nr_throttled": 0,
+        "throttled_usec": 0,
+        "throttled_seconds": 0.0,
+        "throttling_frequency_pct": 0.0
+      }
+    },
+    "cfs_throttling_analysis": {
+      "multi_task_aggregate_explanation": "cgroup v2 cpu.stat throttled_usec represents the sum of execution time during which runnable threads in the cgroup were withheld from CPU execution due to quota exhaustion. Because PostgreSQL runs multiple backend threads/processes (8 active client connections plus postmaster, checkpointer, bgwriter, and walwriter), multiple threads can be throttled simultaneously within each 100ms CFS quota period. Consequently, aggregate throttled_usec accumulates across concurrent tasks and can mathematically exceed elapsed wall-clock duration.",
+      "methodological_guardrails": [
+        "throttled_usec must NEVER be interpreted as individual request wait time or client perceived latency.",
+        "throttled_usec must NEVER be divided by client connection count (e.g. 8) to claim average client stall time.",
+        "throttled_usec must NEVER be converted to a percentage of benchmark duration without explicitly noting multi-task aggregation."
+      ]
+    }
+  }
+]

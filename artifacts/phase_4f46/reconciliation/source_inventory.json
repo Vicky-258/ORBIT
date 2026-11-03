@@ -1,0 +1,1446 @@
+{
+  "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+  "scanned_at_utc": "2026-11-03T08:41:43.654570+00:00",
+  "root_directory": "artifacts/phase_4f4_empirical/exec_p4f4_20261103_053428_525413_19491",
+  "total_files": 282,
+  "total_bytes": 195318308,
+  "campaign_artifacts": {
+    "campaign_state_partial.json": {
+      "rel_path": "campaign_state_partial.json",
+      "size_bytes": 110880,
+      "sha256": "9c2bac9586a9cd9aac359ab1bf04514127ddcc0020f0128d3b2006763006caa0"
+    },
+    "campaign_summary.json": {
+      "rel_path": "campaign_summary.json",
+      "size_bytes": 8763,
+      "sha256": "7cc387384503a87c3f428fcdc8b9f8c7a4e2eecb8f038581a656b98ab7a4cc38"
+    },
+    "consumed_authorization.json": {
+      "rel_path": "consumed_authorization.json",
+      "size_bytes": 579,
+      "sha256": "571e0c920803f4b0bbc3029f812d43625f75e6de5f24bf24f64814807b6fdc14"
+    },
+    "preflight_verification.json": {
+      "rel_path": "preflight_verification.json",
+      "size_bytes": 509,
+      "sha256": "ca87000c6d02ef037ed77f22f9e6b7d9498ebb15db6cc0d1ba64704ab08c7782"
+    },
+    "verified_manifest.json": {
+      "rel_path": "verified_manifest.json",
+      "size_bytes": 4986,
+      "sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6"
+    },
+    "verified_manifest_sha256.txt": {
+      "rel_path": "verified_manifest_sha256.txt",
+      "size_bytes": 64,
+      "sha256": "0873e97a54b5dbd49b67dc819711e2e55c1ba5d20a6628e6629068b278f568df"
+    }
+  },
+  "trial_artifacts": {
+    "ro_1cpu_r1": {
+      "client_isolation.json": {
+        "rel_path": "trials/ro_1cpu_r1/client_isolation.json",
+        "size_bytes": 743,
+        "sha256": "eee4c7bb00f09288086e3ce6032b0e4f5b071268a1c63aceb52ae40592dc8eab"
+      },
+      "command.txt": {
+        "rel_path": "trials/ro_1cpu_r1/command.txt",
+        "size_bytes": 220,
+        "sha256": "66a14417303bfb18f5a105e40496cc7d3fbecc6ad8909741c50f3fba9c3bb5d0"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/ro_1cpu_r1/correlation_analysis.json",
+        "size_bytes": 1080,
+        "sha256": "53a994ee52c1b0d68aaf8d876891cb160d6f713e685142c75c97cee3363272f8"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/ro_1cpu_r1/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "981ec080aa6aefe7b409a251b2e90d0030558154aab359e6b3bcfcd1e57f96fd"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/ro_1cpu_r1/database_state_diff.json",
+        "size_bytes": 429,
+        "sha256": "1bedb0ea21e7bcce67faf4f6458c61144fe7719b5391216b1d308e59256b7d68"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/ro_1cpu_r1/database_state_post.json",
+        "size_bytes": 1710,
+        "sha256": "aaff2c510395d2cf62823c6aaeafa4ee8162cc889f5a9590a4c62681255c3e11"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/ro_1cpu_r1/metric_provenance.json",
+        "size_bytes": 1542,
+        "sha256": "16defbac4d8f76d41432dc177a580d24cd7a339c7dd29acea8df470a3dfb42fd"
+      },
+      "monitoring_samples_ro_1cpu_r1.csv": {
+        "rel_path": "trials/ro_1cpu_r1/monitoring_samples_ro_1cpu_r1.csv",
+        "size_bytes": 562466,
+        "sha256": "db644175f45ae07d1bb68e0357ec7dc30efd315e1850c40525c2fbfc20e25dea"
+      },
+      "monitoring_samples_ro_1cpu_r1.json": {
+        "rel_path": "trials/ro_1cpu_r1/monitoring_samples_ro_1cpu_r1.json",
+        "size_bytes": 1613034,
+        "sha256": "aaed2efa0e17ea626f71bc1b17f46719810e0f1de2683287f18ce7a5b0d04af0"
+      },
+      "monitoring_summary_ro_1cpu_r1.json": {
+        "rel_path": "trials/ro_1cpu_r1/monitoring_summary_ro_1cpu_r1.json",
+        "size_bytes": 1621,
+        "sha256": "c6be0078a5cfd2170274cc97bb7ef09b4315ca18081efe77ca9517354bb9f959"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/ro_1cpu_r1/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/ro_1cpu_r1/pgbench.stdout",
+        "size_bytes": 398,
+        "sha256": "6e97111d5adf1710446da591d617c893062049a4e1183f86da9013d6349868c6"
+      },
+      "pgbench_ro_1cpu_r1.21646": {
+        "rel_path": "trials/ro_1cpu_r1/pgbench_ro_1cpu_r1.21646",
+        "size_bytes": 9006718,
+        "sha256": "a331839072c05e8353abc5440f6603d8e3d511de4e7eba45caf051e51fcd4d77"
+      },
+      "pgbench_ro_1cpu_r1.21646.1": {
+        "rel_path": "trials/ro_1cpu_r1/pgbench_ro_1cpu_r1.21646.1",
+        "size_bytes": 8999026,
+        "sha256": "4d5d0816f43c6671c94ee896f857f06ed40c37f89faab4479b2df36d2dd6fd08"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/ro_1cpu_r1/postgres_metrics_delta.json",
+        "size_bytes": 1400,
+        "sha256": "239f722180d22f4098a1160693f3e8d7944a6485af02874e1d94e69df6c87421"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/ro_1cpu_r1/postgres_sampler_telemetry.json",
+        "size_bytes": 270,
+        "sha256": "9e7495b5b5c2350917cef8130170bbd9eaa8764b54c9383c52edc56cc5481380"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/ro_1cpu_r1/postgres_snapshot_post.json",
+        "size_bytes": 1280,
+        "sha256": "0177c537d85c90e136e6ba37a9e6c6b9bea446d7575e3600ae9937f6951cb33b"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/ro_1cpu_r1/postgres_snapshot_pre.json",
+        "size_bytes": 1271,
+        "sha256": "1c55bd5962d7d86b2bc0ab13ffa04906dfd8899a0918da7c5842347fbdc0b034"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/ro_1cpu_r1/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "48cee2d32dda7faccc870d22aaf3c58187c020b0a32416f8ef404f2e05027de1"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/ro_1cpu_r1/storage_metrics_delta.json",
+        "size_bytes": 980,
+        "sha256": "abea1df713012d4b03dd7d0142c60e79388da8b02b27d76a5ef8f73e27008669"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/ro_1cpu_r1/storage_snapshot_post.json",
+        "size_bytes": 2847,
+        "sha256": "a99d6bcb4322c8686b23d5cc5f17f6cb68f3f8625b01fce707ffe09095f6fe33"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/ro_1cpu_r1/storage_snapshot_pre.json",
+        "size_bytes": 2846,
+        "sha256": "d870e314af2eb83c4bfcf498c39b8744976c5e1f8616cc325a5396a672b0dcfa"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/ro_1cpu_r1/trial_summary.json",
+        "size_bytes": 8189,
+        "sha256": "72fe0825eb2b03e110e5fdc4b695c1276ca18c346be09a768219920490ceabcd"
+      }
+    },
+    "ro_1cpu_r2": {
+      "client_isolation.json": {
+        "rel_path": "trials/ro_1cpu_r2/client_isolation.json",
+        "size_bytes": 743,
+        "sha256": "f72799019c0def7303e45861ef98ef5ea897cbdb9a8a8ba9fe2b4cc6ef8371b9"
+      },
+      "command.txt": {
+        "rel_path": "trials/ro_1cpu_r2/command.txt",
+        "size_bytes": 220,
+        "sha256": "e082dd1c1638d0f0fee6fb8e0a7e805697f8c13edb1da7d47465b23991ca6e06"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/ro_1cpu_r2/correlation_analysis.json",
+        "size_bytes": 1080,
+        "sha256": "409c6a139a2a2b137568aaab3e0e07656c9d66a018ad1b80af4c12ee3fc5d426"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/ro_1cpu_r2/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "80f916f5b5f526909a66b143e93a74ef9144f1a256d8fbb555c3721cb2abff4c"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/ro_1cpu_r2/database_state_diff.json",
+        "size_bytes": 429,
+        "sha256": "1bedb0ea21e7bcce67faf4f6458c61144fe7719b5391216b1d308e59256b7d68"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/ro_1cpu_r2/database_state_post.json",
+        "size_bytes": 1710,
+        "sha256": "d39c31835b8d55a1f322701211fff1b539762f36124bfc0c9337b16e380a4f4d"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/ro_1cpu_r2/metric_provenance.json",
+        "size_bytes": 1541,
+        "sha256": "5bc916e6b9f9759d9109fc266ae54617f4d6459fa1e05c3a6d5444b3bd000357"
+      },
+      "monitoring_samples_ro_1cpu_r2.csv": {
+        "rel_path": "trials/ro_1cpu_r2/monitoring_samples_ro_1cpu_r2.csv",
+        "size_bytes": 562247,
+        "sha256": "804fe998c759836e1f462412776dd68f1ee5e768e73fbaf8b174fad797bed082"
+      },
+      "monitoring_samples_ro_1cpu_r2.json": {
+        "rel_path": "trials/ro_1cpu_r2/monitoring_samples_ro_1cpu_r2.json",
+        "size_bytes": 1612301,
+        "sha256": "ba6747abc500c20cc5e7247bc16ec002fea57cd97cecf96d57615c9bf7778582"
+      },
+      "monitoring_summary_ro_1cpu_r2.json": {
+        "rel_path": "trials/ro_1cpu_r2/monitoring_summary_ro_1cpu_r2.json",
+        "size_bytes": 1619,
+        "sha256": "5f08c2e3c024e4d4ff441bfdccad0eab00311be34ac51bd1c46fc6e114eac660"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/ro_1cpu_r2/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/ro_1cpu_r2/pgbench.stdout",
+        "size_bytes": 398,
+        "sha256": "f99664f8dd9cbedfa19fa6d051c67e60d14b3928f514f099d1cb93bf471f13c5"
+      },
+      "pgbench_ro_1cpu_r2.33668": {
+        "rel_path": "trials/ro_1cpu_r2/pgbench_ro_1cpu_r2.33668",
+        "size_bytes": 8812623,
+        "sha256": "51fd4f1acdb2e74a0312e4b1e340721750b86164d28fe64b7fcf13ef77ab7ed8"
+      },
+      "pgbench_ro_1cpu_r2.33668.1": {
+        "rel_path": "trials/ro_1cpu_r2/pgbench_ro_1cpu_r2.33668.1",
+        "size_bytes": 8836878,
+        "sha256": "55dad800815bfb19b7c1bb121ee64c3cac41a0cd7461978026e68571c78a2b2e"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/ro_1cpu_r2/postgres_metrics_delta.json",
+        "size_bytes": 1400,
+        "sha256": "35a2739381bc39499cad3683643fe46944e154584da3ce75c9b5e4fe5a637334"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/ro_1cpu_r2/postgres_sampler_telemetry.json",
+        "size_bytes": 270,
+        "sha256": "7d95d2174010d2f19e2f81ebc9dfe07de8465c6df22c16cce20ad454944c669d"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/ro_1cpu_r2/postgres_snapshot_post.json",
+        "size_bytes": 1278,
+        "sha256": "7f29a1dbd32fce3a14b538495e59d7d8d0d38038754edc43bdd6e5d7af13bf67"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/ro_1cpu_r2/postgres_snapshot_pre.json",
+        "size_bytes": 1272,
+        "sha256": "8bd0b02ad11ecc4358d4c126b2242baa4107e1b566d90aac1d1e59f6ea962cda"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/ro_1cpu_r2/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "290535e0218a9226444130f99a229bbe806feb2a2112fa5b88b80439d612eb55"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/ro_1cpu_r2/storage_metrics_delta.json",
+        "size_bytes": 984,
+        "sha256": "3b278f2fbc23d0bbfd43069aad2066e59fb8e367f08535dae7cec7f27bf32903"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/ro_1cpu_r2/storage_snapshot_post.json",
+        "size_bytes": 2853,
+        "sha256": "830e2b08064d2ee5e2e779f2251f5ab77ef2afdef301d26a02aa6750869279ef"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/ro_1cpu_r2/storage_snapshot_pre.json",
+        "size_bytes": 2852,
+        "sha256": "d8642507d131a177047015b1f0892de2405695f11af793a2cae90ead57a997e9"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/ro_1cpu_r2/trial_summary.json",
+        "size_bytes": 8191,
+        "sha256": "f5981381347b4291a1bf71be916cf330209d4ab03ecdff5669768f3b95160108"
+      }
+    },
+    "ro_1cpu_r3": {
+      "client_isolation.json": {
+        "rel_path": "trials/ro_1cpu_r3/client_isolation.json",
+        "size_bytes": 743,
+        "sha256": "ccbbde8a710e042a45bdd3fdfd33b9d4fba4b937d42684a5c715075805ae849c"
+      },
+      "command.txt": {
+        "rel_path": "trials/ro_1cpu_r3/command.txt",
+        "size_bytes": 220,
+        "sha256": "f9e5c1f7073ba45ea66aa52b4dc188d5b7ad223ed77b6bdf766fafe0c162a8cb"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/ro_1cpu_r3/correlation_analysis.json",
+        "size_bytes": 1080,
+        "sha256": "c00cc045f0fe4d693d0132decc72787d6778de016f53676d109aa576d5d3e3d5"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/ro_1cpu_r3/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "fe44577e1662acee9264ca34d2dc3f20886168aa2669dbeb0dd87ad687277f98"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/ro_1cpu_r3/database_state_diff.json",
+        "size_bytes": 429,
+        "sha256": "1bedb0ea21e7bcce67faf4f6458c61144fe7719b5391216b1d308e59256b7d68"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/ro_1cpu_r3/database_state_post.json",
+        "size_bytes": 1710,
+        "sha256": "e13fec57292b769fcb029bb8714d31e731c0e3b27eff31926f49bbf4b1dea4df"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/ro_1cpu_r3/metric_provenance.json",
+        "size_bytes": 1540,
+        "sha256": "0a7831916b13f6005f4457ac052545b6f29861008bc367a0d26e6e7115f34bb0"
+      },
+      "monitoring_samples_ro_1cpu_r3.csv": {
+        "rel_path": "trials/ro_1cpu_r3/monitoring_samples_ro_1cpu_r3.csv",
+        "size_bytes": 562276,
+        "sha256": "3054bc94d305d752a3e4dc37fbc3f5145e73b7d7c5103110a5c3681ef2c1625c"
+      },
+      "monitoring_samples_ro_1cpu_r3.json": {
+        "rel_path": "trials/ro_1cpu_r3/monitoring_samples_ro_1cpu_r3.json",
+        "size_bytes": 1612864,
+        "sha256": "e2f0ede21c4dd8e729b6662f4c2a22d1e1613993487308d4252fb9218dd87b69"
+      },
+      "monitoring_summary_ro_1cpu_r3.json": {
+        "rel_path": "trials/ro_1cpu_r3/monitoring_summary_ro_1cpu_r3.json",
+        "size_bytes": 1620,
+        "sha256": "c338ee8fcbdb92af25c39f89a8b07bed3df7439e04c517f722bbbac5cba01395"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/ro_1cpu_r3/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/ro_1cpu_r3/pgbench.stdout",
+        "size_bytes": 398,
+        "sha256": "5175f08fbd12c64c7361966bacd2838be6329d74c9c2eba2e2303ab0502285c2"
+      },
+      "pgbench_ro_1cpu_r3.29672": {
+        "rel_path": "trials/ro_1cpu_r3/pgbench_ro_1cpu_r3.29672",
+        "size_bytes": 8920832,
+        "sha256": "69ee71870089f81c5857fc98f6891b6131984f8f81e471ce66f071c4067f1433"
+      },
+      "pgbench_ro_1cpu_r3.29672.1": {
+        "rel_path": "trials/ro_1cpu_r3/pgbench_ro_1cpu_r3.29672.1",
+        "size_bytes": 8937369,
+        "sha256": "2233bf77446ea40e674b13dfde706c7cc4e41d9f2ad7944561cfe17b6b1dbf8b"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/ro_1cpu_r3/postgres_metrics_delta.json",
+        "size_bytes": 1401,
+        "sha256": "66b8591987f45c0c54f25e7772825700560826c34f0704b00869fe97a9e7f644"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/ro_1cpu_r3/postgres_sampler_telemetry.json",
+        "size_bytes": 270,
+        "sha256": "21cf9eaa8342557dcf34750547406eea36434f402bcd23b761b1a28a5df59016"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/ro_1cpu_r3/postgres_snapshot_post.json",
+        "size_bytes": 1282,
+        "sha256": "2a272349dbc49c69101411a8b013a067ea55ddf715d16fb3f3ecbf6207451e1d"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/ro_1cpu_r3/postgres_snapshot_pre.json",
+        "size_bytes": 1270,
+        "sha256": "f99664cdbeebd6104a761d5faac62ee90f4661d5adfc83fcc7ed286c9bb0c34b"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/ro_1cpu_r3/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "22ebb627dc39e5d9635a5e926ddc8dc8221e90a40cb306ebf6e9f2dffe5b9b52"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/ro_1cpu_r3/storage_metrics_delta.json",
+        "size_bytes": 983,
+        "sha256": "5e68fbf84062f4a11f692b402e3aac1d1f639db0cc4ed951c84f23a225e60fc9"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/ro_1cpu_r3/storage_snapshot_post.json",
+        "size_bytes": 2855,
+        "sha256": "fbf275670b88054cc70bc92769ac7c3df424b359428bffd64605e1e387d27796"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/ro_1cpu_r3/storage_snapshot_pre.json",
+        "size_bytes": 2855,
+        "sha256": "5bd851670eb9dd6a68e60e7c1d72384e9e7a5fd0bf7073bdf911ca4089adc65d"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/ro_1cpu_r3/trial_summary.json",
+        "size_bytes": 8189,
+        "sha256": "f333b6dcf1fa3a790a2d2355c699148b4d3b6fbcf381890daa1e7f3a363def0c"
+      }
+    },
+    "ro_2cpu_r1": {
+      "client_isolation.json": {
+        "rel_path": "trials/ro_2cpu_r1/client_isolation.json",
+        "size_bytes": 743,
+        "sha256": "0ea163a4bc13d9b15dc873e984dfb7bcfa4377cabd2bfb5beb45a8f157be0977"
+      },
+      "command.txt": {
+        "rel_path": "trials/ro_2cpu_r1/command.txt",
+        "size_bytes": 220,
+        "sha256": "892b14b23d5dc7658f7ad63da3ee6c7f43a43f99ffd6c64ecdade14860eec201"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/ro_2cpu_r1/correlation_analysis.json",
+        "size_bytes": 1081,
+        "sha256": "3352df94d3a1fb057b92989ff50d971e1915aa9ca9b27bbbe25eda98c966ce20"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/ro_2cpu_r1/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "3bab731473bf5e76f4e30a94fbbd1b9f6e4a5d84e383598384e97c279e008b5d"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/ro_2cpu_r1/database_state_diff.json",
+        "size_bytes": 429,
+        "sha256": "1bedb0ea21e7bcce67faf4f6458c61144fe7719b5391216b1d308e59256b7d68"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/ro_2cpu_r1/database_state_post.json",
+        "size_bytes": 1710,
+        "sha256": "e8da09366024c7f65c1d99c1e26002de8d19bc69989a6e629673444b5d836c85"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/ro_2cpu_r1/metric_provenance.json",
+        "size_bytes": 1543,
+        "sha256": "5798f4eb079bd9f3aaf21ddbcd8aee1aed0cf45b791400a4afc7a6ca4377c84c"
+      },
+      "monitoring_samples_ro_2cpu_r1.csv": {
+        "rel_path": "trials/ro_2cpu_r1/monitoring_samples_ro_2cpu_r1.csv",
+        "size_bytes": 562341,
+        "sha256": "377fa23711d7b3364559b660824077f9255843352d8f90276f5a918272ca227d"
+      },
+      "monitoring_samples_ro_2cpu_r1.json": {
+        "rel_path": "trials/ro_2cpu_r1/monitoring_samples_ro_2cpu_r1.json",
+        "size_bytes": 1611307,
+        "sha256": "36f4e501c00ec450b6e95663fa423a2783a4ead3d1036a09e2841257f1fa1bc9"
+      },
+      "monitoring_summary_ro_2cpu_r1.json": {
+        "rel_path": "trials/ro_2cpu_r1/monitoring_summary_ro_2cpu_r1.json",
+        "size_bytes": 1614,
+        "sha256": "14ed599e8e4287f1b65409feef20bbe56f6e35fc4a04235a0abbcc0843caaaea"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/ro_2cpu_r1/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/ro_2cpu_r1/pgbench.stdout",
+        "size_bytes": 399,
+        "sha256": "5f478faf1a463431a50ab5f4a3d3acaadad17838a347b71f9037484ccfb66a87"
+      },
+      "pgbench_ro_2cpu_r1.20364": {
+        "rel_path": "trials/ro_2cpu_r1/pgbench_ro_2cpu_r1.20364",
+        "size_bytes": 18288428,
+        "sha256": "db72034dc6d0c4ce8517a3f70118b63cd10096cecfc30301d48814c695ba848c"
+      },
+      "pgbench_ro_2cpu_r1.20364.1": {
+        "rel_path": "trials/ro_2cpu_r1/pgbench_ro_2cpu_r1.20364.1",
+        "size_bytes": 18301028,
+        "sha256": "0129cbc78d01f9663ce3ef0e11d5fe8c8c7a309542d2e450c34ad657046d0f04"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/ro_2cpu_r1/postgres_metrics_delta.json",
+        "size_bytes": 1401,
+        "sha256": "67470adab5354099c1eb22167aab3dc839ff4b9b8a84bf7bf5381809a5107b7b"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/ro_2cpu_r1/postgres_sampler_telemetry.json",
+        "size_bytes": 270,
+        "sha256": "39464538edcca11e5bdde5c588ac399923ae6f6c5012d8c385e2d0b59c3d8eb1"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/ro_2cpu_r1/postgres_snapshot_post.json",
+        "size_bytes": 1282,
+        "sha256": "0f3f8be185f34630f97c8224b39199e554a72cca589d8d799cb2b3db999feeee"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/ro_2cpu_r1/postgres_snapshot_pre.json",
+        "size_bytes": 1270,
+        "sha256": "dde17e2e2e00ad77638970c765aad7298ab8825323653a9f670999e061df27eb"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/ro_2cpu_r1/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "78c2f6e38405ded8c013aaeba0ef26e7c41b4f927d51e73cb4b8f9d544bb8ea7"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/ro_2cpu_r1/storage_metrics_delta.json",
+        "size_bytes": 992,
+        "sha256": "a1fc74a8ed200028073c87759c0066cc156570a095b7c3a37bbaca5e75e7d945"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/ro_2cpu_r1/storage_snapshot_post.json",
+        "size_bytes": 2849,
+        "sha256": "0507d058e5dc77948f3de80ac83e1c5305e6dd0f51747cd13b05ba0f95ab81a9"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/ro_2cpu_r1/storage_snapshot_pre.json",
+        "size_bytes": 2849,
+        "sha256": "88977f672ecc3d25dad691bdfb3663c9cdd0c1e728cac64072d7a5d148741315"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/ro_2cpu_r1/trial_summary.json",
+        "size_bytes": 8204,
+        "sha256": "dae810652f1ab569665a4bcc8c94e92d99bcb3acfb9671268b97bde93d5b7e8e"
+      }
+    },
+    "ro_2cpu_r2": {
+      "client_isolation.json": {
+        "rel_path": "trials/ro_2cpu_r2/client_isolation.json",
+        "size_bytes": 743,
+        "sha256": "8998209628fc44d5aa18f4ab51bbca69768353660ee262b54cf13f2bf770194d"
+      },
+      "command.txt": {
+        "rel_path": "trials/ro_2cpu_r2/command.txt",
+        "size_bytes": 220,
+        "sha256": "c0c5b9dd93ef93e1ed460c717c45c92eb9c586b882709e3ba04175f5cc65a6ad"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/ro_2cpu_r2/correlation_analysis.json",
+        "size_bytes": 1078,
+        "sha256": "62b1ca8d7a9ced59018fd8c4d3788cb9b4f8962441bf562d8f90c99541c89439"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/ro_2cpu_r2/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "e21fb1de6a06352c101e57fb0d81b3bed963b12de1f2d96f0d89eb748466326b"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/ro_2cpu_r2/database_state_diff.json",
+        "size_bytes": 429,
+        "sha256": "1bedb0ea21e7bcce67faf4f6458c61144fe7719b5391216b1d308e59256b7d68"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/ro_2cpu_r2/database_state_post.json",
+        "size_bytes": 1710,
+        "sha256": "ef886adb76015fb70c50e34f4d02c469d45a342ee084e03d2d98cba6fe8df93c"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/ro_2cpu_r2/metric_provenance.json",
+        "size_bytes": 1543,
+        "sha256": "75b08188b91744772589c77d0eb7dc092f15d068539cb7113b1b711b4229e1e4"
+      },
+      "monitoring_samples_ro_2cpu_r2.csv": {
+        "rel_path": "trials/ro_2cpu_r2/monitoring_samples_ro_2cpu_r2.csv",
+        "size_bytes": 562929,
+        "sha256": "3642491e55d1ee9c0229e58f01940badb362a8093e534a603beb2278c92f3fce"
+      },
+      "monitoring_samples_ro_2cpu_r2.json": {
+        "rel_path": "trials/ro_2cpu_r2/monitoring_samples_ro_2cpu_r2.json",
+        "size_bytes": 1612429,
+        "sha256": "c89021c961d20be0a1da74e62fae5875a5060dae87c1e2129ee39979a0eed832"
+      },
+      "monitoring_summary_ro_2cpu_r2.json": {
+        "rel_path": "trials/ro_2cpu_r2/monitoring_summary_ro_2cpu_r2.json",
+        "size_bytes": 1614,
+        "sha256": "121b9e9738132fa12e605a4164ce6c5520643d91031cb39d011a7cec717b7b14"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/ro_2cpu_r2/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/ro_2cpu_r2/pgbench.stdout",
+        "size_bytes": 400,
+        "sha256": "1327e92ea04ecf5d4776b898fc1c8cff20feb563a5e98fb348cc8a0eeb28d324"
+      },
+      "pgbench_ro_2cpu_r2.24314": {
+        "rel_path": "trials/ro_2cpu_r2/pgbench_ro_2cpu_r2.24314",
+        "size_bytes": 17462473,
+        "sha256": "3d4fcd8e0a0831ea1273fcbd0a71945449556aab027c75e93591014e05d7a445"
+      },
+      "pgbench_ro_2cpu_r2.24314.1": {
+        "rel_path": "trials/ro_2cpu_r2/pgbench_ro_2cpu_r2.24314.1",
+        "size_bytes": 17441538,
+        "sha256": "771a88cdaf8ae7dd3501228ce5841e81ba064a5611eefaa08cabf4b11527cff0"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/ro_2cpu_r2/postgres_metrics_delta.json",
+        "size_bytes": 1422,
+        "sha256": "547640e535047d2ab2256909e7f842a054d33e68b3d50c5913eb0ddf66a63ca7"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/ro_2cpu_r2/postgres_sampler_telemetry.json",
+        "size_bytes": 270,
+        "sha256": "da6642d017beb94af0563e262e958cb93c630fc40f9f15fb00e046cb0df8198c"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/ro_2cpu_r2/postgres_snapshot_post.json",
+        "size_bytes": 1280,
+        "sha256": "cf9f2e2aee4e74793de1b2ce69ce6a160728afbefc7dc36cfebae1b4d8b2f51a"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/ro_2cpu_r2/postgres_snapshot_pre.json",
+        "size_bytes": 1271,
+        "sha256": "f5daa525f5144667d8da404b2b27a7feec7ccf71ed85aa2d5b073018921a4656"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/ro_2cpu_r2/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "00891472798697ba4acae5ca3c44cb3aa52ddb04ed8022ede2926ade2d0b50d7"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/ro_2cpu_r2/storage_metrics_delta.json",
+        "size_bytes": 994,
+        "sha256": "cbd5862aebcf17e66bf6c4731401e533c2228fd079331b89a853df11b62d6f65"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/ro_2cpu_r2/storage_snapshot_post.json",
+        "size_bytes": 2853,
+        "sha256": "0d19aaa6b8822eb80b48ef00827ad2017e03f89bb67b49decab29fea71a7185b"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/ro_2cpu_r2/storage_snapshot_pre.json",
+        "size_bytes": 2853,
+        "sha256": "9b11b0084f191b0c812e05de5ab833d6f6d79064eb9be3d7f75a92ba955341af"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/ro_2cpu_r2/trial_summary.json",
+        "size_bytes": 8225,
+        "sha256": "698fb389e885244414c8ce63e19d8bb4470661f8cc43b45f199c2f2c56a8536d"
+      }
+    },
+    "ro_2cpu_r3": {
+      "client_isolation.json": {
+        "rel_path": "trials/ro_2cpu_r3/client_isolation.json",
+        "size_bytes": 743,
+        "sha256": "b66c7125d0b348b9a59a96e35161fab193f9330ae6a2573b09676097848191cd"
+      },
+      "command.txt": {
+        "rel_path": "trials/ro_2cpu_r3/command.txt",
+        "size_bytes": 220,
+        "sha256": "fa955094fbcafdf409c6d2bfe83eae06f012a429b7f3db31d858d119a4d10d05"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/ro_2cpu_r3/correlation_analysis.json",
+        "size_bytes": 1077,
+        "sha256": "8b995283d4d653a40912da643460b7ee8a525d6bf0d046addb84adc2e0519be8"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/ro_2cpu_r3/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "4ed645684af4a2e42159b15b240ff3745e87f24f7e4014c662d1233ca3d797f8"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/ro_2cpu_r3/database_state_diff.json",
+        "size_bytes": 429,
+        "sha256": "1bedb0ea21e7bcce67faf4f6458c61144fe7719b5391216b1d308e59256b7d68"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/ro_2cpu_r3/database_state_post.json",
+        "size_bytes": 1710,
+        "sha256": "a9c10ba1d728361e59226d4fa2b9540db30f1c9b410ef9da398044dca098f6fe"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/ro_2cpu_r3/metric_provenance.json",
+        "size_bytes": 1543,
+        "sha256": "b3f641d0cb58a0d6ec7b4a848f50cf3fddc32b610d4963ad2a330e469b87b504"
+      },
+      "monitoring_samples_ro_2cpu_r3.csv": {
+        "rel_path": "trials/ro_2cpu_r3/monitoring_samples_ro_2cpu_r3.csv",
+        "size_bytes": 562252,
+        "sha256": "abd48c38846f0182b4f62078538c7a43bb1d407f69a1b255e51e7f6fb6730cbb"
+      },
+      "monitoring_samples_ro_2cpu_r3.json": {
+        "rel_path": "trials/ro_2cpu_r3/monitoring_samples_ro_2cpu_r3.json",
+        "size_bytes": 1610684,
+        "sha256": "ce3f4e2b0fb54c9bc6c80829156a19e88802743f36a17e864f5d5a80b73ef943"
+      },
+      "monitoring_summary_ro_2cpu_r3.json": {
+        "rel_path": "trials/ro_2cpu_r3/monitoring_summary_ro_2cpu_r3.json",
+        "size_bytes": 1615,
+        "sha256": "820727a20fab721c85788c41054dfa5796d2ceefeed665d0cd37042aefa734c8"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/ro_2cpu_r3/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/ro_2cpu_r3/pgbench.stdout",
+        "size_bytes": 399,
+        "sha256": "f2a65ffbeb5f401c2a70538bb9571adc5c275aafe0b493f4f07db1c959f57c70"
+      },
+      "pgbench_ro_2cpu_r3.28326": {
+        "rel_path": "trials/ro_2cpu_r3/pgbench_ro_2cpu_r3.28326",
+        "size_bytes": 17541071,
+        "sha256": "1251265a4dbba1e33768465c829fcee6eeaf9a22f2d99fe24683e268752fdaa1"
+      },
+      "pgbench_ro_2cpu_r3.28326.1": {
+        "rel_path": "trials/ro_2cpu_r3/pgbench_ro_2cpu_r3.28326.1",
+        "size_bytes": 17548805,
+        "sha256": "c0ceaf4434b1fbc6eed873963fc85e6c267a37e58f187f12bf03a12b63b13645"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/ro_2cpu_r3/postgres_metrics_delta.json",
+        "size_bytes": 1399,
+        "sha256": "466e9bea4113f5e9cf279f16553f4d12ec531867e3703b2073baf0d64f9a40a9"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/ro_2cpu_r3/postgres_sampler_telemetry.json",
+        "size_bytes": 270,
+        "sha256": "a9af1664e6ff78a3162ada259cee1cb2e4a78aa20513fb2ac0407415a0e277fe"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/ro_2cpu_r3/postgres_snapshot_post.json",
+        "size_bytes": 1281,
+        "sha256": "ca7a134933f888a6ff4c9368ca2ce1403665b2047cd1429f554f1cedde3cfc13"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/ro_2cpu_r3/postgres_snapshot_pre.json",
+        "size_bytes": 1271,
+        "sha256": "83653b592f80d8734379631b3dc31220745ffbc419f6640621b6449856bb2882"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/ro_2cpu_r3/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "ba8c2a61cff3838b9d826792d46da23b54ea4954d4bd1cc1ac654dfe1ef2f420"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/ro_2cpu_r3/storage_metrics_delta.json",
+        "size_bytes": 990,
+        "sha256": "d96bc030dd37eec5a7332708d165c4c9aef3c1ea1d19e3d7569e28afe562d924"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/ro_2cpu_r3/storage_snapshot_post.json",
+        "size_bytes": 2852,
+        "sha256": "c2472ba0bbc5a1066ddb1b962e465e866eb8d07065bdae0b9d847eea578a033f"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/ro_2cpu_r3/storage_snapshot_pre.json",
+        "size_bytes": 2852,
+        "sha256": "cacd61b9923c8a018a2cc88cdb34cfef76455008e565178debff842cbccbbfc6"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/ro_2cpu_r3/trial_summary.json",
+        "size_bytes": 8196,
+        "sha256": "a35b1e5a06a9691a84c4a0bd41567d52f6914374a07c22d8bf22a07325e750b3"
+      }
+    },
+    "tpcb_1cpu_r1": {
+      "client_isolation.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/client_isolation.json",
+        "size_bytes": 744,
+        "sha256": "eddfe909682594a805c32c12e4e7ac478a76b9e0015bc2fb7aeb8c164dac8101"
+      },
+      "command.txt": {
+        "rel_path": "trials/tpcb_1cpu_r1/command.txt",
+        "size_bytes": 222,
+        "sha256": "09adbb9e717b2a04c33312e5c30d97640f135e19e4753ac3e90b18769cd30db7"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/correlation_analysis.json",
+        "size_bytes": 935,
+        "sha256": "1361fb3bc1a027198cd72b6294897607d329107a9c664e85bd44b836753d669e"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "654fbbc54845b4c81dedabcf0734540cd1335eca4a03b3432f396f37ba71a22b"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/database_state_diff.json",
+        "size_bytes": 449,
+        "sha256": "4819d3e2cd189b0d40f2431a39d557ca889fb0e3868237b02f7be8f5bce4aeff"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/database_state_post.json",
+        "size_bytes": 1777,
+        "sha256": "e360c94035cc2057e851469cde1573ca5c413f826147ae7ec89e72130289624c"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/metric_provenance.json",
+        "size_bytes": 1542,
+        "sha256": "55f28b95c5699e11d3a40cfd809b33e3258a65d38b8252e056b2cfed4cb8a1be"
+      },
+      "monitoring_samples_tpcb_1cpu_r1.csv": {
+        "rel_path": "trials/tpcb_1cpu_r1/monitoring_samples_tpcb_1cpu_r1.csv",
+        "size_bytes": 569381,
+        "sha256": "edc64215e429886f547509866cdf63daa35772aeb6748e7a5d66d09f25cd9b43"
+      },
+      "monitoring_samples_tpcb_1cpu_r1.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/monitoring_samples_tpcb_1cpu_r1.json",
+        "size_bytes": 1620483,
+        "sha256": "f6968ca6330ea578e07936b778d279151558265ec343c4f5b29e3507231ed862"
+      },
+      "monitoring_summary_tpcb_1cpu_r1.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/monitoring_summary_tpcb_1cpu_r1.json",
+        "size_bytes": 1619,
+        "sha256": "42c9b3d43398b3723284feead4427715089a2f0f03aa18dd265e7fb80287a032"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/tpcb_1cpu_r1/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/tpcb_1cpu_r1/pgbench.stdout",
+        "size_bytes": 400,
+        "sha256": "c9d07409cf49997da0882e4f09da12838af595f07415be568fa7fd67de975676"
+      },
+      "pgbench_tpcb_1cpu_r1.27002": {
+        "rel_path": "trials/tpcb_1cpu_r1/pgbench_tpcb_1cpu_r1.27002",
+        "size_bytes": 682782,
+        "sha256": "425948e8aaa5c0aebe23a893315c8db39d3511b0a76f54b396aa6ae4915f0ac3"
+      },
+      "pgbench_tpcb_1cpu_r1.27002.1": {
+        "rel_path": "trials/tpcb_1cpu_r1/pgbench_tpcb_1cpu_r1.27002.1",
+        "size_bytes": 688459,
+        "sha256": "df90b483b6a4febae09a348af1615ebbe6659f24a96dc06b048ad168b3d58df8"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/postgres_metrics_delta.json",
+        "size_bytes": 1644,
+        "sha256": "9b42863b0779c18f7a923be927e1c851097f8c1d19bfe9c50aa6917d96d8f568"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/postgres_sampler_telemetry.json",
+        "size_bytes": 269,
+        "sha256": "5c7c0e03fdcd842dfc703e8916d43ed9d3f4886ef146dcee5030aa38d9b88cc6"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/postgres_snapshot_post.json",
+        "size_bytes": 1292,
+        "sha256": "21bbafe91d229aab19d179ec56e42c0f4c92f3e784419312d9bec2e3f0ed9c75"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/postgres_snapshot_pre.json",
+        "size_bytes": 1269,
+        "sha256": "88425c121e52ba2a6e9d1a1851c887975a6a1b4945da2766c6dd1e67c802d2cb"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "ff042347766eb22e53a93866e8505c5024c9d0b4b7a750c44cf31d9fec46eed3"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/storage_metrics_delta.json",
+        "size_bytes": 982,
+        "sha256": "9d0126fed16f4fd226001bfa5fd809606c1402b07a81094c31595365d4f9f8bc"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/storage_snapshot_post.json",
+        "size_bytes": 2854,
+        "sha256": "3e2b79a1c7f474e5228445fa3b473b48c0d46b9690f771a5dcfa98fac8804756"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/storage_snapshot_pre.json",
+        "size_bytes": 2848,
+        "sha256": "98e62c7b334d1eb6f71921aab65994730cf62953a81ab7ea3d159d259c9f7681"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/tpcb_1cpu_r1/trial_summary.json",
+        "size_bytes": 8310,
+        "sha256": "a0409b1991b4f048f661d2e7a7756d73c7b1dddec550ae3e08b81e233476c2dd"
+      }
+    },
+    "tpcb_1cpu_r2": {
+      "client_isolation.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/client_isolation.json",
+        "size_bytes": 744,
+        "sha256": "6cc551c70263186fff79e9d4267cdae8325379370cf1508e0c050d46892601a9"
+      },
+      "command.txt": {
+        "rel_path": "trials/tpcb_1cpu_r2/command.txt",
+        "size_bytes": 222,
+        "sha256": "18f73f51eedf4ba1bd01fe1f2c5cc1c346c33fc3000ed956ac6cadf8e8d0cfe3"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/correlation_analysis.json",
+        "size_bytes": 936,
+        "sha256": "82674c754c7cfba3f1d6452ca42c45e992420dfb6a931337df817c2c213a527c"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "40549e7e57e3bc4574090d2e4225bfd68742993736c4ee0e16cf24f912140287"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/database_state_diff.json",
+        "size_bytes": 449,
+        "sha256": "5565b714015c22a7a2a69e131782f0f5ca2173618638fa3fe323cfee0d48e7d3"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/database_state_post.json",
+        "size_bytes": 1773,
+        "sha256": "32ebebba7d762dd2a13619058c29f54c432f1525ea44fc27e5c9943174961c06"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/metric_provenance.json",
+        "size_bytes": 1543,
+        "sha256": "b99baa10556109a79c7cd3419191c9cf62e4ee8a3afd885c1f62a02fe764eaa3"
+      },
+      "monitoring_samples_tpcb_1cpu_r2.csv": {
+        "rel_path": "trials/tpcb_1cpu_r2/monitoring_samples_tpcb_1cpu_r2.csv",
+        "size_bytes": 569544,
+        "sha256": "0df50bde8018c26833dc444d7260214b60e4a2eb98be1e5a63695de16dbd0fb7"
+      },
+      "monitoring_samples_tpcb_1cpu_r2.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/monitoring_samples_tpcb_1cpu_r2.json",
+        "size_bytes": 1621714,
+        "sha256": "a65e03b49bcb220f6cabeb0b2ee4acd8929eb02d3ead22c451029d54b55f3d87"
+      },
+      "monitoring_summary_tpcb_1cpu_r2.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/monitoring_summary_tpcb_1cpu_r2.json",
+        "size_bytes": 1620,
+        "sha256": "fb7b1710220ae11629b826959eea3b0aa4cf6412401f77216db8193d95981636"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/tpcb_1cpu_r2/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/tpcb_1cpu_r2/pgbench.stdout",
+        "size_bytes": 400,
+        "sha256": "c57c95aeb6c6b36fbb028ff7871f934f9c42b5e0d6b88ad58fbeafcd47f7608e"
+      },
+      "pgbench_tpcb_1cpu_r2.32312": {
+        "rel_path": "trials/tpcb_1cpu_r2/pgbench_tpcb_1cpu_r2.32312",
+        "size_bytes": 612072,
+        "sha256": "adabdfe7b6dc17d3d32ecec37a89c0d20ba38826286eaf80aa0e4f38338fd52e"
+      },
+      "pgbench_tpcb_1cpu_r2.32312.1": {
+        "rel_path": "trials/tpcb_1cpu_r2/pgbench_tpcb_1cpu_r2.32312.1",
+        "size_bytes": 606895,
+        "sha256": "cd21cee3c636033816af93e4e0f8ef86fe9b81e83cff7f5d0355ac59706dd597"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/postgres_metrics_delta.json",
+        "size_bytes": 1573,
+        "sha256": "01e53817a5f0532f10003f061bfe353433a72547fe25f36fbe8c75bc2b254e0a"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/postgres_sampler_telemetry.json",
+        "size_bytes": 269,
+        "sha256": "17599ff444e5f096aa71740c298329cadf2fd78860d5cd59c3521ee64facfd13"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/postgres_snapshot_post.json",
+        "size_bytes": 1292,
+        "sha256": "495b29ce2b68989aacc6c2649d24e52273150223dcfa67ce5dbc1a47d1ef2427"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/postgres_snapshot_pre.json",
+        "size_bytes": 1270,
+        "sha256": "997de2b8e46a37cd86ebb276aa3cd03f06288b10559a3ff3fe2349ca24f42c85"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "3c5fc39382eef5efc3c731e7d98d707d089ec055c229b1128ec4c112f9e9c2b4"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/storage_metrics_delta.json",
+        "size_bytes": 985,
+        "sha256": "7366ff7216d81e2cc9f79c35d674790e1d94408921ce4a28f070ef260f306b0d"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/storage_snapshot_post.json",
+        "size_bytes": 2849,
+        "sha256": "0b57f1c11c9f0ae9edec34c3066526a35f48d13f817e259b744a384b46d23465"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/storage_snapshot_pre.json",
+        "size_bytes": 2846,
+        "sha256": "2eed19028b9b9aaca63a0c9ede47bd531d3f4f37e53022790b391323074adfd9"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/tpcb_1cpu_r2/trial_summary.json",
+        "size_bytes": 8243,
+        "sha256": "4c7d527a06c3433ce705bca2520bed1723cf6d38a378c3cf66ecda3736156c62"
+      }
+    },
+    "tpcb_1cpu_r3": {
+      "client_isolation.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/client_isolation.json",
+        "size_bytes": 744,
+        "sha256": "575d581da7ac1503aa4999f669411da157ed44d760a0e774429b2be6453d6ae7"
+      },
+      "command.txt": {
+        "rel_path": "trials/tpcb_1cpu_r3/command.txt",
+        "size_bytes": 222,
+        "sha256": "1b6978e2f70801c0ec88562ec732a6f10f25c927cabded47f7a2d4489451f099"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/correlation_analysis.json",
+        "size_bytes": 934,
+        "sha256": "dc4d67ee515d06fb4b0a368236ddfaf79a3178cd7ec22d47d3c65c680a6594e1"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "88dfc9a10e40c7332500e478a96e1505a4ec755638ebdb4953ecf34dd347cdf3"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/database_state_diff.json",
+        "size_bytes": 449,
+        "sha256": "c91b1e1187ba14cd64f71d3651ac9d3c29b9e84b67285c75a138ad5998456d50"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/database_state_post.json",
+        "size_bytes": 1776,
+        "sha256": "9f31b71c2c9282d0a60da14b9a40bd781e3840565ad4d197c1469f8c9612456a"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/metric_provenance.json",
+        "size_bytes": 1543,
+        "sha256": "0a26f41395c48555381849d822703fa2ee0dc92a754b71f8e5f90a006b3adf0f"
+      },
+      "monitoring_samples_tpcb_1cpu_r3.csv": {
+        "rel_path": "trials/tpcb_1cpu_r3/monitoring_samples_tpcb_1cpu_r3.csv",
+        "size_bytes": 570493,
+        "sha256": "20a149813da740e97239234b8f65ef3b9ce14bdf5927a046a22b399e4344d06b"
+      },
+      "monitoring_samples_tpcb_1cpu_r3.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/monitoring_samples_tpcb_1cpu_r3.json",
+        "size_bytes": 1621595,
+        "sha256": "e4ebf0413ffb08955b3c9949a1528e60eae39d16bba9b88460a4612a3faaa960"
+      },
+      "monitoring_summary_tpcb_1cpu_r3.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/monitoring_summary_tpcb_1cpu_r3.json",
+        "size_bytes": 1618,
+        "sha256": "c2855ffc0c5fce6e6a1556509ae98c006081932069471492a8ad2b7906232ecc"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/tpcb_1cpu_r3/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/tpcb_1cpu_r3/pgbench.stdout",
+        "size_bytes": 400,
+        "sha256": "38c7ab24c43eb701a4cd738eb4213ce6b21ed17d3ed380568275972568385e15"
+      },
+      "pgbench_tpcb_1cpu_r3.30980": {
+        "rel_path": "trials/tpcb_1cpu_r3/pgbench_tpcb_1cpu_r3.30980",
+        "size_bytes": 718182,
+        "sha256": "3a43ce947ef192804b5d226256ee8fbf968c577dcbe16a9469ac420a31ec20a8"
+      },
+      "pgbench_tpcb_1cpu_r3.30980.1": {
+        "rel_path": "trials/tpcb_1cpu_r3/pgbench_tpcb_1cpu_r3.30980.1",
+        "size_bytes": 723104,
+        "sha256": "7de8534ca71970661ad317553c1cfaa2aa21dd2a650b73f8c54efd4c393e5753"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/postgres_metrics_delta.json",
+        "size_bytes": 1638,
+        "sha256": "72e3ea828f40aab75a0de4524b2f554b4d2f8fd3133f24ec8d7db1a4088a375b"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/postgres_sampler_telemetry.json",
+        "size_bytes": 269,
+        "sha256": "512f11c6afff1ad61c233576cc4e5fa786b8414ac07f19b7fa6c4bda07ca2c28"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/postgres_snapshot_post.json",
+        "size_bytes": 1293,
+        "sha256": "024f729a88dd484c357bc66f5f203143c9a715d993611aa90f62c6600af866b9"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/postgres_snapshot_pre.json",
+        "size_bytes": 1272,
+        "sha256": "739cd4df21aa98a873d00ff90cddcc3a8df7b1e4ddc8e7a16255aaaf81df2d2d"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "8ea2acb65504fe0212282a111c34ef413d7bef86846b236c96eee42411fe85c2"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/storage_metrics_delta.json",
+        "size_bytes": 981,
+        "sha256": "10c238f925378f3afc499f3b4cbb1284ca2c3585512be49601fba203ef446b27"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/storage_snapshot_post.json",
+        "size_bytes": 2849,
+        "sha256": "0e3a2bdfb47bae80e433ed30ba52f5989c8675e2272f283a8200defb1151c53c"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/storage_snapshot_pre.json",
+        "size_bytes": 2845,
+        "sha256": "581f8893a320ff5a4c3ca23243a921a4966b16bf58db082935c700df7885e7f2"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/tpcb_1cpu_r3/trial_summary.json",
+        "size_bytes": 8303,
+        "sha256": "e20201d5d0c203b5b0231e014554d9c6f18e25fbe077395ea85b83407ef40bbc"
+      }
+    },
+    "tpcb_2cpu_r1": {
+      "client_isolation.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/client_isolation.json",
+        "size_bytes": 744,
+        "sha256": "1a3a510cc5e7a9850813381947d4a5247a02d0e14c9b1f500a66cafb38d4122f"
+      },
+      "command.txt": {
+        "rel_path": "trials/tpcb_2cpu_r1/command.txt",
+        "size_bytes": 222,
+        "sha256": "98df1fa64f4230db6d7049357fd660ef6edcfbe545c664a23e7dad6b341c65bd"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/correlation_analysis.json",
+        "size_bytes": 896,
+        "sha256": "eb1689bcb435b53b92c98a46f47baa8678779c56ba5f14968b144c9bf4ebed30"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "6a3521841f7722a797373bff078b86579f342d1b7b7863192984e01d90f4ba7c"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/database_state_diff.json",
+        "size_bytes": 449,
+        "sha256": "d9c40bde3d274033816da78d8844ae6eb9fbd74016449c532efb95e552a96ba9"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/database_state_post.json",
+        "size_bytes": 1772,
+        "sha256": "0f500ce3e92ec41e5742b9aaf6e25c2b05a8405eec085594c4233a4a8f2a2eee"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/metric_provenance.json",
+        "size_bytes": 1542,
+        "sha256": "d9e9e594e850ef39e6b4eff41c02a0781bbbad6870ece0c94b52273a87ad44a6"
+      },
+      "monitoring_samples_tpcb_2cpu_r1.csv": {
+        "rel_path": "trials/tpcb_2cpu_r1/monitoring_samples_tpcb_2cpu_r1.csv",
+        "size_bytes": 556364,
+        "sha256": "ae0fb973aa16b187b92f5b56d339222b4e92277944f8147f8ac25154d302c280"
+      },
+      "monitoring_samples_tpcb_2cpu_r1.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/monitoring_samples_tpcb_2cpu_r1.json",
+        "size_bytes": 1608000,
+        "sha256": "18730cf6ed6a91f2090f816ffa0938f024375e515201322f5a9512b390418117"
+      },
+      "monitoring_summary_tpcb_2cpu_r1.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/monitoring_summary_tpcb_2cpu_r1.json",
+        "size_bytes": 1601,
+        "sha256": "d9754aee7a577df66ab1dbd73d87186e8ebdf8567a5cf47fcaae1a89fa3d6326"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/tpcb_2cpu_r1/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/tpcb_2cpu_r1/pgbench.stdout",
+        "size_bytes": 400,
+        "sha256": "aa137075866925cb001d86b92fd5f7a5ccbb94ea0eaf09aa9745d0563faedfc2"
+      },
+      "pgbench_tpcb_2cpu_r1.22976": {
+        "rel_path": "trials/tpcb_2cpu_r1/pgbench_tpcb_2cpu_r1.22976",
+        "size_bytes": 781301,
+        "sha256": "9cb4e116fe234fa62f883ec2df1798f9a9d32082cbc3201f147464a2d732c922"
+      },
+      "pgbench_tpcb_2cpu_r1.22976.1": {
+        "rel_path": "trials/tpcb_2cpu_r1/pgbench_tpcb_2cpu_r1.22976.1",
+        "size_bytes": 779615,
+        "sha256": "0d5593ed4f026455c17c098567d87c4ed7af278b04ada34a1de110c04b394469"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/postgres_metrics_delta.json",
+        "size_bytes": 1644,
+        "sha256": "ba87fe234bc58d7f3b669990fb6b5d2f46a08999cc78a1b461e957e9a96f22aa"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/postgres_sampler_telemetry.json",
+        "size_bytes": 269,
+        "sha256": "e17fe247432e211b5bef39aa9166c625e0926a2056d5645f0aa829aca8f454b1"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/postgres_snapshot_post.json",
+        "size_bytes": 1293,
+        "sha256": "5b9681c524bb1165b1792e6bfba466a865db6f261196a7b8af72ea657a74652b"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/postgres_snapshot_pre.json",
+        "size_bytes": 1271,
+        "sha256": "97d101e3d5e3e461e3d8ca311cdfac6c6f10918d6f4c24ac67a050394b872fbf"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "f9788b144a495c0a2d53650363fcc80e3c92626b4dc0676dc80823186812ea46"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/storage_metrics_delta.json",
+        "size_bytes": 994,
+        "sha256": "e4f24fb26139a0883373113442b842fc71a79d441a3385e4cda90cecd4e10858"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/storage_snapshot_post.json",
+        "size_bytes": 2854,
+        "sha256": "ce2513c3ffce2c30fab96118cd02b056dd84675212422ecc627b684232795db8"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/storage_snapshot_pre.json",
+        "size_bytes": 2847,
+        "sha256": "51fa0dcf3258626daa31693f0e62ce837fb34fd563123b0f1a38f7580e27c7e8"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/tpcb_2cpu_r1/trial_summary.json",
+        "size_bytes": 8276,
+        "sha256": "68767d47dc674e845e0348f4d74961658df6863802229b54a3493e00f8542eac"
+      }
+    },
+    "tpcb_2cpu_r2": {
+      "client_isolation.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/client_isolation.json",
+        "size_bytes": 744,
+        "sha256": "ab50455898f9919c0ec897bbf1bec8befee8144da9fb081b9fa73a8f0c45edf5"
+      },
+      "command.txt": {
+        "rel_path": "trials/tpcb_2cpu_r2/command.txt",
+        "size_bytes": 222,
+        "sha256": "f699b6e0e9df7ddf32c78d66b8e338ff4ae1e3d2b6373b86af85e8eab57cefa2"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/correlation_analysis.json",
+        "size_bytes": 896,
+        "sha256": "faa2d4355282510b55f93545afbc42690f4a851f66b462cbc6a55d19f1197052"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "e8edae048104a3081f59107673a14ea673efcc69bca6678ddf47667ed971702f"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/database_state_diff.json",
+        "size_bytes": 449,
+        "sha256": "6710b0bfdeac8fbde8a392def2563472647e7839616e99e420dd8cd77e970655"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/database_state_post.json",
+        "size_bytes": 1775,
+        "sha256": "d45587ad335719696474c18807d354e5ca6e6d86132de3ffa8b6b2fa2a6da2c4"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/metric_provenance.json",
+        "size_bytes": 1541,
+        "sha256": "36b1064befb758c34203b8a9005f0aded8d0fa8a7bf555abaaa2ed46f17ccace"
+      },
+      "monitoring_samples_tpcb_2cpu_r2.csv": {
+        "rel_path": "trials/tpcb_2cpu_r2/monitoring_samples_tpcb_2cpu_r2.csv",
+        "size_bytes": 556013,
+        "sha256": "ce68243525548beb6d56beaa519af93998085334bdda569fc307aa61b512accb"
+      },
+      "monitoring_samples_tpcb_2cpu_r2.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/monitoring_samples_tpcb_2cpu_r2.json",
+        "size_bytes": 1607135,
+        "sha256": "fb6a0a54f78258177d0d060933e93aebdad9ceb4d9e50075bf996ecdcfa74a74"
+      },
+      "monitoring_summary_tpcb_2cpu_r2.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/monitoring_summary_tpcb_2cpu_r2.json",
+        "size_bytes": 1599,
+        "sha256": "747dc99710593e0e3b714ef8c43e99cfe2986084aea4e56eb51620f0f2cd6b1b"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/tpcb_2cpu_r2/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/tpcb_2cpu_r2/pgbench.stdout",
+        "size_bytes": 400,
+        "sha256": "604be32bdef4504309df0075ece76fa9c7edd16d2f8671f1667162bb5885fc09"
+      },
+      "pgbench_tpcb_2cpu_r2.25625": {
+        "rel_path": "trials/tpcb_2cpu_r2/pgbench_tpcb_2cpu_r2.25625",
+        "size_bytes": 754392,
+        "sha256": "a034922df6f0dd3f1bfb4ce26962b26d5a4ed2c131e6639ed83d82a0978bdaeb"
+      },
+      "pgbench_tpcb_2cpu_r2.25625.1": {
+        "rel_path": "trials/tpcb_2cpu_r2/pgbench_tpcb_2cpu_r2.25625.1",
+        "size_bytes": 761446,
+        "sha256": "ca97431c6de7bc808dd587efe8285e8fbcd7f7ab1863caed3451d8be4a287f28"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/postgres_metrics_delta.json",
+        "size_bytes": 1645,
+        "sha256": "024b6d4fb2d17c693a093cd0e70d60340876ccd4554798155771086c3e68e429"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/postgres_sampler_telemetry.json",
+        "size_bytes": 269,
+        "sha256": "bff21f9003fda4dfd8d53ad6bcc5f1587a9b08bff102d58eb862b8172d6630c8"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/postgres_snapshot_post.json",
+        "size_bytes": 1293,
+        "sha256": "f626bd7c02b30b292aeaf908ead7c3a55a5c20553768d8ce2fb89978236854e6"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/postgres_snapshot_pre.json",
+        "size_bytes": 1271,
+        "sha256": "d2bc4347fcd407e31326160fa81e160bfb9f5e2725c8b90f50068b4302307f64"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "44a7f0c695cc0e733d282be8cb55427f1b4922ce8b80ac45f0bd8c04cace8f35"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/storage_metrics_delta.json",
+        "size_bytes": 985,
+        "sha256": "1d924a3f6a62d406d304bd3e50278c5d480e18c608a4b5eafe87707d62ba6d9c"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/storage_snapshot_post.json",
+        "size_bytes": 2853,
+        "sha256": "f269f26b6a68ebb32fb2b8ee560d6d799dfca9b7051dad6d2adcb08125073768"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/storage_snapshot_pre.json",
+        "size_bytes": 2850,
+        "sha256": "6b7c07bc6c0ded51ea0d3c1a3f328f5be6791217a3030435dda7f092283b543b"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/tpcb_2cpu_r2/trial_summary.json",
+        "size_bytes": 8267,
+        "sha256": "5f6bc135fd694b5d867893743468b564afdfdc08f0532461f2583392a60924ae"
+      }
+    },
+    "tpcb_2cpu_r3": {
+      "client_isolation.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/client_isolation.json",
+        "size_bytes": 744,
+        "sha256": "99ffb766dfa9c85386b08bad46973483cc44e91f46941def5d38827bc5cf8b93"
+      },
+      "command.txt": {
+        "rel_path": "trials/tpcb_2cpu_r3/command.txt",
+        "size_bytes": 222,
+        "sha256": "8a1d1230edeea36bd3b4dbd38d2a9d044a27630412d899760c57364ee9589cbb"
+      },
+      "correlation_analysis.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/correlation_analysis.json",
+        "size_bytes": 896,
+        "sha256": "442794de0f163afa4274d0f329a6c49852576e0227fa64dba8493de3bf1e256f"
+      },
+      "database_state_baseline.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/database_state_baseline.json",
+        "size_bytes": 1711,
+        "sha256": "89f1c42d1be70daee53a5107fd3e3e75f97a2a64400c542084087c917844f234"
+      },
+      "database_state_diff.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/database_state_diff.json",
+        "size_bytes": 449,
+        "sha256": "0ea3f1334df407bda95c6638d1ae092ae70deea21df3c546c95a15a5495e1f5d"
+      },
+      "database_state_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/database_state_post.json",
+        "size_bytes": 1773,
+        "sha256": "c11fd359d8131ec9b2482d393fed87b870625816ee72c96fcf033e914ccd2446"
+      },
+      "metric_provenance.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/metric_provenance.json",
+        "size_bytes": 1543,
+        "sha256": "8ceef6ba91604494bce0f33f4622290a6b5a131ffde1880b722193a242cc8e99"
+      },
+      "monitoring_samples_tpcb_2cpu_r3.csv": {
+        "rel_path": "trials/tpcb_2cpu_r3/monitoring_samples_tpcb_2cpu_r3.csv",
+        "size_bytes": 556126,
+        "sha256": "53ace3e294cbc3ccff3f9124e5b5b1054ca50141e2d22217d50ef6438d1e2e48"
+      },
+      "monitoring_samples_tpcb_2cpu_r3.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/monitoring_samples_tpcb_2cpu_r3.json",
+        "size_bytes": 1607228,
+        "sha256": "1ebdbf9128302653484c5f064ee62e192b506c32f9171769f9a4cac06053ab18"
+      },
+      "monitoring_summary_tpcb_2cpu_r3.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/monitoring_summary_tpcb_2cpu_r3.json",
+        "size_bytes": 1600,
+        "sha256": "c3caf28cfbf40d659fb820e1bc7ad5e8b93ad1cae79a599eb50ff632d859d936"
+      },
+      "pgbench.stderr": {
+        "rel_path": "trials/tpcb_2cpu_r3/pgbench.stderr",
+        "size_bytes": 23,
+        "sha256": "a4f3d27a9d6bc91630bb18445429e0258ae477886c21c867985d59d345363174"
+      },
+      "pgbench.stdout": {
+        "rel_path": "trials/tpcb_2cpu_r3/pgbench.stdout",
+        "size_bytes": 400,
+        "sha256": "d796518c58c6702abf2981979004c89da317f09c279135f147de9a9379b972db"
+      },
+      "pgbench_tpcb_2cpu_r3.34986": {
+        "rel_path": "trials/tpcb_2cpu_r3/pgbench_tpcb_2cpu_r3.34986",
+        "size_bytes": 764840,
+        "sha256": "bc4686e24377628f716bdd329f09eca513795c7fc7c5720d05793121cb37121e"
+      },
+      "pgbench_tpcb_2cpu_r3.34986.1": {
+        "rel_path": "trials/tpcb_2cpu_r3/pgbench_tpcb_2cpu_r3.34986.1",
+        "size_bytes": 762856,
+        "sha256": "105607ed5ace8ed6c64bdce9f5d95af54c38f3d944d328482a22aac4e86f451c"
+      },
+      "postgres_metrics_delta.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/postgres_metrics_delta.json",
+        "size_bytes": 1639,
+        "sha256": "bb96049f7136afe6555c189a9020a3da7f1232745651d335925558aa967ebf8d"
+      },
+      "postgres_sampler_telemetry.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/postgres_sampler_telemetry.json",
+        "size_bytes": 268,
+        "sha256": "89fdd39c82b2535942eda9ab46a78eb21962dae33f3eaf090d97b6bc07ddf9de"
+      },
+      "postgres_snapshot_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/postgres_snapshot_post.json",
+        "size_bytes": 1293,
+        "sha256": "287c5e52f998135af84788c665ba281d8b55db65b7dd53cf551fa8cb648a0645"
+      },
+      "postgres_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/postgres_snapshot_pre.json",
+        "size_bytes": 1271,
+        "sha256": "1c0ef956179bfa83f6ad334220076aee6bd6e8526efab83e88bd4f161d760bfa"
+      },
+      "resource_verification.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/resource_verification.json",
+        "size_bytes": 347,
+        "sha256": "e4148398c3159a4e1578f738dc69fe5e79a1af081bbcb63c9fe3a1fafcf99132"
+      },
+      "storage_metrics_delta.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/storage_metrics_delta.json",
+        "size_bytes": 983,
+        "sha256": "2b1ea9b69aec971b99aebcbe107ca72cf1a893459422939c07606694ca5d0ebd"
+      },
+      "storage_snapshot_post.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/storage_snapshot_post.json",
+        "size_bytes": 2859,
+        "sha256": "bc7e1167e5c4158548c43f9fddc334810cac6af146d176cda93c47e6a012fce2"
+      },
+      "storage_snapshot_pre.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/storage_snapshot_pre.json",
+        "size_bytes": 2854,
+        "sha256": "0d03a51eeca9b0553a5531b637c4e4f337faa7209226c38099aae6d0eab9519f"
+      },
+      "trial_summary.json": {
+        "rel_path": "trials/tpcb_2cpu_r3/trial_summary.json",
+        "size_bytes": 8264,
+        "sha256": "90a41852e02643b279d136e9dfca58090c049c0631e7084178e288954e48844b"
+      }
+    }
+  },
+  "missing_or_corrupted": []
+}

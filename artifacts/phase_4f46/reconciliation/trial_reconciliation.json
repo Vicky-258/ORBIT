@@ -1,0 +1,686 @@
+[
+  {
+    "trial_id": "ro_1cpu_r1",
+    "workload_profile": "read_only_select",
+    "cpu_quota_cores": 1.0,
+    "replication": 1,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 578711,
+      "min_ms": 0.034,
+      "max_ms": 80.695,
+      "mean_ms": 0.41053864018482455,
+      "std_sample_ms": 4.889151621274866,
+      "std_population_ms": 4.889147397099299,
+      "p50_ms": 0.086,
+      "p90_ms": 0.131,
+      "p95_ms": 0.147,
+      "p99_ms": 0.238,
+      "p999_ms": 76.70829000000003
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 578711,
+      "failed_transactions": 0,
+      "tps": 19295.777203,
+      "latency_avg_ms": 0.415,
+      "p50_ms": 0.086,
+      "p90_ms": 0.131,
+      "p95_ms": 0.147,
+      "p99_ms": 0.238,
+      "p999_ms": 76.708,
+      "max_ms": 80.695,
+      "std_ms": 4.889
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 578711,
+      "failed_transactions": 0,
+      "latency_average_ms": 0.415,
+      "initial_connection_time_ms": 8.657,
+      "tps": 19295.777203
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684125.987496,
+      "last_tx_timestamp_epoch": 1793684155.978241,
+      "tx_duration_sec": 29.990745067596436,
+      "stored_wall_duration_sec": 30.015
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 0.415,
+        "observed_value": 0.410539,
+        "difference": -0.004461,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "ro_1cpu_r2",
+    "workload_profile": "read_only_select",
+    "cpu_quota_cores": 1.0,
+    "replication": 2,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 567752,
+      "min_ms": 0.034,
+      "max_ms": 79.058,
+      "mean_ms": 0.41842240273922415,
+      "std_sample_ms": 4.929678305595156,
+      "std_population_ms": 4.929673964192153,
+      "p50_ms": 0.088,
+      "p90_ms": 0.133,
+      "p95_ms": 0.152,
+      "p99_ms": 0.247,
+      "p999_ms": 76.722
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 567752,
+      "failed_transactions": 0,
+      "tps": 18930.292689,
+      "latency_avg_ms": 0.423,
+      "p50_ms": 0.088,
+      "p90_ms": 0.133,
+      "p95_ms": 0.152,
+      "p99_ms": 0.247,
+      "p999_ms": 76.722,
+      "max_ms": 79.058,
+      "std_ms": 4.93
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 567752,
+      "failed_transactions": 0,
+      "latency_average_ms": 0.423,
+      "initial_connection_time_ms": 8.578,
+      "tps": 18930.292689
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684525.920765,
+      "last_tx_timestamp_epoch": 1793684555.911666,
+      "tx_duration_sec": 29.990900993347168,
+      "stored_wall_duration_sec": 30.017
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 0.423,
+        "observed_value": 0.418422,
+        "difference": -0.004578,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "ro_1cpu_r3",
+    "workload_profile": "read_only_select",
+    "cpu_quota_cores": 1.0,
+    "replication": 3,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 573860,
+      "min_ms": 0.034,
+      "max_ms": 80.927,
+      "mean_ms": 0.4139874864949639,
+      "std_sample_ms": 4.908284258790253,
+      "std_population_ms": 4.908279982236392,
+      "p50_ms": 0.087,
+      "p90_ms": 0.132,
+      "p95_ms": 0.148,
+      "p99_ms": 0.24,
+      "p999_ms": 76.73
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 573860,
+      "failed_transactions": 0,
+      "tps": 19134.026745,
+      "latency_avg_ms": 0.418,
+      "p50_ms": 0.087,
+      "p90_ms": 0.132,
+      "p95_ms": 0.148,
+      "p99_ms": 0.24,
+      "p999_ms": 76.73,
+      "max_ms": 80.927,
+      "std_ms": 4.908
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 573860,
+      "failed_transactions": 0,
+      "latency_average_ms": 0.418,
+      "initial_connection_time_ms": 8.621,
+      "tps": 19134.026745
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684393.597621,
+      "last_tx_timestamp_epoch": 1793684423.588331,
+      "tx_duration_sec": 29.990710020065308,
+      "stored_wall_duration_sec": 30.017
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 0.418,
+        "observed_value": 0.413987,
+        "difference": -0.004013,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "ro_2cpu_r1",
+    "workload_profile": "read_only_select",
+    "cpu_quota_cores": 2.0,
+    "replication": 1,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 1162170,
+      "min_ms": 0.035,
+      "max_ms": 58.332,
+      "mean_ms": 0.20228647874235267,
+      "std_sample_ms": 2.333297320486694,
+      "std_population_ms": 2.333296316632773,
+      "p50_ms": 0.087,
+      "p90_ms": 0.131,
+      "p95_ms": 0.146,
+      "p99_ms": 0.216,
+      "p999_ms": 51.724831000000236
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 1162170,
+      "failed_transactions": 0,
+      "tps": 38749.471399,
+      "latency_avg_ms": 0.206,
+      "p50_ms": 0.087,
+      "p90_ms": 0.131,
+      "p95_ms": 0.146,
+      "p99_ms": 0.216,
+      "p999_ms": 51.725,
+      "max_ms": 58.332,
+      "std_ms": 2.333
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 1162170,
+      "failed_transactions": 0,
+      "latency_average_ms": 0.206,
+      "initial_connection_time_ms": 8.357,
+      "tps": 38749.471399
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684080.838048,
+      "last_tx_timestamp_epoch": 1793684110.829202,
+      "tx_duration_sec": 29.991153955459595,
+      "stored_wall_duration_sec": 30.015
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 0.206,
+        "observed_value": 0.202286,
+        "difference": -0.003714,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "ro_2cpu_r2",
+    "workload_profile": "read_only_select",
+    "cpu_quota_cores": 2.0,
+    "replication": 2,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 1107928,
+      "min_ms": 0.035,
+      "max_ms": 57.956,
+      "mean_ms": 0.2121481242463409,
+      "std_sample_ms": 2.3853832011262113,
+      "std_population_ms": 2.3853821246195523,
+      "p50_ms": 0.091,
+      "p90_ms": 0.141,
+      "p95_ms": 0.165,
+      "p99_ms": 0.249,
+      "p999_ms": 51.777073000000094
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 1107928,
+      "failed_transactions": 0,
+      "tps": 36943.345066,
+      "latency_avg_ms": 0.217,
+      "p50_ms": 0.091,
+      "p90_ms": 0.141,
+      "p95_ms": 0.165,
+      "p99_ms": 0.249,
+      "p999_ms": 51.777,
+      "max_ms": 57.956,
+      "std_ms": 2.385
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 1107928,
+      "failed_transactions": 0,
+      "latency_average_ms": 0.217,
+      "initial_connection_time_ms": 10.246,
+      "tps": 36943.345066
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684215.022547,
+      "last_tx_timestamp_epoch": 1793684245.011433,
+      "tx_duration_sec": 29.9888858795166,
+      "stored_wall_duration_sec": 30.009
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 0.217,
+        "observed_value": 0.212148,
+        "difference": -0.004852,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "ro_2cpu_r3",
+    "workload_profile": "read_only_select",
+    "cpu_quota_cores": 2.0,
+    "replication": 3,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 1113979,
+      "min_ms": 0.034,
+      "max_ms": 58.566,
+      "mean_ms": 0.21114618228889415,
+      "std_sample_ms": 2.4066132417879293,
+      "std_population_ms": 2.406612161599801,
+      "p50_ms": 0.088,
+      "p90_ms": 0.139,
+      "p95_ms": 0.162,
+      "p99_ms": 0.254,
+      "p999_ms": 52.271022000000116
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 1113979,
+      "failed_transactions": 0,
+      "tps": 37142.144198,
+      "latency_avg_ms": 0.215,
+      "p50_ms": 0.088,
+      "p90_ms": 0.139,
+      "p95_ms": 0.162,
+      "p99_ms": 0.254,
+      "p999_ms": 52.271,
+      "max_ms": 58.566,
+      "std_ms": 2.407
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 1113979,
+      "failed_transactions": 0,
+      "latency_average_ms": 0.215,
+      "initial_connection_time_ms": 7.914,
+      "tps": 37142.144198
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684347.996424,
+      "last_tx_timestamp_epoch": 1793684377.987878,
+      "tx_duration_sec": 29.991454124450684,
+      "stored_wall_duration_sec": 30.016
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 0.215,
+        "observed_value": 0.211146,
+        "difference": -0.003854,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "tpcb_1cpu_r1",
+    "workload_profile": "balanced_oltp_tpcb",
+    "cpu_quota_cores": 1.0,
+    "replication": 1,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 43136,
+      "min_ms": 0.81,
+      "max_ms": 458.26,
+      "mean_ms": 5.5574797848664685,
+      "std_sample_ms": 9.35829828976518,
+      "std_population_ms": 9.358189814796159,
+      "p50_ms": 3.879,
+      "p90_ms": 10.436,
+      "p95_ms": 13.82325,
+      "p99_ms": 26.865500000000104,
+      "p999_ms": 77.01044000000344
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 43136,
+      "failed_transactions": 0,
+      "tps": 1438.086262,
+      "latency_avg_ms": 5.563,
+      "p50_ms": 3.879,
+      "p90_ms": 10.436,
+      "p95_ms": 13.823,
+      "p99_ms": 26.866,
+      "p999_ms": 77.01,
+      "max_ms": 458.26,
+      "std_ms": 9.358
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 43136,
+      "failed_transactions": 0,
+      "latency_average_ms": 5.563,
+      "initial_connection_time_ms": 9.116,
+      "tps": 1438.086262
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684304.202547,
+      "last_tx_timestamp_epoch": 1793684334.191846,
+      "tx_duration_sec": 29.989298820495605,
+      "stored_wall_duration_sec": 30.03
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 5.563,
+        "observed_value": 5.55748,
+        "difference": -0.00552,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "tpcb_1cpu_r2",
+    "workload_profile": "balanced_oltp_tpcb",
+    "cpu_quota_cores": 1.0,
+    "replication": 2,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 38327,
+      "min_ms": 0.82,
+      "max_ms": 363.055,
+      "mean_ms": 6.261134187387481,
+      "std_sample_ms": 9.077102852592745,
+      "std_population_ms": 9.076984435262121,
+      "p50_ms": 4.013,
+      "p90_ms": 13.295,
+      "p95_ms": 17.453,
+      "p99_ms": 33.459659999999985,
+      "p999_ms": 116.37787400001777
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 38327,
+      "failed_transactions": 0,
+      "tps": 1276.42856,
+      "latency_avg_ms": 6.267,
+      "p50_ms": 4.013,
+      "p90_ms": 13.295,
+      "p95_ms": 17.453,
+      "p99_ms": 33.46,
+      "p999_ms": 116.378,
+      "max_ms": 363.055,
+      "std_ms": 9.077
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 38327,
+      "failed_transactions": 0,
+      "latency_average_ms": 6.267,
+      "initial_connection_time_ms": 9.558,
+      "tps": 1276.42856
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684482.084727,
+      "last_tx_timestamp_epoch": 1793684512.10885,
+      "tx_duration_sec": 30.024122953414917,
+      "stored_wall_duration_sec": 30.048
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 6.267,
+        "observed_value": 6.261134,
+        "difference": -0.005866,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "tpcb_1cpu_r3",
+    "workload_profile": "balanced_oltp_tpcb",
+    "cpu_quota_cores": 1.0,
+    "replication": 3,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 45334,
+      "min_ms": 0.798,
+      "max_ms": 425.464,
+      "mean_ms": 5.287835399479419,
+      "std_sample_ms": 7.851416544571754,
+      "std_population_ms": 7.851329948861662,
+      "p50_ms": 3.792,
+      "p90_ms": 9.936700000000004,
+      "p95_ms": 13.305699999999996,
+      "p99_ms": 22.76536999999998,
+      "p999_ms": 80.34756000002292
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 45334,
+      "failed_transactions": 0,
+      "tps": 1511.269549,
+      "latency_avg_ms": 5.294,
+      "p50_ms": 3.792,
+      "p90_ms": 9.937,
+      "p95_ms": 13.306,
+      "p99_ms": 22.765,
+      "p999_ms": 80.348,
+      "max_ms": 425.464,
+      "std_ms": 7.851
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 45334,
+      "failed_transactions": 0,
+      "latency_average_ms": 5.294,
+      "initial_connection_time_ms": 8.195,
+      "tps": 1511.269549
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684438.168867,
+      "last_tx_timestamp_epoch": 1793684468.163736,
+      "tx_duration_sec": 29.994868993759155,
+      "stored_wall_duration_sec": 30.016
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 5.294,
+        "observed_value": 5.287835,
+        "difference": -0.006165,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "tpcb_2cpu_r1",
+    "workload_profile": "balanced_oltp_tpcb",
+    "cpu_quota_cores": 2.0,
+    "replication": 1,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 49106,
+      "min_ms": 0.806,
+      "max_ms": 100.46,
+      "mean_ms": 4.8814579481122475,
+      "std_sample_ms": 4.140626471928602,
+      "std_population_ms": 4.140584311626885,
+      "p50_ms": 3.779,
+      "p90_ms": 9.086500000000001,
+      "p95_ms": 11.758,
+      "p99_ms": 19.111,
+      "p999_ms": 41.01428000000189
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 49106,
+      "failed_transactions": 0,
+      "tps": 1636.961774,
+      "latency_avg_ms": 4.887,
+      "p50_ms": 3.779,
+      "p90_ms": 9.087,
+      "p95_ms": 11.758,
+      "p99_ms": 19.111,
+      "p999_ms": 41.014,
+      "max_ms": 100.46,
+      "std_ms": 4.141
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 49106,
+      "failed_transactions": 0,
+      "latency_average_ms": 4.887,
+      "initial_connection_time_ms": 8.106,
+      "tps": 1636.961774
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684170.460921,
+      "last_tx_timestamp_epoch": 1793684200.456729,
+      "tx_duration_sec": 29.995807886123657,
+      "stored_wall_duration_sec": 30.02
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 4.887,
+        "observed_value": 4.881458,
+        "difference": -0.005542,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "tpcb_2cpu_r2",
+    "workload_profile": "balanced_oltp_tpcb",
+    "cpu_quota_cores": 2.0,
+    "replication": 2,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 47699,
+      "min_ms": 0.802,
+      "max_ms": 267.697,
+      "mean_ms": 5.025473427115872,
+      "std_sample_ms": 5.75210217315704,
+      "std_population_ms": 5.752041877004904,
+      "p50_ms": 3.827,
+      "p90_ms": 9.08040000000001,
+      "p95_ms": 11.685299999999996,
+      "p99_ms": 21.00611999999998,
+      "p999_ms": 48.132112000007155
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 47699,
+      "failed_transactions": 0,
+      "tps": 1590.11089,
+      "latency_avg_ms": 5.031,
+      "p50_ms": 3.827,
+      "p90_ms": 9.08,
+      "p95_ms": 11.685,
+      "p99_ms": 21.006,
+      "p999_ms": 48.132,
+      "max_ms": 267.697,
+      "std_ms": 5.752
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 47699,
+      "failed_transactions": 0,
+      "latency_average_ms": 5.031,
+      "initial_connection_time_ms": 8.424,
+      "tps": 1590.11089
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684260.486028,
+      "last_tx_timestamp_epoch": 1793684290.480694,
+      "tx_duration_sec": 29.99466609954834,
+      "stored_wall_duration_sec": 30.015
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 5.031,
+        "observed_value": 5.025473,
+        "difference": -0.005527,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  },
+  {
+    "trial_id": "tpcb_2cpu_r3",
+    "workload_profile": "balanced_oltp_tpcb",
+    "cpu_quota_cores": 2.0,
+    "replication": 3,
+    "status": "SUCCESS",
+    "recalculated_metrics": {
+      "count": 48066,
+      "min_ms": 0.809,
+      "max_ms": 136.129,
+      "mean_ms": 4.987165938501228,
+      "std_sample_ms": 4.335366140627115,
+      "std_population_ms": 4.33532104233841,
+      "p50_ms": 3.8235,
+      "p90_ms": 9.3275,
+      "p95_ms": 11.9925,
+      "p99_ms": 21.189399999999992,
+      "p999_ms": 40.64493500000001
+    },
+    "stored_summary_metrics": {
+      "total_transactions": 48066,
+      "failed_transactions": 0,
+      "tps": 1602.337213,
+      "latency_avg_ms": 4.993,
+      "p50_ms": 3.824,
+      "p90_ms": 9.328,
+      "p95_ms": 11.992,
+      "p99_ms": 21.189,
+      "p999_ms": 40.645,
+      "max_ms": 136.129,
+      "std_ms": 4.335
+    },
+    "pgbench_stdout": {
+      "transactions_actually_processed": 48066,
+      "failed_transactions": 0,
+      "latency_average_ms": 4.993,
+      "initial_connection_time_ms": 7.924,
+      "tps": 1602.337213
+    },
+    "log_files_count": 2,
+    "malformed_rows_count": 0,
+    "time_coverage": {
+      "first_tx_timestamp_epoch": 1793684570.418901,
+      "last_tx_timestamp_epoch": 1793684600.413962,
+      "tx_duration_sec": 29.995060920715332,
+      "stored_wall_duration_sec": 30.017
+    },
+    "discrepancies": [
+      {
+        "metric": "latency_avg_ms",
+        "expected_value": 4.993,
+        "observed_value": 4.987166,
+        "difference": -0.005834,
+        "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+      }
+    ]
+  }
+]

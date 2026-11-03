@@ -1,0 +1,907 @@
+[
+  {
+    "trial_id": "ro_1cpu_r1",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 41.305,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 778623,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 2309,
+        "delta_wal_records": 22,
+        "delta_wal_fpi": 0,
+        "delta_wal_write": 5,
+        "delta_wal_sync": 5,
+        "wal_write_time_ms": 0.09,
+        "wal_sync_time_ms": 19.22
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 0,
+        "observed_wait_events": {
+          "Client:ClientRead": 1577,
+          "Timeout:VacuumDelay": 1
+        },
+        "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 23,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 379,
+      "missed_samples": 0,
+      "total_samples_attempted": 379,
+      "mean_query_duration_ms": 5.89,
+      "total_query_duration_ms": 2233.17,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "ro_1cpu_r2",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 41.408,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 763602,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 2309,
+        "delta_wal_records": 22,
+        "delta_wal_fpi": 0,
+        "delta_wal_write": 5,
+        "delta_wal_sync": 5,
+        "wal_write_time_ms": 0.09,
+        "wal_sync_time_ms": 25.36
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 0,
+        "observed_wait_events": {
+          "Client:ClientRead": 1462,
+          "Timeout:VacuumDelay": 1
+        },
+        "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 23,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 379,
+      "missed_samples": 0,
+      "total_samples_attempted": 379,
+      "mean_query_duration_ms": 5.92,
+      "total_query_duration_ms": 2243.77,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "ro_1cpu_r3",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 41.382,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 773096,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 2309,
+        "delta_wal_records": 22,
+        "delta_wal_fpi": 0,
+        "delta_wal_write": 5,
+        "delta_wal_sync": 5,
+        "wal_write_time_ms": 0.09,
+        "wal_sync_time_ms": 167.97
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 0,
+        "observed_wait_events": {
+          "Client:ClientRead": 1456,
+          "Timeout:VacuumDelay": 1
+        },
+        "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 23,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 378,
+      "missed_samples": 0,
+      "total_samples_attempted": 378,
+      "mean_query_duration_ms": 5.94,
+      "total_query_duration_ms": 2244.03,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r1",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 42.425,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 1546700,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 2309,
+        "delta_wal_records": 22,
+        "delta_wal_fpi": 0,
+        "delta_wal_write": 6,
+        "delta_wal_sync": 6,
+        "wal_write_time_ms": 0.12,
+        "wal_sync_time_ms": 19.05
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 0,
+        "observed_wait_events": {
+          "Client:ClientRead": 1493,
+          "Timeout:VacuumDelay": 1
+        },
+        "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 23,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 389,
+      "missed_samples": 0,
+      "total_samples_attempted": 389,
+      "mean_query_duration_ms": 3.04,
+      "total_query_duration_ms": 1183.32,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r2",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 42.32,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 1511234,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 2256,
+        "delta_wal_records": 22,
+        "delta_wal_fpi": 0,
+        "delta_wal_write": 6,
+        "delta_wal_sync": 6,
+        "wal_write_time_ms": 0.12,
+        "wal_sync_time_ms": 24.8
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 0,
+        "observed_wait_events": {
+          "Client:ClientRead": 1484,
+          "Timeout:VacuumDelay": 1,
+          "IO:WALSync": 1
+        },
+        "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 23,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 388,
+      "missed_samples": 0,
+      "total_samples_attempted": 388,
+      "mean_query_duration_ms": 3.14,
+      "total_query_duration_ms": 1219.05,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r3",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 42.321,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 1518406,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 2257,
+        "delta_wal_records": 22,
+        "delta_wal_fpi": 0,
+        "delta_wal_write": 6,
+        "delta_wal_sync": 6,
+        "wal_write_time_ms": 0.1,
+        "wal_sync_time_ms": 34.1
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 0,
+        "observed_wait_events": {
+          "Client:ClientRead": 1505,
+          "Timeout:VacuumDelay": 2
+        },
+        "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 23,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 388,
+      "missed_samples": 0,
+      "total_samples_attempted": 388,
+      "mean_query_duration_ms": 3.28,
+      "total_query_duration_ms": 1271.47,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r1",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 40.537,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 59650,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 28095039,
+        "delta_wal_records": 436506,
+        "delta_wal_fpi": 1,
+        "delta_wal_write": 59174,
+        "delta_wal_sync": 59168,
+        "wal_write_time_ms": 764.98,
+        "wal_sync_time_ms": 36704.42
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 2066,
+        "observed_wait_events": {
+          "IO:WALSync": 372,
+          "Lock:transactionid": 1568,
+          "Lock:tuple": 547,
+          "Client:ClientRead": 165,
+          "LWLock:WALWrite": 234,
+          "LWLock:BufferContent": 1,
+          "IO:WALWrite": 7,
+          "Timeout:VacuumDelay": 2,
+          "Timeout:VacuumTruncate": 48
+        },
+        "lock_contention_classification": "CONFIRMED_LOCK_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 28,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 394,
+      "missed_samples": 0,
+      "total_samples_attempted": 394,
+      "mean_query_duration_ms": 1.62,
+      "total_query_duration_ms": 638.95,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r2",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 40.6,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 50969,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 24104165,
+        "delta_wal_records": 374075,
+        "delta_wal_fpi": 1,
+        "delta_wal_write": 50495,
+        "delta_wal_sync": 50490,
+        "wal_write_time_ms": 667.12,
+        "wal_sync_time_ms": 36877.76
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 2097,
+        "observed_wait_events": {
+          "Lock:transactionid": 1559,
+          "Lock:tuple": 582,
+          "IO:WALSync": 371,
+          "LWLock:WALWrite": 233,
+          "Client:ClientRead": 165,
+          "IO:WALWrite": 3,
+          "Timeout:VacuumDelay": 1
+        },
+        "lock_contention_classification": "CONFIRMED_LOCK_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 28,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 395,
+      "missed_samples": 0,
+      "total_samples_attempted": 395,
+      "mean_query_duration_ms": 1.57,
+      "total_query_duration_ms": 618.39,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r3",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 40.516,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 63101,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 29628718,
+        "delta_wal_records": 460690,
+        "delta_wal_fpi": 1,
+        "delta_wal_write": 62638,
+        "delta_wal_sync": 62631,
+        "wal_write_time_ms": 785.6,
+        "wal_sync_time_ms": 36613.16
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 2041,
+        "observed_wait_events": {
+          "Lock:transactionid": 1631,
+          "Lock:tuple": 456,
+          "IO:WALSync": 370,
+          "LWLock:WALWrite": 239,
+          "Client:ClientRead": 176,
+          "IO:WALWrite": 5,
+          "Timeout:VacuumDelay": 2,
+          "LWLock:LockManager": 1,
+          "LWLock:BufferContent": 1
+        },
+        "lock_contention_classification": "CONFIRMED_LOCK_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 28,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 394,
+      "missed_samples": 0,
+      "total_samples_attempted": 394,
+      "mean_query_duration_ms": 1.52,
+      "total_query_duration_ms": 600.52,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r1",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 40.592,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 67346,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 31615682,
+        "delta_wal_records": 492000,
+        "delta_wal_fpi": 1,
+        "delta_wal_write": 66888,
+        "delta_wal_sync": 66882,
+        "wal_write_time_ms": 861.89,
+        "wal_sync_time_ms": 37025.18
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 2051,
+        "observed_wait_events": {
+          "Lock:tuple": 507,
+          "Lock:transactionid": 1545,
+          "LWLock:WALWrite": 194,
+          "IO:WALSync": 370,
+          "Client:ClientRead": 190,
+          "IO:WALWrite": 9,
+          "LWLock:BufferContent": 1,
+          "Timeout:VacuumDelay": 3,
+          "Timeout:VacuumTruncate": 49
+        },
+        "lock_contention_classification": "CONFIRMED_LOCK_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 28,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 395,
+      "missed_samples": 0,
+      "total_samples_attempted": 395,
+      "mean_query_duration_ms": 1.34,
+      "total_query_duration_ms": 531.14,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r2",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 40.527,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 66124,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 31064977,
+        "delta_wal_records": 483382,
+        "delta_wal_fpi": 1,
+        "delta_wal_write": 65657,
+        "delta_wal_sync": 65650,
+        "wal_write_time_ms": 865.86,
+        "wal_sync_time_ms": 37008.32
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 2071,
+        "observed_wait_events": {
+          "IO:WALSync": 357,
+          "Lock:transactionid": 1493,
+          "LWLock:WALWrite": 183,
+          "Lock:tuple": 564,
+          "Client:ClientRead": 198,
+          "IO:WALWrite": 11,
+          "LWLock:BufferContent": 1,
+          "Timeout:VacuumDelay": 2,
+          "Timeout:VacuumTruncate": 49
+        },
+        "lock_contention_classification": "CONFIRMED_LOCK_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 28,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 395,
+      "missed_samples": 0,
+      "total_samples_attempted": 395,
+      "mean_query_duration_ms": 1.41,
+      "total_query_duration_ms": 558.91,
+      "monitoring_connection_count": 1
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r3",
+    "timing_instrumentation_active": true,
+    "duration_seconds": 40.534,
+    "metrics_taxonomy": {
+      "database_transactions": {
+        "status": "AVAILABLE",
+        "commits": 66495,
+        "rollbacks": 1,
+        "buffer_hit_ratio_pct": 100.0
+      },
+      "wal_activity": {
+        "status": "AVAILABLE",
+        "delta_wal_bytes": 31224768,
+        "delta_wal_records": 485696,
+        "delta_wal_fpi": 1,
+        "delta_wal_write": 66037,
+        "delta_wal_sync": 66031,
+        "wal_write_time_ms": 845.96,
+        "wal_sync_time_ms": 36978.52
+      },
+      "checkpoints_and_bgwriter": {
+        "status": "AVAILABLE",
+        "timed_checkpoints": 0,
+        "requested_checkpoints": 0,
+        "checkpoint_write_time_ms": 0.0,
+        "checkpoint_sync_time_ms": 0.0,
+        "checkpoint_buffers_written": 0,
+        "bgwriter_buffers_clean": 0,
+        "bgwriter_maxwritten_clean": 0,
+        "note": "Zero timed/requested checkpoints observed within the 30s benchmark window (ZERO_OBSERVED)."
+      },
+      "table_level_dml_statistics": {
+        "status": "UNAVAILABLE",
+        "reason": "pg_stat_user_tables view query failed or table stats were not enabled in postgresql.conf (track_counts). Listed in unsupported_or_missing_views.",
+        "unsupported_or_missing_views": [
+          "pg_stat_user_tables"
+        ]
+      },
+      "concurrency_and_locks": {
+        "status": "AVAILABLE",
+        "observed_lock_waits": 2032,
+        "observed_wait_events": {
+          "Lock:tuple": 541,
+          "LWLock:WALWrite": 220,
+          "IO:WALSync": 370,
+          "Lock:transactionid": 1526,
+          "Client:ClientRead": 179,
+          "IO:WALWrite": 6,
+          "IO:WALInitWrite": 1,
+          "Timeout:VacuumDelay": 1,
+          "Timeout:VacuumTruncate": 49
+        },
+        "lock_contention_classification": "CONFIRMED_LOCK_CONTENTION_OBSERVED"
+      },
+      "engine_io_timing": {
+        "status": "AVAILABLE",
+        "delta_io_reads": 28,
+        "delta_io_writes": 0,
+        "delta_io_fsyncs": 0
+      },
+      "deadlocks": {
+        "status": "ZERO_OBSERVED",
+        "delta_deadlocks": 0,
+        "delta_conflicts": 0,
+        "note": "Zero deadlocks occurred during benchmark execution."
+      }
+    },
+    "sampler_telemetry": {
+      "sampling_interval_sec": 0.1,
+      "sampler_mode": "persistent_coprocess",
+      "successful_samples": 395,
+      "missed_samples": 0,
+      "total_samples_attempted": 395,
+      "mean_query_duration_ms": 1.38,
+      "total_query_duration_ms": 545.4,
+      "monitoring_connection_count": 1
+    }
+  }
+]

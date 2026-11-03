@@ -1,0 +1,123 @@
+{
+  "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+  "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+  "manifest_verified": true,
+  "model_registry_integrity": {
+    "status": "VERIFIED",
+    "model_count": 24,
+    "expected_model_count": 24,
+    "sha256": "90112d2390e8d52fde40506d35fa3aaed8a7f5c6e15e18714b06690f121ef26b",
+    "tables": [
+      "models",
+      "experiments",
+      "authorizations"
+    ],
+    "intact": true
+  },
+  "total_trials_scheduled": 12,
+  "total_trials_reconciled": 12,
+  "total_raw_transactions_parsed": 5376068,
+  "total_malformed_records": 0,
+  "total_failed_transactions": 0,
+  "total_discrepancies_identified": 12,
+  "discrepancies": [
+    {
+      "trial_id": "ro_1cpu_r1",
+      "metric": "latency_avg_ms",
+      "expected_value": 0.415,
+      "observed_value": 0.410539,
+      "difference": -0.004461,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "ro_1cpu_r2",
+      "metric": "latency_avg_ms",
+      "expected_value": 0.423,
+      "observed_value": 0.418422,
+      "difference": -0.004578,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "ro_1cpu_r3",
+      "metric": "latency_avg_ms",
+      "expected_value": 0.418,
+      "observed_value": 0.413987,
+      "difference": -0.004013,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "ro_2cpu_r1",
+      "metric": "latency_avg_ms",
+      "expected_value": 0.206,
+      "observed_value": 0.202286,
+      "difference": -0.003714,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "ro_2cpu_r2",
+      "metric": "latency_avg_ms",
+      "expected_value": 0.217,
+      "observed_value": 0.212148,
+      "difference": -0.004852,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "ro_2cpu_r3",
+      "metric": "latency_avg_ms",
+      "expected_value": 0.215,
+      "observed_value": 0.211146,
+      "difference": -0.003854,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "tpcb_1cpu_r1",
+      "metric": "latency_avg_ms",
+      "expected_value": 5.563,
+      "observed_value": 5.55748,
+      "difference": -0.00552,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "tpcb_1cpu_r2",
+      "metric": "latency_avg_ms",
+      "expected_value": 6.267,
+      "observed_value": 6.261134,
+      "difference": -0.005866,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "tpcb_1cpu_r3",
+      "metric": "latency_avg_ms",
+      "expected_value": 5.294,
+      "observed_value": 5.287835,
+      "difference": -0.006165,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "tpcb_2cpu_r1",
+      "metric": "latency_avg_ms",
+      "expected_value": 4.887,
+      "observed_value": 4.881458,
+      "difference": -0.005542,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "tpcb_2cpu_r2",
+      "metric": "latency_avg_ms",
+      "expected_value": 5.031,
+      "observed_value": 5.025473,
+      "difference": -0.005527,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    },
+    {
+      "trial_id": "tpcb_2cpu_r3",
+      "metric": "latency_avg_ms",
+      "expected_value": 4.993,
+      "observed_value": 4.987166,
+      "difference": -0.005834,
+      "explanation": "Stored latency_avg_ms was captured directly from pgbench.stdout summary, which represents pgbench's internal timing calculation, whereas observed_value is the exact arithmetic mean of all individual microsecond transaction log records."
+    }
+  ],
+  "reconciliation_status": "COMPLETE",
+  "generated_at_utc": "2026-11-03T08:41:49.374240+00:00"
+}

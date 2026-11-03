@@ -1,0 +1,386 @@
+[
+  {
+    "trial_id": "ro_1cpu_r1",
+    "duration_seconds": 41.295,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 450560,
+        "read_iops": 0.0,
+        "write_iops": 1.0,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 11,
+        "host_writes_completed": 1611,
+        "host_read_mb": 0.172,
+        "host_write_mb": 24.516,
+        "host_io_utilization_pct": 0.16,
+        "avg_queue_depth": 0.1,
+        "avg_await_ms": 2.57
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+        "classification_reason": "No physical storage bottleneck detected: host busy time 0.2% < 50%, avg queue depth 0.10 < 1.0, avg latency 2.57ms. Write activity absorbed by page cache without sustained queues."
+      }
+    }
+  },
+  {
+    "trial_id": "ro_1cpu_r2",
+    "duration_seconds": 41.403,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 352256,
+        "read_iops": 0.0,
+        "write_iops": 0.8,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 77,
+        "host_writes_completed": 1815,
+        "host_read_mb": 4.527,
+        "host_write_mb": 27.449,
+        "host_io_utilization_pct": 1.68,
+        "avg_queue_depth": 0.02,
+        "avg_await_ms": 0.19
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+        "classification_reason": "No physical storage bottleneck detected: host busy time 1.7% < 50%, avg queue depth 0.02 < 1.0, avg latency 0.19ms. Write activity absorbed by page cache without sustained queues."
+      }
+    }
+  },
+  {
+    "trial_id": "ro_1cpu_r3",
+    "duration_seconds": 41.362,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 352256,
+        "read_iops": 0.0,
+        "write_iops": 0.8,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 87,
+        "host_writes_completed": 719,
+        "host_read_mb": 0.781,
+        "host_write_mb": 10.668,
+        "host_io_utilization_pct": 0.31,
+        "avg_queue_depth": 0.01,
+        "avg_await_ms": 0.27
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+        "classification_reason": "No physical storage bottleneck detected: host busy time 0.3% < 50%, avg queue depth 0.01 < 1.0, avg latency 0.27ms. Write activity absorbed by page cache without sustained queues."
+      }
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r1",
+    "duration_seconds": 42.425,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 114688,
+        "write_bytes": 409600,
+        "read_iops": 0.1,
+        "write_iops": 0.9,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 71,
+        "host_writes_completed": 3530,
+        "host_read_mb": 1.363,
+        "host_write_mb": 55.078,
+        "host_io_utilization_pct": 0.21,
+        "avg_queue_depth": 0.01,
+        "avg_await_ms": 0.15
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+        "classification_reason": "No physical storage bottleneck detected: host busy time 0.2% < 50%, avg queue depth 0.01 < 1.0, avg latency 0.15ms. Write activity absorbed by page cache without sustained queues."
+      }
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r2",
+    "duration_seconds": 42.31,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 1802240,
+        "write_bytes": 393216,
+        "read_iops": 1.0,
+        "write_iops": 0.9,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 322,
+        "host_writes_completed": 1314,
+        "host_read_mb": 4.887,
+        "host_write_mb": 20.137,
+        "host_io_utilization_pct": 0.24,
+        "avg_queue_depth": 0.01,
+        "avg_await_ms": 0.23
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+        "classification_reason": "No physical storage bottleneck detected: host busy time 0.2% < 50%, avg queue depth 0.01 < 1.0, avg latency 0.23ms. Write activity absorbed by page cache without sustained queues."
+      }
+    }
+  },
+  {
+    "trial_id": "ro_2cpu_r3",
+    "duration_seconds": 42.317,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 1736704,
+        "write_bytes": 491520,
+        "read_iops": 1.0,
+        "write_iops": 1.1,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 53,
+        "host_writes_completed": 690,
+        "host_read_mb": 2.137,
+        "host_write_mb": 10.465,
+        "host_io_utilization_pct": 0.2,
+        "avg_queue_depth": 0.01,
+        "avg_await_ms": 0.4
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+        "classification_reason": "No physical storage bottleneck detected: host busy time 0.2% < 50%, avg queue depth 0.01 < 1.0, avg latency 0.40ms. Write activity absorbed by page cache without sustained queues."
+      }
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r1",
+    "duration_seconds": 40.548,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 3951083520,
+        "read_iops": 0.0,
+        "write_iops": 9597.7,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 20,
+        "host_writes_completed": 607616,
+        "host_read_mb": 0.312,
+        "host_write_mb": 7184.246,
+        "host_io_utilization_pct": 67.32,
+        "avg_queue_depth": 1.61,
+        "avg_await_ms": 0.11
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "STORAGE_PRESSURE_SUSPECTED",
+        "classification_reason": "Storage pressure suspected but unconfirmed: host busy time 67.3%, avg queue depth 1.61, avg request latency 0.11ms. Does not meet concurrent saturation criteria."
+      }
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r2",
+    "duration_seconds": 40.55,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 3300724736,
+        "read_iops": 0.0,
+        "write_iops": 8083.3,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 6764,
+        "host_writes_completed": 508551,
+        "host_read_mb": 103.523,
+        "host_write_mb": 5971.559,
+        "host_io_utilization_pct": 70.87,
+        "avg_queue_depth": 1.58,
+        "avg_await_ms": 0.12
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "STORAGE_PRESSURE_SUSPECTED",
+        "classification_reason": "Storage pressure suspected but unconfirmed: host busy time 70.9%, avg queue depth 1.58, avg request latency 0.12ms. Does not meet concurrent saturation criteria."
+      }
+    }
+  },
+  {
+    "trial_id": "tpcb_1cpu_r3",
+    "duration_seconds": 40.52,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 4104118272,
+        "read_iops": 0.0,
+        "write_iops": 10048.6,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 17,
+        "host_writes_completed": 632380,
+        "host_read_mb": 0.242,
+        "host_write_mb": 7431.383,
+        "host_io_utilization_pct": 66.71,
+        "avg_queue_depth": 1.52,
+        "avg_await_ms": 0.1
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "STORAGE_PRESSURE_SUSPECTED",
+        "classification_reason": "Storage pressure suspected but unconfirmed: host busy time 66.7%, avg queue depth 1.52, avg request latency 0.10ms. Does not meet concurrent saturation criteria."
+      }
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r1",
+    "duration_seconds": 40.579,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 2125824,
+        "write_bytes": 4456849408,
+        "read_iops": 1.2,
+        "write_iops": 10828.9,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 205,
+        "host_writes_completed": 691230,
+        "host_read_mb": 4.328,
+        "host_write_mb": 8183.598,
+        "host_io_utilization_pct": 69.45,
+        "avg_queue_depth": 2.97,
+        "avg_await_ms": 0.17
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "STORAGE_PRESSURE_SUSPECTED",
+        "classification_reason": "Storage pressure suspected but unconfirmed: host busy time 69.5%, avg queue depth 2.97, avg request latency 0.17ms. Does not meet concurrent saturation criteria."
+      }
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r2",
+    "duration_seconds": 40.524,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 4310953984,
+        "read_iops": 0.0,
+        "write_iops": 10548.0,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 107,
+        "host_writes_completed": 673290,
+        "host_read_mb": 5.238,
+        "host_write_mb": 7951.859,
+        "host_io_utilization_pct": 68.36,
+        "avg_queue_depth": 2.86,
+        "avg_await_ms": 0.17
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "STORAGE_PRESSURE_SUSPECTED",
+        "classification_reason": "Storage pressure suspected but unconfirmed: host busy time 68.4%, avg queue depth 2.86, avg request latency 0.17ms. Does not meet concurrent saturation criteria."
+      }
+    }
+  },
+  {
+    "trial_id": "tpcb_2cpu_r3",
+    "duration_seconds": 40.569,
+    "metrics_taxonomy": {
+      "cgroup_io_stat": {
+        "status": "AVAILABLE",
+        "read_bytes": 0,
+        "write_bytes": 4381310976,
+        "read_iops": 0.0,
+        "write_iops": 10665.4,
+        "discard_bytes": 0
+      },
+      "host_diskstats": {
+        "status": "AVAILABLE",
+        "primary_device": "nvme0n1p9",
+        "filesystem_type": "btrfs",
+        "host_reads_completed": 40,
+        "host_writes_completed": 676795,
+        "host_read_mb": 0.68,
+        "host_write_mb": 7991.289,
+        "host_io_utilization_pct": 68.29,
+        "avg_queue_depth": 2.03,
+        "avg_await_ms": 0.12
+      },
+      "bottleneck_assessment": {
+        "status": "AVAILABLE",
+        "is_storage_bound": false,
+        "pressure_classification": "STORAGE_PRESSURE_SUSPECTED",
+        "classification_reason": "Storage pressure suspected but unconfirmed: host busy time 68.3%, avg queue depth 2.03, avg request latency 0.12ms. Does not meet concurrent saturation criteria."
+      }
+    }
+  }
+]

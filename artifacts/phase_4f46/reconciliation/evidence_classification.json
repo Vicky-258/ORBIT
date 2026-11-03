@@ -1,0 +1,105 @@
+{
+  "findings": [
+    {
+      "finding_id": "FINDING_P4F46_01",
+      "classification": "OBSERVED",
+      "title": "Throughput and Latency Metrics Across 12 Verified Pilot Trials",
+      "claim": "Under PostgreSQL 16 SF2 with 8 concurrent clients, read-only select achieved 19,120 \u00b1 183 TPS (mean latency 0.414ms) under 1 vCPU and 37,612 \u00b1 990 TPS (mean latency 0.208ms) under 2 vCPU. Balanced OLTP (TPC-B) achieved 1,409 \u00b1 120 TPS (mean latency 5.674ms) under 1 vCPU and 1,610 \u00b1 24 TPS (mean latency 4.964ms) under 2 vCPU across 3 independent replications each.",
+      "supporting_metrics": [
+        "achieved_tps",
+        "raw_transaction_latencies_ms"
+      ],
+      "methodology": "Direct microsecond transaction logging via host pgbench client and linear percentile interpolation.",
+      "confidence": "HIGH (100% complete transaction reconciliation across 5,376,068 raw records).",
+      "limitations": [
+        "Limited to 3 replications per condition; controlled engineering pilot scope."
+      ]
+    },
+    {
+      "finding_id": "FINDING_P4F46_02",
+      "classification": "OBSERVED",
+      "title": "Continuous CFS Throttling in Read-Only Workload Under Both Quotas",
+      "claim": "In read_only_select, the PostgreSQL container was throttled in 100.0% of CFS periods (299-300 periods) under both 1 vCPU and 2 vCPU quotas during the 30-second measurement window. Aggregate throttled time accumulated to 92.95-96.08 seconds across 8 client worker threads under 1 vCPU and 63.43-64.05 seconds under 2 vCPU.",
+      "supporting_metrics": [
+        "cgroup_nr_periods",
+        "cgroup_nr_throttled",
+        "cgroup_throttled_usec"
+      ],
+      "methodology": "Direct cgroup v2 cpu.stat delta measurement over isolated measurement interval.",
+      "confidence": "HIGH (Direct hardware/kernel counter measurements across all 6 read-only trials).",
+      "limitations": [
+        "Aggregate multi-task metric; reflects core-queue delay across multiple threads, not individual client stall."
+      ]
+    },
+    {
+      "finding_id": "FINDING_P4F46_03",
+      "classification": "CORRELATED",
+      "title": "Temporal Association of Read-Only Tail Latency with CFS Quota Exhaustion",
+      "claim": "In read_only_select, transaction latency spikes clustering at ~76-80ms (under 1 vCPU) and ~51-58ms (under 2 vCPU) exhibit strong temporal alignment with 100ms CFS quota periods and simultaneous multi-client thread freezes.",
+      "supporting_metrics": [
+        "pgbench_timestamps",
+        "cgroup_throttled_usec",
+        "cfs_period_alignment_pct"
+      ],
+      "methodology": "Temporal correlation analysis linking microsecond transaction completion timestamps to CFS quota boundary periods.",
+      "confidence": "MODERATE (High temporal alignment, but causal isolation requires variable-quota intervention without confounding thread counts).",
+      "limitations": [
+        "Correlation only; does not isolate kernel thread scheduling latencies from application queueing."
+      ]
+    },
+    {
+      "finding_id": "FINDING_P4F46_04",
+      "classification": "OBSERVED",
+      "title": "Absence of CFS Throttling in Balanced OLTP Under 2 vCPU",
+      "claim": "In balanced_oltp_tpcb under 2 vCPU quota, zero CFS throttling events and zero throttled CPU microseconds were observed across all 3 replications (0 / 300 periods throttled, CPU utilization 50.8-51.4%), yet significant tail latency persisted (p95 = 11.8ms, p99 = 20.4ms, max up to 267.7ms).",
+      "supporting_metrics": [
+        "cgroup_nr_throttled",
+        "cgroup_throttled_usec",
+        "p95_ms",
+        "p99_ms",
+        "max_ms"
+      ],
+      "methodology": "Direct kernel cgroup v2 sampling and pgbench raw transaction log distribution calculation.",
+      "confidence": "VERY HIGH (Directly observed across all 3 replications).",
+      "limitations": [
+        "Establishes that tail latency in 2 vCPU TPC-B is not caused by CFS throttling, but does not isolate the primary cause."
+      ]
+    },
+    {
+      "finding_id": "FINDING_P4F46_05",
+      "classification": "OBSERVED",
+      "title": "Observed Row Lock and WAL Sync Wait Events in Balanced OLTP",
+      "claim": "In balanced_oltp_tpcb, persistent engine coprocess sampling observed substantial concurrency wait events including Lock:tuple (400-600 events), Lock:transactionid (1,200-1,600 events), LWLock:WALWrite (150-250 events), and IO:WALSync (250-400 events) per trial. In read_only_select, these wait events were 0.",
+      "supporting_metrics": [
+        "pg_stat_activity_wait_events",
+        "observed_lock_waits",
+        "delta_wal_sync"
+      ],
+      "methodology": "Persistent background PostgreSQL sampler coprocess querying pg_stat_activity at 100ms intervals.",
+      "confidence": "HIGH (Direct PostgreSQL internal view sampling across all 6 OLTP trials).",
+      "limitations": [
+        "Sampled at 100ms intervals; does not capture instantaneous lock queue durations."
+      ]
+    },
+    {
+      "finding_id": "FINDING_P4F46_06",
+      "classification": "HYPOTHESIS",
+      "title": "Row-Level Contention and WAL Serialization Limit Balanced OLTP Quota Scaling",
+      "claim": "The modest throughput improvement of balanced OLTP (+14.28% from 1 vCPU to 2 vCPU) and persistent tail latency under zero CPU throttling are hypothesized to be caused by lock contention on the 2 branch and 20 teller rows (SF=2) combined with synchronous WAL commit serialization.",
+      "supporting_metrics": [
+        "delta_wal_sync_time_ms",
+        "observed_wait_events",
+        "throughput_scaling_pct"
+      ],
+      "methodology": "Architectural inference synthesizing observed lock wait events, WAL sync durations (~37s cumulative), and workload data structure.",
+      "confidence": "MODERATE (Plausible mechanism supported by observed wait events, but individual causal contributions remain unisolated).",
+      "limitations": [
+        "Causal proof requires controlled ablation experiments (e.g., scale factor expansion or asynchronous commit)."
+      ]
+    }
+  ],
+  "guardrails_evaluation": {
+    "causal_claims_validated": false,
+    "justification": "In accordance with Phase 4F.3.2 scientific validation guardrails, causal claims require explicit controlled intervention experiments with variable isolation and validated counterfactual baselines. Phase 4F.4 was a 12-trial characterization pilot. Therefore, mechanistic interpretations (e.g., lock contention or WAL sync as the sole root cause of OLTP latency) are strictly classified as HYPOTHESIS or CORRELATED, preventing unsubstantiated causal claims from being promoted as validated empirical facts."
+  }
+}

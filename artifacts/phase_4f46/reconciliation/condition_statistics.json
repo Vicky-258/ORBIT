@@ -1,0 +1,444 @@
+{
+  "conditions": {
+    "ro_1cpu": {
+      "condition_name": "ro_1cpu",
+      "workload_profile": "read_only_select",
+      "cpu_quota_cores": 1.0,
+      "trials": [
+        "ro_1cpu_r1",
+        "ro_1cpu_r2",
+        "ro_1cpu_r3"
+      ],
+      "across_replication_statistics": {
+        "replication_count": 3,
+        "throughput_tps": {
+          "mean": 19120.03,
+          "sample_std_ddof_1": 183.14,
+          "population_std_ddof_0": 149.54,
+          "min": 18930.29,
+          "max": 19295.78,
+          "cv_sample_pct": 0.96
+        },
+        "latency_mean_ms": {
+          "mean": 0.4143,
+          "sample_std_ddof_1": 0.004,
+          "population_std_ddof_0": 0.0032
+        },
+        "per_trial_percentiles": {
+          "p50_ms": [
+            0.086,
+            0.088,
+            0.087
+          ],
+          "p90_ms": [
+            0.131,
+            0.133,
+            0.132
+          ],
+          "p95_ms": [
+            0.147,
+            0.152,
+            0.148
+          ],
+          "p99_ms": [
+            0.238,
+            0.247,
+            0.24
+          ],
+          "p999_ms": [
+            76.7083,
+            76.722,
+            76.73
+          ],
+          "max_ms": [
+            80.695,
+            79.058,
+            80.927
+          ]
+        },
+        "mean_of_per_trial_percentiles": {
+          "mean_p50_ms": 0.087,
+          "mean_p90_ms": 0.132,
+          "mean_p95_ms": 0.149,
+          "mean_p99_ms": 0.2417,
+          "mean_p999_ms": 76.7201,
+          "mean_max_ms": 80.2267
+        }
+      },
+      "pooled_distribution_statistics": {
+        "count": 1720323,
+        "min_ms": 0.034,
+        "max_ms": 80.927,
+        "mean_ms": 0.41429094536316724,
+        "std_sample_ms": 4.908934796770608,
+        "std_population_ms": 4.908933370022401,
+        "p50_ms": 0.087,
+        "p90_ms": 0.132,
+        "p95_ms": 0.149,
+        "p99_ms": 0.242,
+        "p999_ms": 76.71867800000031
+      },
+      "percentile_distinction_comparison": {
+        "p50": {
+          "mean_of_per_trial": 0.087,
+          "pooled": 0.087,
+          "delta": 0.0
+        },
+        "p95": {
+          "mean_of_per_trial": 0.149,
+          "pooled": 0.149,
+          "delta": 0.0
+        },
+        "p99": {
+          "mean_of_per_trial": 0.2417,
+          "pooled": 0.242,
+          "delta": 0.0003
+        },
+        "p999": {
+          "mean_of_per_trial": 76.7201,
+          "pooled": 76.7187,
+          "delta": -0.0014
+        }
+      },
+      "statistical_uncertainty_limitations": {
+        "independent_replications": 3,
+        "statement": "Controlled engineering pilot with N=3 independent replications per condition. Statistical confidence is bounded. Tail latency estimates (p99.9, max) are highly sensitive to rare queueing events. Results must not be extrapolated beyond the tested container and benchmark environment."
+      }
+    },
+    "ro_2cpu": {
+      "condition_name": "ro_2cpu",
+      "workload_profile": "read_only_select",
+      "cpu_quota_cores": 2.0,
+      "trials": [
+        "ro_2cpu_r1",
+        "ro_2cpu_r2",
+        "ro_2cpu_r3"
+      ],
+      "across_replication_statistics": {
+        "replication_count": 3,
+        "throughput_tps": {
+          "mean": 37611.65,
+          "sample_std_ddof_1": 990.38,
+          "population_std_ddof_0": 808.64,
+          "min": 36943.35,
+          "max": 38749.47,
+          "cv_sample_pct": 2.63
+        },
+        "latency_mean_ms": {
+          "mean": 0.2085,
+          "sample_std_ddof_1": 0.0054,
+          "population_std_ddof_0": 0.0044
+        },
+        "per_trial_percentiles": {
+          "p50_ms": [
+            0.087,
+            0.091,
+            0.088
+          ],
+          "p90_ms": [
+            0.131,
+            0.141,
+            0.139
+          ],
+          "p95_ms": [
+            0.146,
+            0.165,
+            0.162
+          ],
+          "p99_ms": [
+            0.216,
+            0.249,
+            0.254
+          ],
+          "p999_ms": [
+            51.7248,
+            51.7771,
+            52.271
+          ],
+          "max_ms": [
+            58.332,
+            57.956,
+            58.566
+          ]
+        },
+        "mean_of_per_trial_percentiles": {
+          "mean_p50_ms": 0.0887,
+          "mean_p90_ms": 0.137,
+          "mean_p95_ms": 0.1577,
+          "mean_p99_ms": 0.2397,
+          "mean_p999_ms": 51.9243,
+          "mean_max_ms": 58.2847
+        }
+      },
+      "pooled_distribution_statistics": {
+        "count": 3384077,
+        "min_ms": 0.034,
+        "max_ms": 58.566,
+        "mean_ms": 0.2084315862198171,
+        "std_sample_ms": 2.3746901665511877,
+        "std_population_ms": 2.3746898156888485,
+        "p50_ms": 0.089,
+        "p90_ms": 0.137,
+        "p95_ms": 0.158,
+        "p99_ms": 0.24,
+        "p999_ms": 51.919924000000584
+      },
+      "percentile_distinction_comparison": {
+        "p50": {
+          "mean_of_per_trial": 0.0887,
+          "pooled": 0.089,
+          "delta": 0.0003
+        },
+        "p95": {
+          "mean_of_per_trial": 0.1577,
+          "pooled": 0.158,
+          "delta": 0.0003
+        },
+        "p99": {
+          "mean_of_per_trial": 0.2397,
+          "pooled": 0.24,
+          "delta": 0.0003
+        },
+        "p999": {
+          "mean_of_per_trial": 51.9243,
+          "pooled": 51.9199,
+          "delta": -0.0044
+        }
+      },
+      "statistical_uncertainty_limitations": {
+        "independent_replications": 3,
+        "statement": "Controlled engineering pilot with N=3 independent replications per condition. Statistical confidence is bounded. Tail latency estimates (p99.9, max) are highly sensitive to rare queueing events. Results must not be extrapolated beyond the tested container and benchmark environment."
+      }
+    },
+    "tpcb_1cpu": {
+      "condition_name": "tpcb_1cpu",
+      "workload_profile": "balanced_oltp_tpcb",
+      "cpu_quota_cores": 1.0,
+      "trials": [
+        "tpcb_1cpu_r1",
+        "tpcb_1cpu_r2",
+        "tpcb_1cpu_r3"
+      ],
+      "across_replication_statistics": {
+        "replication_count": 3,
+        "throughput_tps": {
+          "mean": 1408.59,
+          "sample_std_ddof_1": 120.17,
+          "population_std_ddof_0": 98.12,
+          "min": 1276.43,
+          "max": 1511.27,
+          "cv_sample_pct": 8.53
+        },
+        "latency_mean_ms": {
+          "mean": 5.7021,
+          "sample_std_ddof_1": 0.5025,
+          "population_std_ddof_0": 0.4103
+        },
+        "per_trial_percentiles": {
+          "p50_ms": [
+            3.879,
+            4.013,
+            3.792
+          ],
+          "p90_ms": [
+            10.436,
+            13.295,
+            9.9367
+          ],
+          "p95_ms": [
+            13.8232,
+            17.453,
+            13.3057
+          ],
+          "p99_ms": [
+            26.8655,
+            33.4597,
+            22.7654
+          ],
+          "p999_ms": [
+            77.0104,
+            116.3779,
+            80.3476
+          ],
+          "max_ms": [
+            458.26,
+            363.055,
+            425.464
+          ]
+        },
+        "mean_of_per_trial_percentiles": {
+          "mean_p50_ms": 3.8947,
+          "mean_p90_ms": 11.2226,
+          "mean_p95_ms": 14.8606,
+          "mean_p99_ms": 27.6968,
+          "mean_p999_ms": 91.2453,
+          "mean_max_ms": 415.593
+        }
+      },
+      "pooled_distribution_statistics": {
+        "count": 126797,
+        "min_ms": 0.798,
+        "max_ms": 458.26,
+        "mean_ms": 5.673767265787046,
+        "std_sample_ms": 8.769254503302566,
+        "std_population_ms": 8.76921992333698,
+        "p50_ms": 3.888,
+        "p90_ms": 10.934,
+        "p95_ms": 15.009399999999994,
+        "p99_ms": 27.387279999999954,
+        "p999_ms": 94.07665600001825
+      },
+      "percentile_distinction_comparison": {
+        "p50": {
+          "mean_of_per_trial": 3.8947,
+          "pooled": 3.888,
+          "delta": -0.0067
+        },
+        "p95": {
+          "mean_of_per_trial": 14.8606,
+          "pooled": 15.0094,
+          "delta": 0.1488
+        },
+        "p99": {
+          "mean_of_per_trial": 27.6968,
+          "pooled": 27.3873,
+          "delta": -0.3095
+        },
+        "p999": {
+          "mean_of_per_trial": 91.2453,
+          "pooled": 94.0767,
+          "delta": 2.8314
+        }
+      },
+      "statistical_uncertainty_limitations": {
+        "independent_replications": 3,
+        "statement": "Controlled engineering pilot with N=3 independent replications per condition. Statistical confidence is bounded. Tail latency estimates (p99.9, max) are highly sensitive to rare queueing events. Results must not be extrapolated beyond the tested container and benchmark environment."
+      }
+    },
+    "tpcb_2cpu": {
+      "condition_name": "tpcb_2cpu",
+      "workload_profile": "balanced_oltp_tpcb",
+      "cpu_quota_cores": 2.0,
+      "trials": [
+        "tpcb_2cpu_r1",
+        "tpcb_2cpu_r2",
+        "tpcb_2cpu_r3"
+      ],
+      "across_replication_statistics": {
+        "replication_count": 3,
+        "throughput_tps": {
+          "mean": 1609.8,
+          "sample_std_ddof_1": 24.3,
+          "population_std_ddof_0": 19.84,
+          "min": 1590.11,
+          "max": 1636.96,
+          "cv_sample_pct": 1.51
+        },
+        "latency_mean_ms": {
+          "mean": 4.9647,
+          "sample_std_ddof_1": 0.0746,
+          "population_std_ddof_0": 0.0609
+        },
+        "per_trial_percentiles": {
+          "p50_ms": [
+            3.779,
+            3.827,
+            3.8235
+          ],
+          "p90_ms": [
+            9.0865,
+            9.0804,
+            9.3275
+          ],
+          "p95_ms": [
+            11.758,
+            11.6853,
+            11.9925
+          ],
+          "p99_ms": [
+            19.111,
+            21.0061,
+            21.1894
+          ],
+          "p999_ms": [
+            41.0143,
+            48.1321,
+            40.6449
+          ],
+          "max_ms": [
+            100.46,
+            267.697,
+            136.129
+          ]
+        },
+        "mean_of_per_trial_percentiles": {
+          "mean_p50_ms": 3.8098,
+          "mean_p90_ms": 9.1648,
+          "mean_p95_ms": 11.8119,
+          "mean_p99_ms": 20.4355,
+          "mean_p999_ms": 43.2638,
+          "mean_max_ms": 168.0953
+        }
+      },
+      "pooled_distribution_statistics": {
+        "count": 144871,
+        "min_ms": 0.802,
+        "max_ms": 267.697,
+        "mean_ms": 4.963947574048635,
+        "std_sample_ms": 4.790066979934997,
+        "std_population_ms": 4.790050447726184,
+        "p50_ms": 3.809,
+        "p90_ms": 9.162,
+        "p95_ms": 11.825,
+        "p99_ms": 20.371299999999987,
+        "p999_ms": 43.99685000000021
+      },
+      "percentile_distinction_comparison": {
+        "p50": {
+          "mean_of_per_trial": 3.8098,
+          "pooled": 3.809,
+          "delta": -0.0008
+        },
+        "p95": {
+          "mean_of_per_trial": 11.8119,
+          "pooled": 11.825,
+          "delta": 0.0131
+        },
+        "p99": {
+          "mean_of_per_trial": 20.4355,
+          "pooled": 20.3713,
+          "delta": -0.0642
+        },
+        "p999": {
+          "mean_of_per_trial": 43.2638,
+          "pooled": 43.9969,
+          "delta": 0.7331
+        }
+      },
+      "statistical_uncertainty_limitations": {
+        "independent_replications": 3,
+        "statement": "Controlled engineering pilot with N=3 independent replications per condition. Statistical confidence is bounded. Tail latency estimates (p99.9, max) are highly sensitive to rare queueing events. Results must not be extrapolated beyond the tested container and benchmark environment."
+      }
+    }
+  },
+  "quota_scaling_comparisons": {
+    "read_only_select": {
+      "workload": "read_only_select",
+      "throughput_1cpu_mean_tps": 19120.03,
+      "throughput_2cpu_mean_tps": 37611.65,
+      "throughput_scaling_pct": 96.71,
+      "latency_1cpu_mean_ms": 0.4143,
+      "latency_2cpu_mean_ms": 0.2085,
+      "latency_reduction_pct": 49.67
+    },
+    "balanced_oltp_tpcb": {
+      "workload": "balanced_oltp_tpcb",
+      "throughput_1cpu_mean_tps": 1408.59,
+      "throughput_2cpu_mean_tps": 1609.8,
+      "throughput_scaling_pct": 14.28,
+      "latency_1cpu_mean_ms": 5.7021,
+      "latency_2cpu_mean_ms": 4.9647,
+      "latency_reduction_pct": 12.93
+    }
+  }
+}
