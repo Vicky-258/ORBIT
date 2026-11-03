@@ -71,7 +71,14 @@ class PgbenchOutputParser:
             raise ValueError(f"Invalid non-positive or non-finite latency: {lat_avg_ms}")
 
         failed_tx_match = re.search(r"number of failed transactions:\s*([0-9]+)", stdout)
-        failed_count = int(failed_tx_match.group(1)) if failed_tx_match else 0
+        if failed_tx_match:
+            failed_count: Optional[int] = int(failed_tx_match.group(1))
+            failed_status = "AVAILABLE"
+            failed_reason = None
+        else:
+            failed_count = None
+            failed_status = "UNAVAILABLE"
+            failed_reason = "Line 'number of failed transactions:' not found in pgbench stdout."
 
         total_tx_match = re.search(r"number of transactions actually processed:\s*([0-9]+)", stdout)
         total_tx = int(total_tx_match.group(1)) if total_tx_match else 0
@@ -80,6 +87,8 @@ class PgbenchOutputParser:
             "tps": tps,
             "latency_avg_ms": lat_avg_ms,
             "failed_transactions": failed_count,
+            "failed_transactions_status": failed_status,
+            "failed_transactions_reason": failed_reason,
             "total_transactions": total_tx,
         }
 
@@ -611,7 +620,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                             trial_p99s.append(log_stats["p99_ms"])
                             trial_total_tx.append(summary["total_transactions"])
                             total_samples += log_stats["sample_count"]
-                            failed_this_rep = summary.get("failed_transactions", 0)
+                            failed_this_rep = summary.get("failed_transactions") or 0
                             total_failed_tx += failed_this_rep
 
                             # Active metrics from continuous monitoring
@@ -956,7 +965,7 @@ class DockerBenchmarkRunner(BenchmarkRunner):
                             trial_p99s.append(log_stats["p99_ms"])
                             trial_total_tx.append(summary["total_transactions"])
                             total_samples += log_stats["sample_count"]
-                            failed_this_rep = summary.get("failed_transactions", 0)
+                            failed_this_rep = summary.get("failed_transactions") or 0
                             total_failed_tx += failed_this_rep
 
                             active_cpu_pct = mon_summary.mean_container_cpu_pct if mon_summary.mean_container_cpu_pct is not None else 25.0

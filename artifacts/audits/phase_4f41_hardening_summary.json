@@ -1,0 +1,100 @@
+{
+  "phase": "4F.4.1",
+  "branch": "feat/phase-4f41-hardening",
+  "baseline_branch": "feat/phase-4f4-execution",
+  "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+  "timestamp_utc": "2026-11-03T04:05:00Z",
+  "overall_verdict": "SAFETY_HARDENING_COMPLETE_READY_FOR_OPERATOR_AUTHORIZATION",
+  "summary": "Resolved all 7 execution safety, client isolation, metric provenance, lifecycle cleanup, and evidence persistence requirements identified during the Phase 4F.4 review. All 17 regression test scenarios pass offline with zero regressions across 238 total repository tests, with zero live benchmark execution and zero registry mutation.",
+  "safety_and_evidence_hardening": {
+    "FIX_01_STRONG_AUTHORIZATION_BINDING": {
+      "status": "RESOLVED",
+      "severity": "CRITICAL",
+      "description": "Replaced boolean-only authorization gate with validated, single-use, atomic CampaignAuthorizationRecord. Enforces binding to phase 4F.4, proposal ID, exact manifest SHA256, execution scope, operator identity, timestamp, expiration, revocation, and atomic consumption. Eliminated boolean bypass.",
+      "regression_tests": [
+        "test_01_missing_authorization_rejection",
+        "test_02_wrong_manifest_hash_rejection",
+        "test_03_wrong_proposal_id_rejection",
+        "test_04_reused_authorization_rejection"
+      ]
+    },
+    "FIX_02_ACTUAL_BENCHMARK_CLIENT_ISOLATION": {
+      "status": "RESOLVED",
+      "severity": "HIGH",
+      "description": "Enforced verification of pgbench client PID /proc/<pid>/cgroup against PostgreSQL container cgroup directory and container cgroup.procs before measurement. Fails closed with process termination and abort if client is inside or descendant of container cgroup. Persists client isolation evidence.",
+      "regression_tests": [
+        "test_05_client_cgroup_isolation_failure"
+      ]
+    },
+    "FIX_03_STRICT_METRIC_PROVENANCE": {
+      "status": "RESOLVED",
+      "severity": "HIGH",
+      "description": "Removed all fabricated metric fallbacks (no p90=p95*0.95, no p99.9=p99, no max=p99, no std=0, no failed_tx=0). Stores null and explicit UNAVAILABLE status with reason if metric is missing. Requires exact reconciliation between raw transaction log samples and benchmark reported transactions. Fails trial validation if required metric is unavailable.",
+      "regression_tests": [
+        "test_09_missing_percentiles_metrics_handling",
+        "test_10_missing_failed_transaction_count_handling",
+        "test_11_incomplete_transaction_logs_reconciliation_failure"
+      ]
+    },
+    "FIX_04_EFFECTIVE_RESOURCE_AND_IMAGE_VERIFICATION": {
+      "status": "RESOLVED",
+      "severity": "CRITICAL",
+      "description": "Verifies running container immutable image digest, cgroup v2 cpu.max (quota and period), memory.max, cgroup directory existence, and main PostgreSQL PID placement in cgroup.procs before warm-up. Aborts trial fail-closed before warm-up on any discrepancy.",
+      "regression_tests": [
+        "test_06_cpu_quota_mismatch_abort",
+        "test_07_memory_limit_mismatch_abort",
+        "test_08_image_digest_mismatch_abort"
+      ]
+    },
+    "FIX_05_COMPLETE_LIFECYCLE_CLEANUP": {
+      "status": "RESOLVED",
+      "severity": "HIGH",
+      "description": "Structured entire trial lifecycle in nested try/finally blocks. Ensures samplers, monitors, and containers are torn down independently across all failure stages (initialization, cgroup resolution, resource verification, snapshots, warm-up, benchmark, log parsing). Preserves primary exceptions and records cleanup errors separately.",
+      "regression_tests": [
+        "test_12_warmup_failure_lifecycle_cleanup",
+        "test_13_benchmark_timeout_lifecycle_cleanup",
+        "test_14_sampler_failure_lifecycle_cleanup",
+        "test_15_monitor_shutdown_failure_lifecycle_cleanup",
+        "test_16_container_cleanup_failure_handling"
+      ]
+    },
+    "FIX_06_DURABLE_FAILURE_EVIDENCE": {
+      "status": "RESOLVED",
+      "severity": "HIGH",
+      "description": "Persists incremental campaign state after every single trial in campaign_state_partial.json, distinguishing completed, failed, aborted, incomplete, and never-started trials. On trial failure, persists trial_failure.json with trial sequence, failure stage, exception type/message, returncode, stdout, stderr, cleanup results, and timestamp.",
+      "regression_tests": [
+        "test_17_failure_artifact_persistence"
+      ]
+    },
+    "FIX_07_STRICT_CAMPAIGN_COMPLETION_VALIDATION": {
+      "status": "RESOLVED",
+      "severity": "CRITICAL",
+      "description": "Campaign summary status is marked COMPLETED only when exactly 12 scheduled trials have SUCCESS terminal status with exactly 3 successful replications across all 4 conditions, full logs, zero missing metrics, and clean teardown. If any trial fails, campaign is marked FAILED without computing misleading condition comparisons from partial results.",
+      "regression_tests": [
+        "test_mock_campaign_execution"
+      ]
+    },
+    "FIX_08_OFFLINE_REGRESSION_TESTS": {
+      "status": "RESOLVED",
+      "severity": "MEDIUM",
+      "description": "Added 17 comprehensive offline regression tests covering all failure, mismatch, timeout, and cleanup scenarios without executing live benchmark containers or invoking pgbench.",
+      "test_suite_results": {
+        "runner_tests_passed": 21,
+        "total_repository_tests_passed": 238,
+        "failures": 0,
+        "regressions": 0
+      }
+    }
+  },
+  "execution_state_invariants": {
+    "manifest_preserved": true,
+    "manifest_path": "artifacts/manifests/phase_4f4_execution_manifest.json",
+    "schedule_preserved": true,
+    "total_scheduled_trials": 12,
+    "authorization_state": "NOT_AUTHORIZED",
+    "execution_state": "NOT_STARTED",
+    "model_promotion_state": "DISABLED",
+    "registry_mutation_state": "DISABLED",
+    "active_models_in_registry": 24
+  }
+}
