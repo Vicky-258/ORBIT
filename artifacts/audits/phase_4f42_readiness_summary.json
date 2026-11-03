@@ -1,0 +1,93 @@
+{
+  "phase": "4F.4.2",
+  "audit_type": "INDEPENDENT_CODE_LEVEL_READINESS_AUDIT",
+  "branch": "feat/phase-4f42-readiness-audit",
+  "baseline_branch": "feat/phase-4f41-hardening",
+  "baseline_commit": "b344583",
+  "manifest_path": "artifacts/manifests/phase_4f4_execution_manifest.json",
+  "expected_manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+  "actual_manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+  "timestamp_utc": "2026-11-03T04:20:00Z",
+  "overall_verdict": "CONDITIONALLY_READY",
+  "verdict_rationale": "Phase 4F.4.1 execution engine successfully implemented all 8 safety fixes, with 243 passing tests and zero model mutations. However, code-level inspection and offline tests revealed two high-severity architectural gaps that must be corrected before live execution: (1) lack of OS-level file locking during authorization consumption, permitting concurrent double-consumption races; and (2) absence of pre-execution on-disk manifest file hashing, where the runner validates authorization against a hardcoded Python constant rather than reading and hashing the manifest file on disk.",
+  "findings": [
+    {
+      "finding_id": "FINDING_4F42_01",
+      "title": "Concurrent Authorization Consumption Race Condition",
+      "severity": "HIGH",
+      "audit_area": "1. Authorization integrity",
+      "file_reference": "aads/benchmark/phase_4f4_runner.py:142-154, 931-957",
+      "reproduction_test": "tests/test_phase_4f42_readiness_audit.py::test_audit_concurrent_authorization_consumption_race",
+      "impact": "Multiple concurrent worker processes pointing to the same authorization file can read consumed=False simultaneously before any process replaces the file, permitting multiple unauthorized campaigns from a single authorization record.",
+      "recommended_correction": "Implement mandatory advisory file locking (fcntl.flock with LOCK_EX) on the authorization file descriptor across the read, check, and atomic write operations in CampaignAuthorizationRecord.consume()."
+    },
+    {
+      "finding_id": "FINDING_4F42_02",
+      "title": "Missing Pre-Execution On-Disk Manifest File Hashing",
+      "severity": "HIGH",
+      "audit_area": "2. Manifest integrity",
+      "file_reference": "aads/benchmark/phase_4f4_runner.py:48, 101-127, 944-950",
+      "reproduction_test": "tests/test_phase_4f42_readiness_audit.py::test_audit_manifest_disk_mutation_gap",
+      "impact": "The runner verifies authorization against a static Python constant EXPECTED_MANIFEST_SHA256 rather than reading and hashing the actual artifacts/manifests/phase_4f4_execution_manifest.json file on disk. Any post-authorization tampering or accidental edits to the manifest file on disk go undetected at execution time.",
+      "recommended_correction": "Add manifest_path parameter to Phase4F4Runner.execute_campaign() defaulting to artifacts/manifests/phase_4f4_execution_manifest.json. Read its raw bytes immediately before preflight, compute its SHA256, and verify that disk_manifest_sha256 == auth_record.manifest_sha256 == EXPECTED_MANIFEST_SHA256."
+    },
+    {
+      "finding_id": "FINDING_4F42_03",
+      "title": "Container Launch Command Uses Mutable Tag Instead of Immutable Digest Reference",
+      "severity": "MEDIUM",
+      "audit_area": "3. Runtime identity and isolation",
+      "file_reference": "aads/benchmark/trial_isolation.py:263-267, aads/benchmark/phase_4f4_runner.py:532-537",
+      "reproduction_test": "Code inspection of docker run invocation in TrialIsolationManager.initialize_fresh_container",
+      "impact": "TrialIsolationManager launches containers with the mutable tag postgres:16-alpine rather than the immutable digest postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685. While verify_container_effective_resources checks RepoDigests before warm-up, the container instantiation itself relies on the local tag table.",
+      "recommended_correction": "Pass the full immutable reference postgres@sha256:... directly to docker run in initialize_fresh_container."
+    },
+    {
+      "finding_id": "FINDING_4F42_04",
+      "title": "Static Default Artifacts Root Directory Overwrites Evidence on Campaign Re-runs",
+      "severity": "MEDIUM",
+      "audit_area": "5. Lifecycle and crash recovery",
+      "file_reference": "aads/benchmark/phase_4f4_runner.py:951",
+      "reproduction_test": "Code inspection of artifacts_root default in execute_campaign",
+      "impact": "If an interrupted campaign is re-run with a fresh authorization without explicitly specifying artifacts_root, it writes to artifacts/phase_4f4_empirical/trials/, overwriting previous trial artifact folders in-place.",
+      "recommended_correction": "Namespace default artifacts root with the execution ID (e.g. artifacts/phase_4f4_empirical/{execution_id}) or create a dedicated archive on new campaign startup."
+    },
+    {
+      "finding_id": "FINDING_4F42_05",
+      "title": "Throttling Telemetry Aggregation Defaults None to 0.0 Seconds",
+      "severity": "LOW",
+      "audit_area": "4. Measurement integrity",
+      "file_reference": "aads/benchmark/phase_4f4_runner.py:1049-1050",
+      "reproduction_test": "Code inspection of condition_summaries in execute_campaign",
+      "impact": "In condition summaries, throt_sec_vals = [t['cgroup_cpu']['throttled_sec'] or 0.0 for t in trials] substitutes 0.0 for missing cgroup throttling telemetry.",
+      "recommended_correction": "Filter out None values or record explicit availability status in condition summary consistent with FIX 03."
+    }
+  ],
+  "audit_areas_evaluation": {
+    "1_authorization_integrity": "PARTIALLY_VERIFIED",
+    "2_manifest_integrity": "PARTIALLY_VERIFIED",
+    "3_runtime_identity_and_isolation": "VERIFIED_WITH_RECOMMENDATION",
+    "4_measurement_integrity": "VERIFIED",
+    "5_lifecycle_and_crash_recovery": "VERIFIED_WITH_RECOMMENDATION",
+    "6_campaign_completion": "VERIFIED",
+    "7_test_quality": "VERIFIED"
+  },
+  "test_count_reconciliation": {
+    "total_tests_in_test_phase_4f4_runner": 21,
+    "dedicated_fix08_regression_tests": 17,
+    "baseline_engine_tests": 4,
+    "readiness_audit_tests_added": 5,
+    "total_repository_tests": 243,
+    "passing_tests": 243,
+    "failing_tests": 0
+  },
+  "absolute_restrictions_compliance": {
+    "benchmarks_executed": false,
+    "docker_containers_launched": false,
+    "pgbench_invoked": false,
+    "live_authorization_consumed": false,
+    "manifest_modified": false,
+    "models_promoted_or_calibrated": false,
+    "historical_records_mutated": false,
+    "active_models_in_registry": 24
+  }
+}
