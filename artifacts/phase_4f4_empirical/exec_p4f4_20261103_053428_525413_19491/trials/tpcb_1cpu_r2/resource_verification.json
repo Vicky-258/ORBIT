@@ -1,0 +1,10 @@
+{
+  "container_id": "22f4ee22c9eefed3c951581b9260f599bf0ec3d97377a308c023170423d263a8",
+  "image_id": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+  "main_pid": 31559,
+  "cpu_quota_usec": 100000,
+  "cpu_period_usec": 100000,
+  "memory_max_bytes": 1073741824,
+  "cgroup_procs_count": 6,
+  "verification_passed": true
+}

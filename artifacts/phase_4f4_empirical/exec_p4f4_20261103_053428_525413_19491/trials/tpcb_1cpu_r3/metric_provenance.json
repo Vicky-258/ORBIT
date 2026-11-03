@@ -1,0 +1,65 @@
+{
+  "tps": {
+    "value": 1511.269549,
+    "status": "AVAILABLE",
+    "source": "pgbench_summary_stdout"
+  },
+  "total_transactions": {
+    "value": 45334,
+    "status": "AVAILABLE",
+    "source": "pgbench_summary_stdout"
+  },
+  "failed_transactions": {
+    "value": 0,
+    "status": "AVAILABLE",
+    "source": "pgbench_summary_stdout",
+    "reason": null
+  },
+  "latency_avg_ms": {
+    "value": 5.294,
+    "status": "AVAILABLE",
+    "source": "pgbench_summary_stdout"
+  },
+  "p50_ms": {
+    "value": 3.792,
+    "status": "AVAILABLE",
+    "source": "raw_transaction_logs",
+    "formula": "numpy.percentile(50, method='linear')"
+  },
+  "p90_ms": {
+    "value": 9.937,
+    "status": "AVAILABLE",
+    "source": "raw_transaction_logs",
+    "formula": "numpy.percentile(90, method='linear')"
+  },
+  "p95_ms": {
+    "value": 13.306,
+    "status": "AVAILABLE",
+    "source": "raw_transaction_logs",
+    "formula": "numpy.percentile(95, method='linear')"
+  },
+  "p99_ms": {
+    "value": 22.765,
+    "status": "AVAILABLE",
+    "source": "raw_transaction_logs",
+    "formula": "numpy.percentile(99, method='linear')"
+  },
+  "p999_ms": {
+    "value": 80.348,
+    "status": "AVAILABLE",
+    "source": "raw_transaction_logs",
+    "formula": "numpy.percentile(99.9, method='linear')"
+  },
+  "max_ms": {
+    "value": 425.464,
+    "status": "AVAILABLE",
+    "source": "raw_transaction_logs",
+    "formula": "numpy.max()"
+  },
+  "std_ms": {
+    "value": 7.851,
+    "status": "AVAILABLE",
+    "source": "raw_transaction_logs",
+    "formula": "numpy.std()"
+  }
+}

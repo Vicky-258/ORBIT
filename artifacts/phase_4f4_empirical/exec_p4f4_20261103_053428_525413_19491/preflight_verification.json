@@ -1,0 +1,17 @@
+{
+  "prerequisites_met": true,
+  "docker_daemon_available": true,
+  "pinned_image_verified": true,
+  "host_pgbench_available": true,
+  "issues": [],
+  "host_metadata": {
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12450H",
+    "architecture": "x86_64",
+    "kernel_release": "6.18.59-1-lts",
+    "os_system": "Linux",
+    "docker_version": "29.9.2",
+    "pgbench_binary": "/usr/bin/pgbench",
+    "pgbench_version": "pgbench (PostgreSQL) 18.6",
+    "timestamp_utc": "2026-11-03T05:34:28.547634+00:00"
+  }
+}

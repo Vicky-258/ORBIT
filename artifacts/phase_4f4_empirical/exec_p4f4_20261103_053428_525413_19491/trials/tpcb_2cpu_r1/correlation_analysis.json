@@ -1,0 +1,25 @@
+{
+  "association_level": "NO_DETECTABLE_ASSOCIATION",
+  "justification": "Spikes do not exhibit 100ms CFS periodicity (0.0% match) and do not correlate with cgroup throttling event progression.",
+  "total_transactions": 49106,
+  "spike_count": 3832,
+  "spike_percentage": 7.804,
+  "cluster_count": 3241,
+  "multi_client_cluster_count": 519,
+  "median_inter_cluster_interval_ms": 5.89,
+  "period_alignment_pct": 0.0,
+  "synchronized_multi_client_cluster_pct": 16.0,
+  "throttling_telemetry": {
+    "cgroup_samples_count": 1970,
+    "samples_with_throttling": 0,
+    "delta_throttling_events": 0
+  },
+  "controlled_intervention_evaluation": {
+    "verified": false,
+    "reason": "No controlled intervention evidence provided."
+  },
+  "methodological_guards": {
+    "individual_client_waiting_time_inferred_from_aggregate": false,
+    "aggregate_throttled_usec_divided_by_client_count": false
+  }
+}

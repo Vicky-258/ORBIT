@@ -1,0 +1,32 @@
+{
+  "duration_seconds": 41.362,
+  "container_io": {
+    "read_bytes": 0,
+    "read_mb": 0.0,
+    "read_mb_per_sec": 0.0,
+    "read_iops": 0.0,
+    "write_bytes": 352256,
+    "write_mb": 0.336,
+    "write_mb_per_sec": 0.008,
+    "write_iops": 0.8,
+    "discard_bytes": 0
+  },
+  "host_io": {
+    "primary_device": "nvme0n1p9",
+    "filesystem_type": "btrfs",
+    "host_reads_completed": 87,
+    "host_writes_completed": 719,
+    "host_read_mb": 0.781,
+    "host_write_mb": 10.668,
+    "host_io_time_ms": 130.0,
+    "host_io_utilization_pct": 0.31,
+    "avg_queue_depth": 0.01,
+    "avg_await_ms": 0.27
+  },
+  "bottleneck_assessment": {
+    "is_storage_bound": false,
+    "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+    "classification_reason": "No physical storage bottleneck detected: host busy time 0.3% < 50%, avg queue depth 0.01 < 1.0, avg latency 0.27ms. Write activity absorbed by page cache without sustained queues."
+  },
+  "unreliable_or_missing_metrics": []
+}

@@ -1,0 +1,240 @@
+{
+  "sequence": 7,
+  "trial_id": "ro_2cpu_r3",
+  "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+  "workload_profile": "read_only_select",
+  "cpu_quota_cores": 2.0,
+  "replication": 3,
+  "status": "SUCCESS",
+  "container_name": "aads-p4f4-ro_2cpu_r3-110855",
+  "host_port": 32775,
+  "client_placement": "host",
+  "client_isolation": {
+    "client_pid": 28326,
+    "client_command": "/usr/bin/pgbench -c 8 -j 2 -T 30 -l --log-prefix=/mnt/v_drive/Codes/AADS/artifacts/phase_4f4_empirical/exec_p4f4_20261103_053428_525413_19491/trials/ro_2cpu_r3/pgbench_ro_2cpu_r3 -S -h 127.0.0.1 -p 32775 -U postgres aadsbench",
+    "client_cgroup_raw": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-org.chromium.Chromium-3298.scope",
+    "client_cgroup_path": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/app-org.chromium.Chromium-3298.scope",
+    "container_cgroup_path": "/sys/fs/cgroup/system.slice/docker-634da1e4bbdf0abac35029189245ff0268c35cb03e728d58b1bdd4e80874927d.scope",
+    "isolated": true,
+    "verified_at_utc": "2026-11-03T05:39:07.973260+00:00"
+  },
+  "pinned_image_reference": "postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+  "pinned_digest": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+  "bench_command": "pgbench -c 8 -j 2 -T 30 -S -l --log-prefix=/mnt/v_drive/Codes/AADS/artifacts/phase_4f4_empirical/exec_p4f4_20261103_053428_525413_19491/trials/ro_2cpu_r3/pgbench_ro_2cpu_r3 postgresql://postgres@127.0.0.1:32775/aadsbench",
+  "tps": 37142.144198,
+  "total_transactions": 1113979,
+  "failed_transactions": 0,
+  "latency_avg_ms": 0.215,
+  "p50_ms": 0.088,
+  "p90_ms": 0.139,
+  "p95_ms": 0.162,
+  "p99_ms": 0.254,
+  "p999_ms": 52.271,
+  "max_ms": 58.566,
+  "std_ms": 2.407,
+  "metric_provenance": {
+    "tps": {
+      "value": 37142.144198,
+      "status": "AVAILABLE",
+      "source": "pgbench_summary_stdout"
+    },
+    "total_transactions": {
+      "value": 1113979,
+      "status": "AVAILABLE",
+      "source": "pgbench_summary_stdout"
+    },
+    "failed_transactions": {
+      "value": 0,
+      "status": "AVAILABLE",
+      "source": "pgbench_summary_stdout",
+      "reason": null
+    },
+    "latency_avg_ms": {
+      "value": 0.215,
+      "status": "AVAILABLE",
+      "source": "pgbench_summary_stdout"
+    },
+    "p50_ms": {
+      "value": 0.088,
+      "status": "AVAILABLE",
+      "source": "raw_transaction_logs",
+      "formula": "numpy.percentile(50, method='linear')"
+    },
+    "p90_ms": {
+      "value": 0.139,
+      "status": "AVAILABLE",
+      "source": "raw_transaction_logs",
+      "formula": "numpy.percentile(90, method='linear')"
+    },
+    "p95_ms": {
+      "value": 0.162,
+      "status": "AVAILABLE",
+      "source": "raw_transaction_logs",
+      "formula": "numpy.percentile(95, method='linear')"
+    },
+    "p99_ms": {
+      "value": 0.254,
+      "status": "AVAILABLE",
+      "source": "raw_transaction_logs",
+      "formula": "numpy.percentile(99, method='linear')"
+    },
+    "p999_ms": {
+      "value": 52.271,
+      "status": "AVAILABLE",
+      "source": "raw_transaction_logs",
+      "formula": "numpy.percentile(99.9, method='linear')"
+    },
+    "max_ms": {
+      "value": 58.566,
+      "status": "AVAILABLE",
+      "source": "raw_transaction_logs",
+      "formula": "numpy.max()"
+    },
+    "std_ms": {
+      "value": 2.407,
+      "status": "AVAILABLE",
+      "source": "raw_transaction_logs",
+      "formula": "numpy.std()"
+    }
+  },
+  "cgroup_cpu": {
+    "mean_cpu_pct": 200.06222305061215,
+    "throttling_events": 400,
+    "throttled_sec": 84.900128,
+    "throttling_status": "AVAILABLE",
+    "throttling_reason": null
+  },
+  "storage": {
+    "duration_seconds": 42.317,
+    "container_io": {
+      "read_bytes": 1736704,
+      "read_mb": 1.656,
+      "read_mb_per_sec": 0.039,
+      "read_iops": 1.0,
+      "write_bytes": 491520,
+      "write_mb": 0.469,
+      "write_mb_per_sec": 0.011,
+      "write_iops": 1.1,
+      "discard_bytes": 0
+    },
+    "host_io": {
+      "primary_device": "nvme0n1p9",
+      "filesystem_type": "btrfs",
+      "host_reads_completed": 53,
+      "host_writes_completed": 690,
+      "host_read_mb": 2.137,
+      "host_write_mb": 10.465,
+      "host_io_time_ms": 83.0,
+      "host_io_utilization_pct": 0.2,
+      "avg_queue_depth": 0.01,
+      "avg_await_ms": 0.4
+    },
+    "bottleneck_assessment": {
+      "is_storage_bound": false,
+      "pressure_classification": "NO_STORAGE_PRESSURE_OBSERVED",
+      "classification_reason": "No physical storage bottleneck detected: host busy time 0.2% < 50%, avg queue depth 0.01 < 1.0, avg latency 0.40ms. Write activity absorbed by page cache without sustained queues."
+    },
+    "unreliable_or_missing_metrics": []
+  },
+  "postgres_deltas": {
+    "duration_seconds": 42.321,
+    "timing_instrumentation_active": true,
+    "wal": {
+      "delta_wal_bytes": 2257,
+      "delta_wal_mb": 0.002,
+      "wal_rate_mb_per_sec": 0.0,
+      "delta_wal_records": 22,
+      "delta_wal_fpi": 0,
+      "delta_wal_write": 6,
+      "delta_wal_sync": 6,
+      "delta_wal_write_time_ms": 0.1,
+      "delta_wal_sync_time_ms": 34.1
+    },
+    "checkpoints_and_bgwriter": {
+      "delta_checkpoints_timed": 0,
+      "delta_checkpoints_req": 0,
+      "delta_checkpoint_write_time_ms": 0.0,
+      "delta_checkpoint_sync_time_ms": 0.0,
+      "delta_checkpoint_buffers_written": 0,
+      "delta_bgwriter_buffers_clean": 0,
+      "delta_bgwriter_maxwritten_clean": 0
+    },
+    "database": {
+      "delta_xact_commit": 1518406,
+      "delta_xact_rollback": 1,
+      "delta_blks_read": 28,
+      "delta_blks_hit": 6081940,
+      "buffer_hit_ratio_pct": 100.0,
+      "cache_hit_ratio_pct": 100.0,
+      "delta_deadlocks": 0,
+      "delta_conflicts": 0
+    },
+    "tables": {
+      "inserts": {},
+      "updates": {},
+      "dead_tuples": {}
+    },
+    "engine_io": {
+      "delta_io_reads": 23,
+      "delta_io_writes": 0,
+      "delta_io_fsyncs": 0
+    },
+    "concurrency_and_locks": {
+      "observed_lock_waits": 0,
+      "observed_wait_events": {
+        "Client:ClientRead": 1505,
+        "Timeout:VacuumDelay": 2
+      },
+      "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+    },
+    "unsupported_or_missing_views": [
+      "pg_stat_user_tables"
+    ]
+  },
+  "cfs_correlation": {
+    "association_level": "STRONG_TEMPORAL_ASSOCIATION",
+    "justification": "Observed spikes align with 100ms CFS period (99.0% match) and demonstrate simultaneous multi-client thread freezes (99.3% synchronized). Establishes strong temporal association. Causal validation requires verified controlled quota manipulation: No controlled intervention evidence provided.",
+    "total_transactions": 1113979,
+    "spike_count": 2400,
+    "spike_percentage": 0.215,
+    "cluster_count": 303,
+    "multi_client_cluster_count": 301,
+    "median_inter_cluster_interval_ms": 99.99,
+    "period_alignment_pct": 99.0,
+    "synchronized_multi_client_cluster_pct": 99.3,
+    "throttling_telemetry": {
+      "cgroup_samples_count": 1964,
+      "samples_with_throttling": 1959,
+      "delta_throttling_events": 400
+    },
+    "controlled_intervention_evaluation": {
+      "verified": false,
+      "reason": "No controlled intervention evidence provided."
+    },
+    "methodological_guards": {
+      "individual_client_waiting_time_inferred_from_aggregate": false,
+      "aggregate_throttled_usec_divided_by_client_count": false
+    }
+  },
+  "sampler_telemetry": {
+    "sampling_interval_sec": 0.1,
+    "sampler_mode": "persistent_coprocess",
+    "successful_samples": 388,
+    "missed_samples": 0,
+    "total_samples_attempted": 388,
+    "mean_query_duration_ms": 3.28,
+    "total_query_duration_ms": 1271.47,
+    "monitoring_connection_count": 1
+  },
+  "baseline_fingerprint": "a933ad78b36fcb11233927d2c0c41ea9ed350b35656190e9c35fa24235f7104b",
+  "timing": {
+    "init_duration_sec": 0.246,
+    "benchmark_wall_duration_sec": 30.016
+  },
+  "artifacts_path": "/mnt/v_drive/Codes/AADS/artifacts/phase_4f4_empirical/exec_p4f4_20261103_053428_525413_19491/trials/ro_2cpu_r3",
+  "cleanup_result": {
+    "success": true,
+    "cleanup_errors": []
+  },
+  "timestamp_utc": "2026-11-03T05:39:40.450453+00:00"
+}

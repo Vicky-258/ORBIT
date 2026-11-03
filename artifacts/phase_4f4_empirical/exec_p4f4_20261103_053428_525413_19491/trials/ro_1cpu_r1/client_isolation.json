@@ -1,0 +1,9 @@
+{
+  "client_pid": 21646,
+  "client_command": "/usr/bin/pgbench -c 8 -j 2 -T 30 -l --log-prefix=/mnt/v_drive/Codes/AADS/artifacts/phase_4f4_empirical/exec_p4f4_20261103_053428_525413_19491/trials/ro_1cpu_r1/pgbench_ro_1cpu_r1 -S -h 127.0.0.1 -p 32769 -U postgres aadsbench",
+  "client_cgroup_raw": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-org.chromium.Chromium-3298.scope",
+  "client_cgroup_path": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/app-org.chromium.Chromium-3298.scope",
+  "container_cgroup_path": "/sys/fs/cgroup/system.slice/docker-63ee4340352fc1d0e7c946e046917f79d4ead1034be653147c9f80fb069ac032.scope",
+  "isolated": true,
+  "verified_at_utc": "2026-11-03T05:35:25.964682+00:00"
+}

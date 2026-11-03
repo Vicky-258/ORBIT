@@ -1,0 +1,73 @@
+{
+  "scale_factor": 2,
+  "row_counts": {
+    "accounts": 200000,
+    "branches": 2,
+    "tellers": 20,
+    "history": 45334
+  },
+  "exact_invariants": {
+    "accounts": {
+      "count": 200000,
+      "min_aid": 1,
+      "max_aid": 200000,
+      "min_balance": -13828,
+      "max_balance": 13604,
+      "sum_balance": -405385,
+      "hash_sum": -817768877346
+    },
+    "branches": {
+      "count": 2,
+      "min_bid": 1,
+      "max_bid": 2,
+      "min_balance": -815267,
+      "max_balance": 409882,
+      "sum_balance": -405385,
+      "hash_sum": 1547817071
+    },
+    "tellers": {
+      "count": 20,
+      "min_tid": 1,
+      "max_tid": 20,
+      "min_balance": -341045,
+      "max_balance": 369364,
+      "sum_balance": -405385,
+      "hash_sum": 2899716183
+    },
+    "history": {
+      "count": 45334
+    }
+  },
+  "fingerprint": {
+    "content_fingerprint": "75591e9996caef5e802dcc1ffbb7c365662130518ea386d922c85eb1fc0c25c7",
+    "algorithm": "aads_composite_aggregate_sha256_v1"
+  },
+  "relation_sizes_bytes": {
+    "accounts": 31965184,
+    "branches": 114688,
+    "tellers": 98304,
+    "history": 2424832,
+    "total_database": 42318871,
+    "indexes_total": 4546560
+  },
+  "diagnostic_metadata": {
+    "dead_tuples_estimate": 3691
+  },
+  "database_configuration": {
+    "shared_buffers": "128MB",
+    "work_mem": "4MB",
+    "max_connections": "100",
+    "checkpoint_timeout": "5min",
+    "synchronous_commit": "on",
+    "autovacuum": "on",
+    "track_io_timing": "on",
+    "track_wal_io_timing": "on"
+  },
+  "container_configuration": {
+    "cpu_limit": "1.0",
+    "memory_limit": "1024m",
+    "image_digest": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+    "host_port": null
+  },
+  "timestamp_utc": "2026-11-03T05:41:08.822878+00:00"
+}

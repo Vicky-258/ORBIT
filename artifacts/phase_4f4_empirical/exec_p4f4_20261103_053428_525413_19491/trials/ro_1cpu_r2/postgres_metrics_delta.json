@@ -1,0 +1,55 @@
+{
+  "duration_seconds": 41.408,
+  "timing_instrumentation_active": true,
+  "wal": {
+    "delta_wal_bytes": 2309,
+    "delta_wal_mb": 0.002,
+    "wal_rate_mb_per_sec": 0.0,
+    "delta_wal_records": 22,
+    "delta_wal_fpi": 0,
+    "delta_wal_write": 5,
+    "delta_wal_sync": 5,
+    "delta_wal_write_time_ms": 0.09,
+    "delta_wal_sync_time_ms": 25.36
+  },
+  "checkpoints_and_bgwriter": {
+    "delta_checkpoints_timed": 0,
+    "delta_checkpoints_req": 0,
+    "delta_checkpoint_write_time_ms": 0.0,
+    "delta_checkpoint_sync_time_ms": 0.0,
+    "delta_checkpoint_buffers_written": 0,
+    "delta_bgwriter_buffers_clean": 0,
+    "delta_bgwriter_maxwritten_clean": 0
+  },
+  "database": {
+    "delta_xact_commit": 763602,
+    "delta_xact_rollback": 1,
+    "delta_blks_read": 28,
+    "delta_blks_hit": 3062744,
+    "buffer_hit_ratio_pct": 100.0,
+    "cache_hit_ratio_pct": 100.0,
+    "delta_deadlocks": 0,
+    "delta_conflicts": 0
+  },
+  "tables": {
+    "inserts": {},
+    "updates": {},
+    "dead_tuples": {}
+  },
+  "engine_io": {
+    "delta_io_reads": 23,
+    "delta_io_writes": 0,
+    "delta_io_fsyncs": 0
+  },
+  "concurrency_and_locks": {
+    "observed_lock_waits": 0,
+    "observed_wait_events": {
+      "Client:ClientRead": 1462,
+      "Timeout:VacuumDelay": 1
+    },
+    "lock_contention_classification": "NO_CONTENTION_OBSERVED"
+  },
+  "unsupported_or_missing_views": [
+    "pg_stat_user_tables"
+  ]
+}

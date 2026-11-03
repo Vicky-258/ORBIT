@@ -1,0 +1,73 @@
+{
+  "scale_factor": 2,
+  "row_counts": {
+    "accounts": 200000,
+    "branches": 2,
+    "tellers": 20,
+    "history": 0
+  },
+  "exact_invariants": {
+    "accounts": {
+      "count": 200000,
+      "min_aid": 1,
+      "max_aid": 200000,
+      "min_balance": 0,
+      "max_balance": 0,
+      "sum_balance": 0,
+      "hash_sum": -182172566045
+    },
+    "branches": {
+      "count": 2,
+      "min_bid": 1,
+      "max_bid": 2,
+      "min_balance": 0,
+      "max_balance": 0,
+      "sum_balance": 0,
+      "hash_sum": 520943833
+    },
+    "tellers": {
+      "count": 20,
+      "min_tid": 1,
+      "max_tid": 20,
+      "min_balance": 0,
+      "max_balance": 0,
+      "sum_balance": 0,
+      "hash_sum": -18510277795
+    },
+    "history": {
+      "count": 0
+    }
+  },
+  "fingerprint": {
+    "content_fingerprint": "a933ad78b36fcb11233927d2c0c41ea9ed350b35656190e9c35fa24235f7104b",
+    "algorithm": "aads_composite_aggregate_sha256_v1"
+  },
+  "relation_sizes_bytes": {
+    "accounts": 31408128,
+    "branches": 57344,
+    "tellers": 57344,
+    "history": 0,
+    "total_database": 39230487,
+    "indexes_total": 4546560
+  },
+  "diagnostic_metadata": {
+    "dead_tuples_estimate": 0
+  },
+  "database_configuration": {
+    "shared_buffers": "128MB",
+    "work_mem": "4MB",
+    "max_connections": "100",
+    "checkpoint_timeout": "5min",
+    "synchronous_commit": "on",
+    "autovacuum": "on",
+    "track_io_timing": "on",
+    "track_wal_io_timing": "on"
+  },
+  "container_configuration": {
+    "cpu_limit": "1.0",
+    "memory_limit": "1024m",
+    "image_digest": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+    "host_port": 32778
+  },
+  "timestamp_utc": "2026-11-03T05:41:11.497393+00:00"
+}

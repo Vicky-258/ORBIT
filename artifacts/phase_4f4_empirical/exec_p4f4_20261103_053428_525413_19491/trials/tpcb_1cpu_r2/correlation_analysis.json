@@ -1,0 +1,25 @@
+{
+  "association_level": "TEMPORAL_ASSOCIATION",
+  "justification": "Latency spikes coincide with periods of cgroup throttling (1971 throttled samples), but lack strict 100ms periodicity (0.0% match) or client synchronization.",
+  "total_transactions": 38327,
+  "spike_count": 5790,
+  "spike_percentage": 15.107,
+  "cluster_count": 3828,
+  "multi_client_cluster_count": 1420,
+  "median_inter_cluster_interval_ms": 4.28,
+  "period_alignment_pct": 0.0,
+  "synchronized_multi_client_cluster_pct": 37.1,
+  "throttling_telemetry": {
+    "cgroup_samples_count": 1971,
+    "samples_with_throttling": 1971,
+    "delta_throttling_events": 208
+  },
+  "controlled_intervention_evaluation": {
+    "verified": false,
+    "reason": "No controlled intervention evidence provided."
+  },
+  "methodological_guards": {
+    "individual_client_waiting_time_inferred_from_aggregate": false,
+    "aggregate_throttled_usec_divided_by_client_count": false
+  }
+}

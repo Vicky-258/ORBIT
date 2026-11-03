@@ -1,0 +1,1 @@
+pgbench -c 8 -j 2 -T 30  -l --log-prefix=/mnt/v_drive/Codes/AADS/artifacts/phase_4f4_empirical/exec_p4f4_20261103_053428_525413_19491/trials/tpcb_2cpu_r1/pgbench_tpcb_2cpu_r1 postgresql://postgres@127.0.0.1:32770/aadsbench

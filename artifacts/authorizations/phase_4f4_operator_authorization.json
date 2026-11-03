@@ -1,0 +1,14 @@
+{
+  "phase": "4F.4",
+  "proposal_id": "prop_phase4f4_live_pilot_001",
+  "authorization_id": "auth_phase4f4_operator_pilot_20261103",
+  "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+  "execution_scope": "PHASE_4F4_12_TRIAL_EMPIRICAL_CAMPAIGN",
+  "operator_identity": "operator",
+  "authorized_at_utc": "2026-11-03T05:30:00Z",
+  "expires_at_utc": "2026-11-04T05:30:00Z",
+  "revoked": false,
+  "consumed": true,
+  "consumed_at_utc": "2026-11-03T05:34:28.526032+00:00",
+  "consumed_by_execution_id": "exec_p4f4_20261103_053428_525413_19491"
+}

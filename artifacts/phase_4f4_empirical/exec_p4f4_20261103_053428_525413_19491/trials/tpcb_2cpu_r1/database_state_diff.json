@@ -1,0 +1,12 @@
+{
+  "delta_history_rows": 49106,
+  "delta_accounts_rows": 0,
+  "delta_branches_rows": 0,
+  "delta_tellers_rows": 0,
+  "delta_history_size_bytes": 2646016,
+  "delta_database_size_bytes": 3383296,
+  "delta_dead_tuples_estimate": 4358,
+  "initial_fingerprint": "a933ad78b36fcb11233927d2c0c41ea9ed350b35656190e9c35fa24235f7104b",
+  "final_fingerprint": "32857034741a390ca186427a903205788d51a54971ce939c3af41816f492fb64",
+  "fingerprint_matches": false
+}

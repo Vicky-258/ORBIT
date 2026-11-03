@@ -1,0 +1,25 @@
+{
+  "association_level": "STRONG_TEMPORAL_ASSOCIATION",
+  "justification": "Observed spikes align with 100ms CFS period (100.0% match) and demonstrate simultaneous multi-client thread freezes (100.0% synchronized). Establishes strong temporal association. Causal validation requires verified controlled quota manipulation: No controlled intervention evidence provided.",
+  "total_transactions": 573860,
+  "spike_count": 2400,
+  "spike_percentage": 0.418,
+  "cluster_count": 300,
+  "multi_client_cluster_count": 300,
+  "median_inter_cluster_interval_ms": 100.0,
+  "period_alignment_pct": 100.0,
+  "synchronized_multi_client_cluster_pct": 100.0,
+  "throttling_telemetry": {
+    "cgroup_samples_count": 1968,
+    "samples_with_throttling": 1968,
+    "delta_throttling_events": 401
+  },
+  "controlled_intervention_evaluation": {
+    "verified": false,
+    "reason": "No controlled intervention evidence provided."
+  },
+  "methodological_guards": {
+    "individual_client_waiting_time_inferred_from_aggregate": false,
+    "aggregate_throttled_usec_divided_by_client_count": false
+  }
+}

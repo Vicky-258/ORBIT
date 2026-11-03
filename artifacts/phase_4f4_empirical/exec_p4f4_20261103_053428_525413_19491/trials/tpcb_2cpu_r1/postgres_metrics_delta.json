@@ -1,0 +1,62 @@
+{
+  "duration_seconds": 40.592,
+  "timing_instrumentation_active": true,
+  "wal": {
+    "delta_wal_bytes": 31615682,
+    "delta_wal_mb": 30.151,
+    "wal_rate_mb_per_sec": 0.743,
+    "delta_wal_records": 492000,
+    "delta_wal_fpi": 1,
+    "delta_wal_write": 66888,
+    "delta_wal_sync": 66882,
+    "delta_wal_write_time_ms": 861.89,
+    "delta_wal_sync_time_ms": 37025.18
+  },
+  "checkpoints_and_bgwriter": {
+    "delta_checkpoints_timed": 0,
+    "delta_checkpoints_req": 0,
+    "delta_checkpoint_write_time_ms": 0.0,
+    "delta_checkpoint_sync_time_ms": 0.0,
+    "delta_checkpoint_buffers_written": 0,
+    "delta_bgwriter_buffers_clean": 0,
+    "delta_bgwriter_maxwritten_clean": 0
+  },
+  "database": {
+    "delta_xact_commit": 67346,
+    "delta_xact_rollback": 1,
+    "delta_blks_read": 33,
+    "delta_blks_hit": 2118251,
+    "buffer_hit_ratio_pct": 100.0,
+    "cache_hit_ratio_pct": 100.0,
+    "delta_deadlocks": 0,
+    "delta_conflicts": 0
+  },
+  "tables": {
+    "inserts": {},
+    "updates": {},
+    "dead_tuples": {}
+  },
+  "engine_io": {
+    "delta_io_reads": 28,
+    "delta_io_writes": 0,
+    "delta_io_fsyncs": 0
+  },
+  "concurrency_and_locks": {
+    "observed_lock_waits": 2051,
+    "observed_wait_events": {
+      "Lock:tuple": 507,
+      "Lock:transactionid": 1545,
+      "LWLock:WALWrite": 194,
+      "IO:WALSync": 370,
+      "Client:ClientRead": 190,
+      "IO:WALWrite": 9,
+      "LWLock:BufferContent": 1,
+      "Timeout:VacuumDelay": 3,
+      "Timeout:VacuumTruncate": 49
+    },
+    "lock_contention_classification": "CONFIRMED_LOCK_CONTENTION_OBSERVED"
+  },
+  "unsupported_or_missing_views": [
+    "pg_stat_user_tables"
+  ]
+}

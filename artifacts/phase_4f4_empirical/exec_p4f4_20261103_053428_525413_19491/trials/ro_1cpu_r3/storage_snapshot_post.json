@@ -1,0 +1,120 @@
+{
+  "timestamp_monotonic": 6615.081802,
+  "timestamp_utc": "2026-11-03T05:40:24.868287+00:00",
+  "cgroup_dir": "/sys/fs/cgroup/system.slice/docker-67efecfac86eba4f8557afba72e81b14de8bf5508518488919522a443ad458b4.scope",
+  "cgroup_io_stat": {
+    "259:0": {
+      "rbytes": 14725120,
+      "wbytes": 106663936,
+      "rios": 230,
+      "wios": 9904,
+      "dbytes": 0,
+      "dios": 0
+    }
+  },
+  "host_diskstats": {
+    "nvme0n1": {
+      "reads_completed": 136672,
+      "read_sectors": 8413068,
+      "read_ms": 34848,
+      "writes_completed": 2404156,
+      "write_sectors": 64543403,
+      "write_ms": 577276,
+      "io_ms": 112934,
+      "weighted_io_ms": 662492
+    },
+    "nvme0n1p1": {
+      "reads_completed": 41,
+      "read_sectors": 2752,
+      "read_ms": 5,
+      "writes_completed": 0,
+      "write_sectors": 0,
+      "write_ms": 0,
+      "io_ms": 7,
+      "weighted_io_ms": 5
+    },
+    "nvme0n1p2": {
+      "reads_completed": 35,
+      "read_sectors": 2416,
+      "read_ms": 4,
+      "writes_completed": 0,
+      "write_sectors": 0,
+      "write_ms": 0,
+      "io_ms": 7,
+      "weighted_io_ms": 4
+    },
+    "nvme0n1p3": {
+      "reads_completed": 41,
+      "read_sectors": 3328,
+      "read_ms": 4,
+      "writes_completed": 0,
+      "write_sectors": 0,
+      "write_ms": 0,
+      "io_ms": 7,
+      "weighted_io_ms": 4
+    },
+    "nvme0n1p4": {
+      "reads_completed": 41,
+      "read_sectors": 3312,
+      "read_ms": 5,
+      "writes_completed": 0,
+      "write_sectors": 0,
+      "write_ms": 0,
+      "io_ms": 10,
+      "weighted_io_ms": 5
+    },
+    "nvme0n1p5": {
+      "reads_completed": 43,
+      "read_sectors": 3344,
+      "read_ms": 4,
+      "writes_completed": 0,
+      "write_sectors": 0,
+      "write_ms": 0,
+      "io_ms": 10,
+      "weighted_io_ms": 4
+    },
+    "nvme0n1p6": {
+      "reads_completed": 20582,
+      "read_sectors": 765712,
+      "read_ms": 2312,
+      "writes_completed": 1540,
+      "write_sectors": 327912,
+      "write_ms": 3887,
+      "io_ms": 2440,
+      "weighted_io_ms": 6199
+    },
+    "nvme0n1p7": {
+      "reads_completed": 41,
+      "read_sectors": 3312,
+      "read_ms": 4,
+      "writes_completed": 0,
+      "write_sectors": 0,
+      "write_ms": 0,
+      "io_ms": 4,
+      "weighted_io_ms": 4
+    },
+    "nvme0n1p8": {
+      "reads_completed": 654,
+      "read_sectors": 21868,
+      "read_ms": 125,
+      "writes_completed": 13,
+      "write_sectors": 11,
+      "write_ms": 1,
+      "io_ms": 54,
+      "weighted_io_ms": 126
+    },
+    "nvme0n1p9": {
+      "reads_completed": 115119,
+      "read_sectors": 7604160,
+      "read_ms": 32375,
+      "writes_completed": 2402600,
+      "write_sectors": 64215480,
+      "write_ms": 573387,
+      "io_ms": 128240,
+      "weighted_io_ms": 616126
+    }
+  },
+  "primary_device": "nvme0n1p9",
+  "filesystem_type": "btrfs",
+  "unavailable_metrics": []
+}

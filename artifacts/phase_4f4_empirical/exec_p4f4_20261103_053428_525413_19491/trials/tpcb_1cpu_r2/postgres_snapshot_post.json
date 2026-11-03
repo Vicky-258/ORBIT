@@ -1,0 +1,61 @@
+{
+  "timestamp_monotonic": 6702.367997,
+  "timestamp_utc": "2026-11-03T05:41:52.154483+00:00",
+  "wal_stats": {
+    "wal_records": 406961,
+    "wal_fpi": 2009,
+    "wal_bytes": 59492108,
+    "wal_buffers_full": 1996,
+    "wal_write": 53250,
+    "wal_sync": 50510,
+    "wal_write_time": 676.707,
+    "wal_sync_time": 36920.44
+  },
+  "checkpointer_stats": {
+    "num_timed": 0,
+    "num_requested": 1,
+    "write_time": 33.0,
+    "sync_time": 138.0,
+    "buffers_written": 923
+  },
+  "bgwriter_stats": {
+    "buffers_clean": 0,
+    "maxwritten_clean": 0,
+    "buffers_alloc": 4707
+  },
+  "database_stats": {
+    "xact_commit": 51029,
+    "xact_rollback": 2,
+    "blks_read": 3394,
+    "blks_hit": 1567118,
+    "tup_returned": 1523812,
+    "tup_fetched": 205029,
+    "tup_inserted": 250626,
+    "tup_updated": 151529,
+    "tup_deleted": 0,
+    "conflicts": 0,
+    "deadlocks": 0
+  },
+  "table_stats": {},
+  "io_stats": {
+    "reads": 5061,
+    "writes": 3220,
+    "fsyncs": 299
+  },
+  "activity_stats": [],
+  "locks_stats": [
+    {
+      "locktype": "relation",
+      "mode": "AccessShareLock",
+      "granted": true,
+      "count": 1
+    }
+  ],
+  "database_settings": {
+    "track_io_timing": "on",
+    "track_wal_io_timing": "on"
+  },
+  "unavailable_metrics": [
+    "pg_stat_user_tables"
+  ]
+}

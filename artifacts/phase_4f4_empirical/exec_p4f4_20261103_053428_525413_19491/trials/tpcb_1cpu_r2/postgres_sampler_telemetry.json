@@ -1,0 +1,10 @@
+{
+  "sampling_interval_sec": 0.1,
+  "sampler_mode": "persistent_coprocess",
+  "successful_samples": 395,
+  "missed_samples": 0,
+  "total_samples_attempted": 395,
+  "mean_query_duration_ms": 1.57,
+  "total_query_duration_ms": 618.39,
+  "monitoring_connection_count": 1
+}
