@@ -41,7 +41,7 @@ def make_test_auth(**kwargs) -> CampaignAuthorizationRecord:
         "execution_scope": EXPECTED_EXECUTION_SCOPE,
         "operator_identity": "independent_auditor",
         "authorized_at_utc": "2026-11-03T10:00:00Z",
-        "expires_at_utc": "2026-11-10T10:00:00Z",
+        "expires_at_utc": "2027-11-10T10:00:00Z",
         "revoked": False,
         "consumed": False,
     }

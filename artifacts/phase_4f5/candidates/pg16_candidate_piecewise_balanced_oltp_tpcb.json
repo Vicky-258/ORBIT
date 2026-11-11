@@ -1,0 +1,140 @@
+{
+  "model_type": "EmpiricalPiecewiseModel",
+  "model_id": "pg16_candidate_piecewise_balanced_oltp_tpcb",
+  "workload_profile": "balanced_oltp_tpcb",
+  "version": "1.0.0-piecewise",
+  "min_cpu_quota": 1.0,
+  "max_cpu_quota": 2.0,
+  "supported_concurrency": 8,
+  "supported_scale_factor": 2,
+  "supported_memory_mb": 1024.0,
+  "knee_cpu": 1.25,
+  "anchors": {
+    "1.0": {
+      "throughput_tps": {
+        "mean": 1408.5947903333333,
+        "sample_std": 120.16606303122312
+      },
+      "latency_mean_ms": {
+        "mean": 5.702149790577789,
+        "sample_std": 0.5025183484711886
+      },
+      "p50_ms": {
+        "mean": 3.8946666666666663,
+        "sample_std": 0.11132984026456402
+      },
+      "p90_ms": {
+        "mean": 11.222566666666667,
+        "sample_std": 1.8120596191442842
+      },
+      "p95_ms": {
+        "mean": 14.860649999999998,
+        "sample_std": 2.259905615838857
+      },
+      "p99_ms": {
+        "mean": 27.69684333333336,
+        "sample_std": 5.395396969124076
+      },
+      "p999_ms": {
+        "mean": 91.24529133334805,
+        "sample_std": 21.82931804011232
+      },
+      "max_ms": {
+        "mean": 415.593,
+        "sample_std": 48.36398956868632
+      },
+      "cpu_utilization_pct": {
+        "mean": 87.56666666666666,
+        "sample_std": 3.9693114432270677
+      },
+      "throttling_frequency_pct": {
+        "mean": 56.88666666666666,
+        "sample_std": 6.799973039162238
+      },
+      "throttled_seconds": {
+        "mean": 2.578,
+        "sample_std": 0.578500648227813
+      },
+      "wal_bytes": {
+        "mean": 27275974.0,
+        "sample_std": 2851897.9764572573
+      },
+      "wal_sync_time_ms": {
+        "mean": 36731.78,
+        "sample_std": 134.40504901230435
+      },
+      "observed_lock_waits": {
+        "mean": 2068.0,
+        "sample_std": 28.053520278211074
+      }
+    },
+    "2.0": {
+      "throughput_tps": {
+        "mean": 1609.8032923333333,
+        "sample_std": 24.30140095455586
+      },
+      "latency_mean_ms": {
+        "mean": 4.964699104576449,
+        "sample_std": 0.07459010335234535
+      },
+      "p50_ms": {
+        "mean": 3.8098333333333336,
+        "sample_std": 0.026759733431656916
+      },
+      "p90_ms": {
+        "mean": 9.164800000000005,
+        "sample_std": 0.14093533978388526
+      },
+      "p95_ms": {
+        "mean": 11.81193333333333,
+        "sample_std": 0.1605445836312574
+      },
+      "p99_ms": {
+        "mean": 20.435506666666658,
+        "sample_std": 1.1507112244752442
+      },
+      "p999_ms": {
+        "mean": 43.26377566666969,
+        "sample_std": 4.220145486014301
+      },
+      "max_ms": {
+        "mean": 168.09533333333331,
+        "sample_std": 88.08199811728464
+      },
+      "cpu_utilization_pct": {
+        "mean": 50.99666666666666,
+        "sample_std": 0.3234707611722161
+      },
+      "throttling_frequency_pct": {
+        "mean": 0.0,
+        "sample_std": 0.0
+      },
+      "throttled_seconds": {
+        "mean": 0.0,
+        "sample_std": 0.0
+      },
+      "wal_bytes": {
+        "mean": 31301809.0,
+        "sample_std": 283320.46522798174
+      },
+      "wal_sync_time_ms": {
+        "mean": 37004.00666666666,
+        "sample_std": 23.62715669168467
+      },
+      "observed_lock_waits": {
+        "mean": 2051.3333333333335,
+        "sample_std": 19.5021366350801
+      }
+    }
+  },
+  "provenance": {
+    "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+    "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+    "manifest_verified": true,
+    "reconciliation_status": "COMPLETE",
+    "total_trials_reconciled": 12,
+    "total_raw_transactions": 5376068,
+    "model_registry_intact": true,
+    "is_valid": true
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "model_type": "EmpiricalLookupModel",
+  "model_id": "pg16_candidate_lookup_read_only_select",
+  "workload_profile": "read_only_select",
+  "version": "1.0.0-lookup",
+  "min_cpu_quota": 1.0,
+  "max_cpu_quota": 2.0,
+  "supported_concurrency": 8,
+  "supported_scale_factor": 2,
+  "supported_memory_mb": 1024.0,
+  "anchors": {
+    "1.0": {
+      "throughput_tps": {
+        "mean": 19120.03221233333,
+        "sample_std": 183.14370778673444,
+        "min": 18930.292689,
+        "max": 19295.777203,
+        "replications": 3
+      },
+      "latency_mean_ms": {
+        "mean": 0.41431617647300417,
+        "sample_std": 0.003952145724766031,
+        "min": 0.41053864018482455,
+        "max": 0.41842240273922415,
+        "replications": 3
+      },
+      "p50_ms": {
+        "mean": 0.08700000000000001,
+        "sample_std": 0.0010000000000000009,
+        "min": 0.086,
+        "max": 0.088,
+        "replications": 3
+      },
+      "p90_ms": {
+        "mean": 0.132,
+        "sample_std": 0.0010000000000000009,
+        "min": 0.131,
+        "max": 0.133,
+        "replications": 3
+      },
+      "p95_ms": {
+        "mean": 0.149,
+        "sample_std": 0.002645751311064593,
+        "min": 0.147,
+        "max": 0.152,
+        "replications": 3
+      },
+      "p99_ms": {
+        "mean": 0.24166666666666667,
+        "sample_std": 0.004725815626252613,
+        "min": 0.238,
+        "max": 0.247,
+        "replications": 3
+      },
+      "p999_ms": {
+        "mean": 76.72009666666668,
+        "sample_std": 0.010979436840428784,
+        "min": 76.70829000000003,
+        "max": 76.73,
+        "replications": 3
+      },
+      "max_ms": {
+        "mean": 80.22666666666667,
+        "sample_std": 1.0187209300555902,
+        "min": 79.058,
+        "max": 80.927,
+        "replications": 3
+      },
+      "cpu_utilization_pct": {
+        "mean": 99.83666666666666,
+        "sample_std": 0.06350852961085851,
+        "min": 99.8,
+        "max": 99.91,
+        "replications": 3
+      },
+      "throttling_frequency_pct": {
+        "mean": 100.0,
+        "sample_std": 0.0,
+        "min": 100.0,
+        "max": 100.0,
+        "replications": 3
+      },
+      "throttled_seconds": {
+        "mean": 94.24933333333333,
+        "sample_std": 1.628132775093401,
+        "min": 92.954,
+        "max": 96.077,
+        "replications": 3
+      },
+      "wal_bytes": {
+        "mean": 2309.0,
+        "sample_std": 0.0,
+        "min": 2309.0,
+        "max": 2309.0,
+        "replications": 3
+      },
+      "wal_sync_time_ms": {
+        "mean": 70.85000000000001,
+        "sample_std": 84.16439686708388,
+        "min": 19.22,
+        "max": 167.97,
+        "replications": 3
+      },
+      "observed_lock_waits": {
+        "mean": 0.0,
+        "sample_std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "replications": 3
+      }
+    },
+    "2.0": {
+      "throughput_tps": {
+        "mean": 37611.65355433334,
+        "sample_std": 990.3799066279629,
+        "min": 36943.345066,
+        "max": 38749.471399,
+        "replications": 3
+      },
+      "latency_mean_ms": {
+        "mean": 0.2085269284258626,
+        "sample_std": 0.00542755756402797,
+        "min": 0.20228647874235267,
+        "max": 0.2121481242463409,
+        "replications": 3
+      },
+      "p50_ms": {
+        "mean": 0.08866666666666667,
+        "sample_std": 0.0020816659994661348,
+        "min": 0.087,
+        "max": 0.091,
+        "replications": 3
+      },
+      "p90_ms": {
+        "mean": 0.137,
+        "sample_std": 0.0052915026221291754,
+        "min": 0.131,
+        "max": 0.141,
+        "replications": 3
+      },
+      "p95_ms": {
+        "mean": 0.15766666666666665,
+        "sample_std": 0.010214368964029717,
+        "min": 0.146,
+        "max": 0.165,
+        "replications": 3
+      },
+      "p99_ms": {
+        "mean": 0.23966666666666667,
+        "sample_std": 0.02064784088793144,
+        "min": 0.216,
+        "max": 0.254,
+        "replications": 3
+      },
+      "p999_ms": {
+        "mean": 51.92430866666681,
+        "sample_std": 0.30139659632171123,
+        "min": 51.724831000000236,
+        "max": 52.271022000000116,
+        "replications": 3
+      },
+      "max_ms": {
+        "mean": 58.28466666666667,
+        "sample_std": 0.307742316448897,
+        "min": 57.956,
+        "max": 58.566,
+        "replications": 3
+      },
+      "cpu_utilization_pct": {
+        "mean": 99.98333333333333,
+        "sample_std": 0.020816659994664012,
+        "min": 99.96,
+        "max": 100.0,
+        "replications": 3
+      },
+      "throttling_frequency_pct": {
+        "mean": 100.0,
+        "sample_std": 0.0,
+        "min": 100.0,
+        "max": 100.0,
+        "replications": 3
+      },
+      "throttled_seconds": {
+        "mean": 63.74266666666667,
+        "sample_std": 0.3085033765347386,
+        "min": 63.435,
+        "max": 64.052,
+        "replications": 3
+      },
+      "wal_bytes": {
+        "mean": 2274.0,
+        "sample_std": 30.315012782448235,
+        "min": 2256.0,
+        "max": 2309.0,
+        "replications": 3
+      },
+      "wal_sync_time_ms": {
+        "mean": 25.983333333333334,
+        "sample_std": 7.5944607006247224,
+        "min": 19.05,
+        "max": 34.1,
+        "replications": 3
+      },
+      "observed_lock_waits": {
+        "mean": 0.0,
+        "sample_std": 0.0,
+        "min": 0.0,
+        "max": 0.0,
+        "replications": 3
+      }
+    }
+  },
+  "observations_count": 6,
+  "provenance": {
+    "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+    "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+    "manifest_verified": true,
+    "reconciliation_status": "COMPLETE",
+    "total_trials_reconciled": 12,
+    "total_raw_transactions": 5376068,
+    "model_registry_intact": true,
+    "is_valid": true
+  }
+}

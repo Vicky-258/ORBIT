@@ -1,0 +1,1412 @@
+{
+  "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+  "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+  "total_observations": 12,
+  "evaluation_strategy": "Leave-One-Replication-Out (LORO) Cross-Validation",
+  "workloads": {
+    "read_only_select": {
+      "lookup": {
+        "model_id": "pg16_candidate_lookup_read_only_select",
+        "model_family": "EmpiricalLookupModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_lookup_read_only_select.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 872.2359,
+              "mae": 663.7787,
+              "mape_pct": 1.9989,
+              "r2_score": 0.9911,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 224.3043,
+                "mae": 189.7396,
+                "mape_pct": 0.9931
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1212.9627,
+                "mae": 1137.8178,
+                "mape_pct": 3.0047
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.96,
+              "cpu_2.0vCPU": 2.63
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.0058,
+              "mae": 0.0052,
+              "mape_pct": 2.0012,
+              "r2_score": 0.9968,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0048,
+                "mae": 0.0041,
+                "mape_pct": 0.9887
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0066,
+                "mae": 0.0062,
+                "mape_pct": 3.0137
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.95,
+              "cpu_2.0vCPU": 2.6
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.002,
+              "mae": 0.0017,
+              "mape_pct": 1.8841,
+              "r2_score": -0.618,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0012,
+                "mae": 0.001,
+                "mape_pct": 1.1496
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0025,
+                "mae": 0.0023,
+                "mape_pct": 2.6187
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.15,
+              "cpu_2.0vCPU": 2.35
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 0.0091,
+              "mae": 0.0073,
+              "mape_pct": 4.78,
+              "r2_score": -0.494,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0032,
+                "mae": 0.003,
+                "mape_pct": 2.005
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0125,
+                "mae": 0.0117,
+                "mape_pct": 7.5551
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.78,
+              "cpu_2.0vCPU": 6.48
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 0.0183,
+              "mae": 0.0145,
+              "mape_pct": 6.1856,
+              "r2_score": -1.2351,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0058,
+                "mae": 0.0053,
+                "mape_pct": 2.1972
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0253,
+                "mae": 0.0237,
+                "mape_pct": 10.1741
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.96,
+              "cpu_2.0vCPU": 8.62
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 0.0579,
+              "mae": 0.0483,
+              "mape_pct": 0.0484,
+              "r2_score": 0.5121,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0778,
+                "mae": 0.0733,
+                "mape_pct": 0.0734
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0255,
+                "mae": 0.0233,
+                "mape_pct": 0.0233
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.06,
+              "cpu_2.0vCPU": 0.02
+            }
+          }
+        }
+      },
+      "linear": {
+        "model_id": "pg16_candidate_linear_read_only_select",
+        "model_family": "EmpiricalLinearRegressionModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_linear_read_only_select.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 872.2359,
+              "mae": 663.7787,
+              "mape_pct": 1.9989,
+              "r2_score": 0.9911,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 224.3043,
+                "mae": 189.7396,
+                "mape_pct": 0.9931
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1212.9627,
+                "mae": 1137.8178,
+                "mape_pct": 3.0047
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.96,
+              "cpu_2.0vCPU": 2.63
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.0058,
+              "mae": 0.0052,
+              "mape_pct": 2.0012,
+              "r2_score": 0.9968,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0048,
+                "mae": 0.0041,
+                "mape_pct": 0.9887
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0066,
+                "mae": 0.0062,
+                "mape_pct": 3.0137
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.95,
+              "cpu_2.0vCPU": 2.6
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.002,
+              "mae": 0.0017,
+              "mape_pct": 1.8841,
+              "r2_score": -0.618,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0012,
+                "mae": 0.001,
+                "mape_pct": 1.1496
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0025,
+                "mae": 0.0023,
+                "mape_pct": 2.6187
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.15,
+              "cpu_2.0vCPU": 2.35
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 0.0091,
+              "mae": 0.0073,
+              "mape_pct": 4.78,
+              "r2_score": -0.494,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0032,
+                "mae": 0.003,
+                "mape_pct": 2.005
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0125,
+                "mae": 0.0117,
+                "mape_pct": 7.5551
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.78,
+              "cpu_2.0vCPU": 6.48
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 0.0183,
+              "mae": 0.0145,
+              "mape_pct": 6.1856,
+              "r2_score": -1.2351,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0058,
+                "mae": 0.0053,
+                "mape_pct": 2.1972
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0253,
+                "mae": 0.0237,
+                "mape_pct": 10.1741
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.96,
+              "cpu_2.0vCPU": 8.62
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 0.0579,
+              "mae": 0.0483,
+              "mape_pct": 0.0484,
+              "r2_score": 0.5121,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0778,
+                "mae": 0.0733,
+                "mape_pct": 0.0734
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0255,
+                "mae": 0.0233,
+                "mape_pct": 0.0233
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.06,
+              "cpu_2.0vCPU": 0.02
+            }
+          }
+        }
+      },
+      "piecewise": {
+        "model_id": "pg16_candidate_piecewise_read_only_select",
+        "model_family": "EmpiricalPiecewiseModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_piecewise_read_only_select.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 872.2359,
+              "mae": 663.7787,
+              "mape_pct": 1.9989,
+              "r2_score": 0.9911,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 224.3043,
+                "mae": 189.7396,
+                "mape_pct": 0.9931
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1212.9627,
+                "mae": 1137.8178,
+                "mape_pct": 3.0047
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.96,
+              "cpu_2.0vCPU": 2.63
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.0058,
+              "mae": 0.0052,
+              "mape_pct": 2.0012,
+              "r2_score": 0.9968,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0048,
+                "mae": 0.0041,
+                "mape_pct": 0.9887
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0066,
+                "mae": 0.0062,
+                "mape_pct": 3.0137
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.95,
+              "cpu_2.0vCPU": 2.6
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.002,
+              "mae": 0.0017,
+              "mape_pct": 1.8841,
+              "r2_score": -0.618,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0012,
+                "mae": 0.001,
+                "mape_pct": 1.1496
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0025,
+                "mae": 0.0023,
+                "mape_pct": 2.6187
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.15,
+              "cpu_2.0vCPU": 2.35
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 0.0091,
+              "mae": 0.0073,
+              "mape_pct": 4.78,
+              "r2_score": -0.494,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0032,
+                "mae": 0.003,
+                "mape_pct": 2.005
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0125,
+                "mae": 0.0117,
+                "mape_pct": 7.5551
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.78,
+              "cpu_2.0vCPU": 6.48
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 0.0183,
+              "mae": 0.0145,
+              "mape_pct": 6.1856,
+              "r2_score": -1.2351,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0058,
+                "mae": 0.0053,
+                "mape_pct": 2.1972
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0253,
+                "mae": 0.0237,
+                "mape_pct": 10.1741
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.96,
+              "cpu_2.0vCPU": 8.62
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 0.0579,
+              "mae": 0.0483,
+              "mape_pct": 0.0484,
+              "r2_score": 0.5121,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0778,
+                "mae": 0.0733,
+                "mape_pct": 0.0734
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0255,
+                "mae": 0.0233,
+                "mape_pct": 0.0233
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.06,
+              "cpu_2.0vCPU": 0.02
+            }
+          }
+        }
+      },
+      "mechanistic": {
+        "model_id": "pg16_candidate_mechanistic_read_only_select",
+        "model_family": "EmpiricalMechanisticModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_mechanistic_read_only_select.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 997.5724,
+              "mae": 725.1006,
+              "mape_pct": 2.2575,
+              "r2_score": 0.9884,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 293.7942,
+                "mae": 238.8375,
+                "mape_pct": 1.256
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1379.8501,
+                "mae": 1211.3638,
+                "mape_pct": 3.259
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.96,
+              "cpu_2.0vCPU": 2.63
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.0051,
+              "mae": 0.0047,
+              "mape_pct": 1.76,
+              "r2_score": 0.9976,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0048,
+                "mae": 0.0041,
+                "mape_pct": 0.9887
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0054,
+                "mae": 0.0053,
+                "mape_pct": 2.5312
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.95,
+              "cpu_2.0vCPU": 2.6
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.0018,
+              "mae": 0.0012,
+              "mape_pct": 1.3052,
+              "r2_score": -0.2809,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0008,
+                "mae": 0.0007,
+                "mape_pct": 0.7664
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0024,
+                "mae": 0.0017,
+                "mape_pct": 1.844
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.15,
+              "cpu_2.0vCPU": 2.35
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 0.0082,
+              "mae": 0.0063,
+              "mape_pct": 3.991,
+              "r2_score": -0.1988,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0024,
+                "mae": 0.0023,
+                "mape_pct": 1.5693
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0113,
+                "mae": 0.0103,
+                "mape_pct": 6.4127
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.78,
+              "cpu_2.0vCPU": 6.48
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 0.0123,
+              "mae": 0.0093,
+              "mape_pct": 3.9853,
+              "r2_score": -0.003,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.0042,
+                "mae": 0.003,
+                "mape_pct": 1.2248
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0169,
+                "mae": 0.0157,
+                "mape_pct": 6.7458
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 1.96,
+              "cpu_2.0vCPU": 8.62
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 0.1223,
+              "mae": 0.09,
+              "mape_pct": 0.0901,
+              "r2_score": -1.1796,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.1714,
+                "mae": 0.1633,
+                "mape_pct": 0.1636
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0238,
+                "mae": 0.0167,
+                "mape_pct": 0.0167
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 0.06,
+              "cpu_2.0vCPU": 0.02
+            }
+          }
+        }
+      }
+    },
+    "balanced_oltp_tpcb": {
+      "lookup": {
+        "model_id": "pg16_candidate_lookup_balanced_oltp_tpcb",
+        "model_family": "EmpiricalLookupModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_lookup_balanced_oltp_tpcb.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 106.1736,
+              "mae": 79.6623,
+              "mape_pct": 5.6406,
+              "r2_score": 0.255,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 147.1728,
+                "mae": 132.1662,
+                "mape_pct": 9.5995
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 29.763,
+                "mae": 27.1585,
+                "mape_pct": 1.6817
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.53,
+              "cpu_2.0vCPU": 1.51
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.4399,
+              "mae": 0.3211,
+              "mape_pct": 5.6826,
+              "r2_score": 0.1281,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.6154,
+                "mae": 0.559,
+                "mape_pct": 9.6829
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0913,
+                "mae": 0.0832,
+                "mape_pct": 1.6823
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.81,
+              "cpu_2.0vCPU": 1.5
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.0992,
+              "mae": 0.0746,
+              "mape_pct": 1.9205,
+              "r2_score": -0.5939,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.1364,
+                "mae": 0.1183,
+                "mape_pct": 3.03
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0328,
+                "mae": 0.0308,
+                "mape_pct": 0.811
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 2.86,
+              "cpu_2.0vCPU": 0.7
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 1.962,
+              "mae": 1.3864,
+              "mape_pct": 9.273,
+              "r2_score": 0.0459,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 2.7678,
+                "mae": 2.5923,
+                "mape_pct": 17.022
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.1966,
+                "mae": 0.1806,
+                "mape_pct": 1.524
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 15.21,
+              "cpu_2.0vCPU": 1.36
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 4.7777,
+              "mae": 3.5437,
+              "mape_pct": 13.7962,
+              "r2_score": 0.0215,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 6.608,
+                "mae": 5.7628,
+                "mape_pct": 20.99
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1.4093,
+                "mae": 1.3245,
+                "mape_pct": 6.6025
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 19.48,
+              "cpu_2.0vCPU": 5.63
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 3.4489,
+              "mae": 2.42,
+              "mape_pct": 2.9479,
+              "r2_score": 0.965,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 4.8614,
+                "mae": 4.4667,
+                "mape_pct": 5.165
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.3962,
+                "mae": 0.3733,
+                "mape_pct": 0.7308
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 4.53,
+              "cpu_2.0vCPU": 0.63
+            }
+          }
+        }
+      },
+      "linear": {
+        "model_id": "pg16_candidate_linear_balanced_oltp_tpcb",
+        "model_family": "EmpiricalLinearRegressionModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_linear_balanced_oltp_tpcb.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 106.1736,
+              "mae": 79.6623,
+              "mape_pct": 5.6406,
+              "r2_score": 0.255,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 147.1728,
+                "mae": 132.1662,
+                "mape_pct": 9.5995
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 29.763,
+                "mae": 27.1585,
+                "mape_pct": 1.6817
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.53,
+              "cpu_2.0vCPU": 1.51
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.4399,
+              "mae": 0.3211,
+              "mape_pct": 5.6826,
+              "r2_score": 0.1281,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.6154,
+                "mae": 0.559,
+                "mape_pct": 9.6829
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0913,
+                "mae": 0.0832,
+                "mape_pct": 1.6823
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.81,
+              "cpu_2.0vCPU": 1.5
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.0992,
+              "mae": 0.0746,
+              "mape_pct": 1.9209,
+              "r2_score": -0.594,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.1364,
+                "mae": 0.1183,
+                "mape_pct": 3.03
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0328,
+                "mae": 0.0309,
+                "mape_pct": 0.8118
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 2.86,
+              "cpu_2.0vCPU": 0.7
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 1.9621,
+              "mae": 1.3865,
+              "mape_pct": 9.2731,
+              "r2_score": 0.0459,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 2.7678,
+                "mae": 2.5923,
+                "mape_pct": 17.022
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.1967,
+                "mae": 0.1806,
+                "mape_pct": 1.5243
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 15.21,
+              "cpu_2.0vCPU": 1.36
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 4.7777,
+              "mae": 3.5437,
+              "mape_pct": 13.7962,
+              "r2_score": 0.0215,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 6.608,
+                "mae": 5.7628,
+                "mape_pct": 20.99
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1.4093,
+                "mae": 1.3245,
+                "mape_pct": 6.6025
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 19.48,
+              "cpu_2.0vCPU": 5.63
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 3.4489,
+              "mae": 2.42,
+              "mape_pct": 2.9479,
+              "r2_score": 0.965,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 4.8614,
+                "mae": 4.4667,
+                "mape_pct": 5.165
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.3962,
+                "mae": 0.3733,
+                "mape_pct": 0.7308
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 4.53,
+              "cpu_2.0vCPU": 0.63
+            }
+          }
+        }
+      },
+      "piecewise": {
+        "model_id": "pg16_candidate_piecewise_balanced_oltp_tpcb",
+        "model_family": "EmpiricalPiecewiseModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_piecewise_balanced_oltp_tpcb.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 106.1736,
+              "mae": 79.6623,
+              "mape_pct": 5.6406,
+              "r2_score": 0.255,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 147.1728,
+                "mae": 132.1662,
+                "mape_pct": 9.5995
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 29.763,
+                "mae": 27.1585,
+                "mape_pct": 1.6817
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.53,
+              "cpu_2.0vCPU": 1.51
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.4399,
+              "mae": 0.3211,
+              "mape_pct": 5.6826,
+              "r2_score": 0.1281,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.6154,
+                "mae": 0.559,
+                "mape_pct": 9.6829
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0913,
+                "mae": 0.0832,
+                "mape_pct": 1.6823
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.81,
+              "cpu_2.0vCPU": 1.5
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.0992,
+              "mae": 0.0746,
+              "mape_pct": 1.9205,
+              "r2_score": -0.5939,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.1364,
+                "mae": 0.1183,
+                "mape_pct": 3.03
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0328,
+                "mae": 0.0308,
+                "mape_pct": 0.811
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 2.86,
+              "cpu_2.0vCPU": 0.7
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 1.962,
+              "mae": 1.3864,
+              "mape_pct": 9.273,
+              "r2_score": 0.0459,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 2.7678,
+                "mae": 2.5923,
+                "mape_pct": 17.022
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.1966,
+                "mae": 0.1806,
+                "mape_pct": 1.524
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 15.21,
+              "cpu_2.0vCPU": 1.36
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 4.7777,
+              "mae": 3.5437,
+              "mape_pct": 13.7962,
+              "r2_score": 0.0215,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 6.608,
+                "mae": 5.7628,
+                "mape_pct": 20.99
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1.4093,
+                "mae": 1.3245,
+                "mape_pct": 6.6025
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 19.48,
+              "cpu_2.0vCPU": 5.63
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 3.4489,
+              "mae": 2.42,
+              "mape_pct": 2.9479,
+              "r2_score": 0.965,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 4.8614,
+                "mae": 4.4667,
+                "mape_pct": 5.165
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.3962,
+                "mae": 0.3733,
+                "mape_pct": 0.7308
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 4.53,
+              "cpu_2.0vCPU": 0.63
+            }
+          }
+        }
+      },
+      "mechanistic": {
+        "model_id": "pg16_candidate_mechanistic_balanced_oltp_tpcb",
+        "model_family": "EmpiricalMechanisticModel",
+        "serialized_path": "artifacts/phase_4f5/candidates/pg16_candidate_mechanistic_balanced_oltp_tpcb.json",
+        "metrics": {
+          "throughput_tps": {
+            "overall_metrics": {
+              "rmse": 107.837,
+              "mae": 81.9802,
+              "mape_pct": 5.7996,
+              "r2_score": 0.2315,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 149.5766,
+                "mae": 136.339,
+                "mape_pct": 9.8876
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 29.7402,
+                "mae": 27.6214,
+                "mape_pct": 1.7117
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.53,
+              "cpu_2.0vCPU": 1.51
+            }
+          },
+          "latency_mean_ms": {
+            "overall_metrics": {
+              "rmse": 0.4399,
+              "mae": 0.3211,
+              "mape_pct": 5.6826,
+              "r2_score": 0.1281,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.6154,
+                "mae": 0.559,
+                "mape_pct": 9.6829
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0913,
+                "mae": 0.0832,
+                "mape_pct": 1.6823
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 8.81,
+              "cpu_2.0vCPU": 1.5
+            }
+          },
+          "p50_ms": {
+            "overall_metrics": {
+              "rmse": 0.0786,
+              "mae": 0.0618,
+              "mape_pct": 1.5853,
+              "r2_score": -0.0008,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 0.1013,
+                "mae": 0.0833,
+                "mape_pct": 2.113
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.0457,
+                "mae": 0.0402,
+                "mape_pct": 1.0576
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 2.86,
+              "cpu_2.0vCPU": 0.7
+            }
+          },
+          "p95_ms": {
+            "overall_metrics": {
+              "rmse": 2.009,
+              "mae": 1.5244,
+              "mape_pct": 10.9098,
+              "r2_score": -0.0003,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 2.4167,
+                "mae": 1.5606,
+                "mape_pct": 9.2078
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 1.4938,
+                "mae": 1.4881,
+                "mape_pct": 12.6118
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 15.21,
+              "cpu_2.0vCPU": 1.36
+            }
+          },
+          "p99_ms": {
+            "overall_metrics": {
+              "rmse": 4.8302,
+              "mae": 4.0422,
+              "mape_pct": 16.2433,
+              "r2_score": -0.0002,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 5.751,
+                "mae": 4.5199,
+                "mape_pct": 14.7871
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 3.6862,
+                "mae": 3.5645,
+                "mape_pct": 17.6996
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 19.48,
+              "cpu_2.0vCPU": 5.63
+            }
+          },
+          "cpu_utilization_pct": {
+            "overall_metrics": {
+              "rmse": 9.0874,
+              "mae": 6.3417,
+              "mape_pct": 7.424,
+              "r2_score": 0.7568,
+              "sample_size": 6,
+              "per_condition_errors": {},
+              "replication_variability_cv": {},
+              "notes": []
+            },
+            "per_condition_errors": {
+              "cpu_1.0vCPU": {
+                "rmse": 12.8488,
+                "mae": 12.4333,
+                "mape_pct": 14.3587
+              },
+              "cpu_2.0vCPU": {
+                "rmse": 0.2641,
+                "mae": 0.25,
+                "mape_pct": 0.4894
+              }
+            },
+            "ground_truth_replication_cv_pct": {
+              "cpu_1.0vCPU": 4.53,
+              "cpu_2.0vCPU": 0.63
+            }
+          }
+        }
+      }
+    }
+  }
+}

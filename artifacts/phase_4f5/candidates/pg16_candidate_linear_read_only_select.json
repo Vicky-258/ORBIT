@@ -1,0 +1,110 @@
+{
+  "model_type": "EmpiricalLinearRegressionModel",
+  "model_id": "pg16_candidate_linear_read_only_select",
+  "workload_profile": "read_only_select",
+  "version": "1.0.0-linear",
+  "min_cpu_quota": 1.0,
+  "max_cpu_quota": 2.0,
+  "supported_concurrency": 8,
+  "supported_scale_factor": 2,
+  "supported_memory_mb": 1024.0,
+  "equations": {
+    "throughput_tps": {
+      "slope": 18491.621342000002,
+      "intercept": 628.4108703333259,
+      "residual_std": 712.1776383579751,
+      "r2_training": 0.9960601383154057
+    },
+    "latency_mean_ms": {
+      "slope": -0.20578924804714163,
+      "intercept": 0.6201054245201458,
+      "residual_std": 0.0047475170847835636,
+      "r2_training": 0.9985827694274982
+    },
+    "p50_ms": {
+      "slope": 0.001666666666666668,
+      "intercept": 0.08533333333333332,
+      "residual_std": 0.0016329931618554536,
+      "r2_training": 0.2808988764044944
+    },
+    "p90_ms": {
+      "slope": 0.004999999999999995,
+      "intercept": 0.127,
+      "residual_std": 0.00380788655293195,
+      "r2_training": 0.39267015706806285
+    },
+    "p95_ms": {
+      "slope": 0.008666666666666675,
+      "intercept": 0.14033333333333334,
+      "residual_std": 0.0074610097618664694,
+      "r2_training": 0.33598409542743546
+    },
+    "p99_ms": {
+      "slope": -0.0019999999999999927,
+      "intercept": 0.24366666666666664,
+      "residual_std": 0.014977761292440649,
+      "r2_training": 0.006642066420664339
+    },
+    "p999_ms": {
+      "slope": -24.795787999999863,
+      "intercept": 101.51588466666654,
+      "residual_std": 0.21326093911877708,
+      "r2_training": 0.9998027804888094
+    },
+    "max_ms": {
+      "slope": -21.941999999999997,
+      "intercept": 102.16866666666667,
+      "residual_std": 0.7524950719661425,
+      "r2_training": 0.9968734623281048
+    },
+    "cpu_utilization_pct": {
+      "slope": 0.14666666666666592,
+      "intercept": 99.69000000000001,
+      "residual_std": 0.047258156262526455,
+      "r2_training": 0.7831715210355943
+    },
+    "throttling_frequency_pct": {
+      "slope": 0.0,
+      "intercept": 100.0,
+      "residual_std": 0.0,
+      "r2_training": 1.0
+    },
+    "throttled_seconds": {
+      "slope": -30.50666666666666,
+      "intercept": 124.75599999999999,
+      "residual_std": 1.1717488354307577,
+      "r2_training": 0.9960812905632876
+    },
+    "wal_bytes": {
+      "slope": -35.0,
+      "intercept": 2344.0,
+      "residual_std": 21.435951110226018,
+      "r2_training": 0.4999319820432594
+    },
+    "wal_sync_time_ms": {
+      "slope": -44.86666666666665,
+      "intercept": 115.71666666666667,
+      "residual_std": 59.75500620589598,
+      "r2_training": 0.17451722605919306
+    },
+    "observed_lock_waits": {
+      "slope": 0.0,
+      "intercept": 0.0,
+      "residual_std": 0.0,
+      "r2_training": 1.0
+    }
+  },
+  "x_mean": 1.5,
+  "ss_x": 1.5,
+  "n_samples": 6,
+  "provenance": {
+    "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+    "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+    "manifest_verified": true,
+    "reconciliation_status": "COMPLETE",
+    "total_trials_reconciled": 12,
+    "total_raw_transactions": 5376068,
+    "model_registry_intact": true,
+    "is_valid": true
+  }
+}

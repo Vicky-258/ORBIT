@@ -61,7 +61,7 @@ def make_valid_authorization(**kwargs) -> CampaignAuthorizationRecord:
         "execution_scope": "PHASE_4F4_12_TRIAL_EMPIRICAL_CAMPAIGN",
         "operator_identity": "lead_operator_test",
         "authorized_at_utc": "2026-11-02T10:00:00Z",
-        "expires_at_utc": "2026-11-10T10:00:00Z",
+        "expires_at_utc": "2027-11-10T10:00:00Z",
         "revoked": False,
         "consumed": False,
     }

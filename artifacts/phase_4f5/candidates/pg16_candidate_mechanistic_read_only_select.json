@@ -1,0 +1,25 @@
+{
+  "model_type": "EmpiricalMechanisticModel",
+  "model_id": "pg16_candidate_mechanistic_read_only_select",
+  "workload_profile": "read_only_select",
+  "version": "1.0.0-mechanistic",
+  "min_cpu_quota": 1.0,
+  "max_cpu_quota": 2.0,
+  "supported_concurrency": 8,
+  "supported_scale_factor": 2,
+  "supported_memory_mb": 1024.0,
+  "s_cpu_base_ms": 0.41431617647300417,
+  "s_wal_ms": 0.0,
+  "w_lock_ms": 0.0,
+  "residual_error_ms": 0.11279537011029594,
+  "provenance": {
+    "execution_id": "exec_p4f4_20261103_053428_525413_19491",
+    "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+    "manifest_verified": true,
+    "reconciliation_status": "COMPLETE",
+    "total_trials_reconciled": 12,
+    "total_raw_transactions": 5376068,
+    "model_registry_intact": true,
+    "is_valid": true
+  }
+}
