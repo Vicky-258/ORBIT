@@ -11,6 +11,13 @@
   "s_cpu_base_ms": 0.41431617647300417,
   "s_wal_ms": 0.0,
   "w_lock_ms": 0.0,
+  "s_fixed_ms": 0.0,
+  "identifiability": {
+    "s_cpu": "IDENTIFIABLE",
+    "s_fixed": "NOT_APPLICABLE",
+    "s_wal": "NOT_APPLICABLE",
+    "w_lock": "NOT_APPLICABLE"
+  },
   "residual_error_ms": 0.11279537011029594,
   "provenance": {
     "execution_id": "exec_p4f4_20261103_053428_525413_19491",

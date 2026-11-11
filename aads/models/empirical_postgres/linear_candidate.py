@@ -14,9 +14,11 @@ from aads.models.empirical_postgres.base import BaseEmpiricalPostgresModel
 from aads.models.empirical_postgres.schemas import (
     EmpiricalPostgresPrediction,
     EmpiricalPostgresQuery,
+    EvidenceStatus,
     MetricPrediction,
     ModelState,
     TrialObservation,
+    UncertaintyType,
     WorkloadProfile,
 )
 
@@ -87,8 +89,24 @@ class EmpiricalLinearRegressionModel(BaseEmpiricalPostgresModel):
         self.max_cpu_quota = float(np.max(x_vals))
         return self
 
-    def _predict_metric(self, key: str, cpu_quota: float, is_extrapolated: bool) -> MetricPrediction:
-        """Evaluates linear regression equation with prediction standard error."""
+    def _predict_metric(
+        self,
+        key: str,
+        cpu_quota: float,
+        evidence_status: EvidenceStatus,
+        is_extrapolated: bool,
+    ) -> MetricPrediction:
+        """Evaluates linear regression equation with prediction standard error and explicit uncertainty types."""
+        if evidence_status == EvidenceStatus.INSUFFICIENT_EVIDENCE:
+            return MetricPrediction(
+                point_estimate=None,
+                uncertainty_std=None,
+                uncertainty_type=UncertaintyType.UNAVAILABLE,
+                is_heuristic=False,
+                confidence_interval_95=None,
+                notes=["Prediction unavailable due to insufficient evidence."],
+            )
+
         eq = self.equations[key]
         slope = eq["slope"]
         intercept = eq["intercept"]
@@ -101,36 +119,120 @@ class EmpiricalLinearRegressionModel(BaseEmpiricalPostgresModel):
         leverage = (1.0 / self.n_samples) + (((cpu_quota - self.x_mean) ** 2) / max(0.001, self.ss_x))
         se_pred = max(0.001, s_e * math.sqrt(1.0 + leverage))
 
-        if is_extrapolated:
+        metric_notes: List[str] = []
+
+        if evidence_status == EvidenceStatus.OBSERVED:
+            ci_lower = max(0.0, point - 1.96 * se_pred)
+            ci_upper = point + 1.96 * se_pred
+            return MetricPrediction(
+                point_estimate=round(point, 4),
+                uncertainty_std=round(se_pred, 4),
+                uncertainty_type=UncertaintyType.PARAMETER_UNCERTAINTY,
+                is_heuristic=False,
+                confidence_interval_95=(round(ci_lower, 4), round(ci_upper, 4)),
+                heuristic_interval=None,
+                heuristic_multiplier=None,
+                notes=["Prediction standard error from OLS linear fit at measured anchor."],
+            )
+
+        elif evidence_status == EvidenceStatus.INTERPOLATED:
+            h_lower = max(0.0, point - 1.96 * se_pred)
+            h_upper = point + 1.96 * se_pred
+            metric_notes.append(
+                "Interpolated estimate between observed endpoints. Linear form assumption; not a calibrated statistical confidence interval."
+            )
+            return MetricPrediction(
+                point_estimate=round(point, 4),
+                uncertainty_std=round(se_pred, 4),
+                uncertainty_type=UncertaintyType.INTERPOLATION_HEURISTIC,
+                is_heuristic=True,
+                confidence_interval_95=None,
+                heuristic_interval=(round(h_lower, 4), round(h_upper, 4)),
+                heuristic_multiplier=1.0,
+                notes=metric_notes,
+            )
+
+        else:  # OUT_OF_RANGE
             distance = max(0.0, self.min_cpu_quota - cpu_quota, cpu_quota - self.max_cpu_quota)
             penalty_factor = 2.0 + (distance * 1.5)
-            se_pred *= penalty_factor
-
-        ci_lower = max(0.0, point - 1.96 * se_pred)
-        ci_upper = point + 1.96 * se_pred
-
-        return MetricPrediction(
-            point_estimate=round(point, 4),
-            uncertainty_std=round(se_pred, 4),
-            confidence_interval_95=(round(ci_lower, 4), round(ci_upper, 4)),
-        )
+            uncertainty = se_pred * penalty_factor
+            h_lower = max(0.0, point - 1.96 * uncertainty)
+            h_upper = point + 1.96 * uncertainty
+            metric_notes.append(
+                f"Extrapolated estimate outside measured support. Applied heuristic distance multiplier ({penalty_factor:.2f}x). Not a statistical confidence interval."
+            )
+            return MetricPrediction(
+                point_estimate=round(point, 4),
+                uncertainty_std=round(uncertainty, 4),
+                uncertainty_type=UncertaintyType.EXTRAPOLATION_HEURISTIC,
+                is_heuristic=True,
+                confidence_interval_95=None,
+                heuristic_interval=(round(h_lower, 4), round(h_upper, 4)),
+                heuristic_multiplier=round(penalty_factor, 4),
+                notes=metric_notes,
+            )
 
     def predict(self, query: EmpiricalPostgresQuery) -> EmpiricalPostgresPrediction:
         """Executes linear model prediction with boundary enforcement."""
         if not self.equations:
             raise RuntimeError("Model must be fitted before calling predict().")
 
-        state, is_extrapolated, notes = self.check_input_boundaries(query)
+        evidence_status, is_extrapolated, notes = self.check_input_boundaries(query)
 
-        tps = self._predict_metric("throughput_tps", query.cpu_quota_cores, is_extrapolated)
-        lat_mean = self._predict_metric("latency_mean_ms", query.cpu_quota_cores, is_extrapolated)
-        p50 = self._predict_metric("p50_ms", query.cpu_quota_cores, is_extrapolated)
-        p90 = self._predict_metric("p90_ms", query.cpu_quota_cores, is_extrapolated)
-        p95 = self._predict_metric("p95_ms", query.cpu_quota_cores, is_extrapolated)
-        p99 = self._predict_metric("p99_ms", query.cpu_quota_cores, is_extrapolated)
-        p999 = self._predict_metric("p999_ms", query.cpu_quota_cores, is_extrapolated)
-        max_lat = self._predict_metric("max_ms", query.cpu_quota_cores, is_extrapolated)
-        cpu_util = self._predict_metric("cpu_utilization_pct", query.cpu_quota_cores, is_extrapolated)
+        def _empty_metric() -> MetricPrediction:
+            return MetricPrediction(
+                point_estimate=None,
+                uncertainty_std=None,
+                uncertainty_type=UncertaintyType.UNAVAILABLE,
+                is_heuristic=False,
+                confidence_interval_95=None,
+                heuristic_interval=None,
+                notes=notes,
+            )
+
+        if evidence_status == EvidenceStatus.INSUFFICIENT_EVIDENCE:
+            return EmpiricalPostgresPrediction(
+                evidence_status=EvidenceStatus.INSUFFICIENT_EVIDENCE,
+                prediction_method="linear_regression",
+                measured_support=self.get_measured_support(),
+                requested_configuration=query.model_dump(),
+                uncertainty=None,
+                uncertainty_type=UncertaintyType.UNAVAILABLE,
+                limitations=notes,
+                identifiability_notes=["Parametric linear regression candidate model."],
+                provenance={
+                    **self.provenance,
+                    "model_type": "EmpiricalLinearRegressionModel",
+                    "n_samples": self.n_samples,
+                },
+                state=ModelState.INSUFFICIENT_EVIDENCE,
+                is_extrapolated=True,
+                uncertainty_notes=notes,
+                workload_profile=str(query.workload_profile.value if hasattr(query.workload_profile, "value") else query.workload_profile),
+                cpu_quota_cores=query.cpu_quota_cores if query.cpu_quota_cores is not None else 0.0,
+                concurrency=query.concurrency,
+                scale_factor=query.scale_factor,
+                memory_mb=query.memory_mb,
+                throughput_tps=_empty_metric(),
+                latency_mean_ms=_empty_metric(),
+                p50_ms=_empty_metric(),
+                p90_ms=_empty_metric(),
+                p95_ms=_empty_metric(),
+                p99_ms=_empty_metric(),
+                p999_ms=_empty_metric(),
+                max_ms=_empty_metric(),
+                cpu_utilization_pct=_empty_metric(),
+            )
+
+        tps = self._predict_metric("throughput_tps", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        lat_mean = self._predict_metric("latency_mean_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p50 = self._predict_metric("p50_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p90 = self._predict_metric("p90_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p95 = self._predict_metric("p95_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p99 = self._predict_metric("p99_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p999 = self._predict_metric("p999_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        max_lat = self._predict_metric("max_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        cpu_util = self._predict_metric("cpu_utilization_pct", query.cpu_quota_cores, evidence_status, is_extrapolated)
 
         throt_freq = None
         throt_sec = None
@@ -139,24 +241,48 @@ class EmpiricalLinearRegressionModel(BaseEmpiricalPostgresModel):
         locks = None
 
         if self.workload_profile == WorkloadProfile.READ_ONLY_SELECT:
-            throt_freq = self._predict_metric("throttling_frequency_pct", query.cpu_quota_cores, is_extrapolated)
-            throt_sec = self._predict_metric("throttled_seconds", query.cpu_quota_cores, is_extrapolated)
+            throt_freq = self._predict_metric("throttling_frequency_pct", query.cpu_quota_cores, evidence_status, is_extrapolated)
+            throt_sec = self._predict_metric("throttled_seconds", query.cpu_quota_cores, evidence_status, is_extrapolated)
         else:
-            wal_bytes = self._predict_metric("wal_bytes", query.cpu_quota_cores, is_extrapolated)
+            wal_bytes = self._predict_metric("wal_bytes", query.cpu_quota_cores, evidence_status, is_extrapolated)
             wal_sec = MetricPrediction(
-                point_estimate=round(wal_bytes.point_estimate / 30.0, 2),
-                uncertainty_std=round(wal_bytes.uncertainty_std / 30.0, 2),
+                point_estimate=round(wal_bytes.point_estimate / 30.0, 2) if wal_bytes.point_estimate is not None else None,
+                uncertainty_std=round(wal_bytes.uncertainty_std / 30.0, 2) if wal_bytes.uncertainty_std is not None else None,
+                uncertainty_type=wal_bytes.uncertainty_type,
+                is_heuristic=wal_bytes.is_heuristic,
                 confidence_interval_95=(
                     round(wal_bytes.confidence_interval_95[0] / 30.0, 2),
                     round(wal_bytes.confidence_interval_95[1] / 30.0, 2),
-                ),
+                ) if wal_bytes.confidence_interval_95 else None,
+                heuristic_interval=(
+                    round(wal_bytes.heuristic_interval[0] / 30.0, 2),
+                    round(wal_bytes.heuristic_interval[1] / 30.0, 2),
+                ) if wal_bytes.heuristic_interval else None,
+                heuristic_multiplier=wal_bytes.heuristic_multiplier,
+                notes=wal_bytes.notes,
             )
-            wal_sync = self._predict_metric("wal_sync_time_ms", query.cpu_quota_cores, is_extrapolated)
-            locks = self._predict_metric("observed_lock_waits", query.cpu_quota_cores, is_extrapolated)
+            wal_sync = self._predict_metric("wal_sync_time_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+            locks = self._predict_metric("observed_lock_waits", query.cpu_quota_cores, evidence_status, is_extrapolated)
+
+        legacy_state = ModelState(evidence_status.value)
 
         return EmpiricalPostgresPrediction(
-            state=state,
+            evidence_status=evidence_status,
+            prediction_method="linear_regression",
+            measured_support=self.get_measured_support(),
+            requested_configuration=query.model_dump(),
+            uncertainty=lat_mean.uncertainty_std,
+            uncertainty_type=lat_mean.uncertainty_type,
+            limitations=notes,
+            identifiability_notes=["Parametric linear OLS model connecting 1.0 and 2.0 vCPU condition means."],
+            provenance={
+                **self.provenance,
+                "model_type": "EmpiricalLinearRegressionModel",
+                "n_samples": self.n_samples,
+            },
+            state=legacy_state,
             is_extrapolated=is_extrapolated,
+            uncertainty_notes=notes,
             workload_profile=self.workload_profile.value,
             cpu_quota_cores=query.cpu_quota_cores,
             concurrency=query.concurrency,
@@ -176,12 +302,6 @@ class EmpiricalLinearRegressionModel(BaseEmpiricalPostgresModel):
             wal_bytes_per_sec=wal_sec,
             wal_sync_time_ms=wal_sync,
             observed_lock_waits=locks,
-            provenance={
-                **self.provenance,
-                "model_type": "EmpiricalLinearRegressionModel",
-                "n_samples": self.n_samples,
-            },
-            uncertainty_notes=notes,
         )
 
     def to_dict(self) -> Dict[str, Any]:

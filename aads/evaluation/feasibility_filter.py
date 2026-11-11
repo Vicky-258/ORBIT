@@ -98,6 +98,31 @@ class FeasibilityFilter:
             )
         )
 
+        # 4. Check Evidence Integrity (Phase 4F.5.1 Scientific Contract)
+        insufficient_evidence_warns = [w for w in sim_result.warnings if "INSUFFICIENT_EVIDENCE" in w.upper()]
+        out_of_range_warns = [w for w in sim_result.warnings if "OUT_OF_RANGE" in w.upper()]
+
+        if insufficient_evidence_warns:
+            checks.append(
+                FeasibilityCheck(
+                    criterion="evidence_integrity",
+                    target_value=1.0,
+                    predicted_value=0.0,
+                    status=FeasibilityStatus.UNCERTAIN,
+                    explanation=f"Insufficient empirical evidence detected: {'; '.join(insufficient_evidence_warns)}. Hard SLA constraints cannot be validated.",
+                )
+            )
+        elif out_of_range_warns:
+            checks.append(
+                FeasibilityCheck(
+                    criterion="evidence_integrity",
+                    target_value=1.0,
+                    predicted_value=0.5,
+                    status=FeasibilityStatus.UNCERTAIN,
+                    explanation=f"Operating outside empirically validated boundaries: {'; '.join(out_of_range_warns)}. Evaluation relies on unvalidated extrapolation.",
+                )
+            )
+
         # Determine overall candidate feasibility
         statuses = [c.status for c in checks]
         if FeasibilityStatus.INFEASIBLE in statuses:

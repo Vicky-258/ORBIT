@@ -1,20 +1,53 @@
 """
-Schemas and Data Structures for Empirical PostgreSQL Performance Models (Phase 4F.5).
+Schemas and Data Structures for Empirical PostgreSQL Performance Models (Phase 4F.5 / 4F.5.1).
 
-Enforces strict epistemological boundaries, explicit model states, out-of-range detection,
-and comprehensive prediction uncertainty reporting.
+Enforces strict epistemological boundaries, explicit prediction contracts:
+- OBSERVED vs INTERPOLATED vs OUT_OF_RANGE vs INSUFFICIENT_EVIDENCE
+- Categorized uncertainty types (replication, interpolation heuristic, extrapolation heuristic, unavailable)
+- Explicit heuristic multipliers that are never labelled as statistical confidence intervals
+- Parameter identifiability declarations
 """
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 from pydantic import BaseModel, Field
 
 
+class EvidenceStatus(str, Enum):
+    """
+    Epistemological status of a prediction based on empirical support.
+    Must never classify interpolated values (e.g. 1.5 vCPU) as OBSERVED or IN_RANGE.
+    """
+    OBSERVED = "OBSERVED"                 # Exact match to empirical measurement support
+    INTERPOLATED = "INTERPOLATED"         # Between measured support points; unmeasured estimate
+    OUT_OF_RANGE = "OUT_OF_RANGE"         # Outside measured support or violating environmental/workload dimensions
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE" # Unsupported workload, missing dimensions, unidentifiable parameters
+
+
+class UncertaintyType(str, Enum):
+    """
+    Epistemological classification of uncertainty.
+    Heuristic penalties must never be labelled as statistical confidence intervals.
+    """
+    REPLICATION_SAMPLE_STD = "REPLICATION_SAMPLE_STD"       # Measured variation across repeated trials (ddof=1)
+    MEASUREMENT_LIMITATION = "MEASUREMENT_LIMITATION"       # Sensor or instrumentation limitations
+    INTERPOLATION_HEURISTIC = "INTERPOLATION_HEURISTIC"     # Uncertainty between support points; heuristic assumption
+    EXTRAPOLATION_HEURISTIC = "EXTRAPOLATION_HEURISTIC"     # Uncertainty outside support points; heuristic distance multiplier
+    MODEL_FORM_UNCERTAINTY = "MODEL_FORM_UNCERTAINTY"       # Uncertainty from choice of functional form
+    PARAMETER_UNCERTAINTY = "PARAMETER_UNCERTAINTY"         # Uncertainty in fitted model parameters
+    UNAVAILABLE = "UNAVAILABLE"                             # No defensible uncertainty estimate exists (never reported as 0.0)
+
+
 class ModelState(str, Enum):
-    """Lifecycle and boundary state for candidate performance models."""
-    EXPERIMENTAL = "EXPERIMENTAL"
+    """
+    Lifecycle and boundary state for candidate performance models.
+    Preserved for backward compatibility while mapping to EvidenceStatus.
+    """
+    OBSERVED = "OBSERVED"
+    INTERPOLATED = "INTERPOLATED"
     IN_RANGE = "IN_RANGE"
     OUT_OF_RANGE = "OUT_OF_RANGE"
     INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
+    EXPERIMENTAL = "EXPERIMENTAL"
     VALIDATION_PENDING = "VALIDATION_PENDING"
 
 
@@ -34,18 +67,60 @@ class EmpiricalPostgresQuery(BaseModel):
 
 
 class MetricPrediction(BaseModel):
-    """A single predicted metric with explicit uncertainty bounds."""
-    point_estimate: float
-    uncertainty_std: float = Field(description="Standard error / standard deviation of prediction")
-    confidence_interval_95: Tuple[float, float] = Field(
-        description="Approximate 95% confidence interval [lower, upper]"
+    """
+    A single predicted metric with explicit uncertainty bounds and epistemological categorization.
+    Heuristic intervals are strictly distinguished from calibrated statistical confidence intervals.
+    """
+    point_estimate: Optional[float] = None
+    uncertainty_std: Optional[float] = Field(
+        default=None,
+        description="Standard error or uncertainty estimate; None if UNAVAILABLE (never silently set to 0.0)"
     )
+    uncertainty_type: UncertaintyType = Field(
+        default=UncertaintyType.REPLICATION_SAMPLE_STD,
+        description="Epistemological classification of the uncertainty value"
+    )
+    is_heuristic: bool = Field(
+        default=False,
+        description="True if uncertainty is based on engineering heuristics rather than formal statistical coverage"
+    )
+    confidence_interval_95: Optional[Tuple[float, float]] = Field(
+        default=None,
+        description="Approximate 95% confidence interval [lower, upper]; None if heuristic or unavailable"
+    )
+    heuristic_interval: Optional[Tuple[float, float]] = Field(
+        default=None,
+        description="Heuristic uncertainty bounds [lower, upper]; explicitly distinct from statistical confidence interval"
+    )
+    heuristic_multiplier: Optional[float] = Field(
+        default=None,
+        description="Penalty multiplier applied (e.g. 2.0 + 1.5 * distance); None if no heuristic multiplier"
+    )
+    notes: List[str] = Field(default_factory=list)
 
 
 class EmpiricalPostgresPrediction(BaseModel):
-    """Structured multi-metric response from an empirical PostgreSQL component model."""
+    """
+    Structured multi-metric response from an empirical PostgreSQL component model.
+    Enforces Phase 4F.5.1 prediction evidence contract.
+    """
+    # Prediction evidence contract fields
+    evidence_status: EvidenceStatus
+    prediction_method: str
+    measured_support: Dict[str, Any] = Field(default_factory=dict)
+    requested_configuration: Dict[str, Any] = Field(default_factory=dict)
+    uncertainty: Optional[float] = None
+    uncertainty_type: UncertaintyType = UncertaintyType.REPLICATION_SAMPLE_STD
+    limitations: List[str] = Field(default_factory=list)
+    identifiability_notes: List[str] = Field(default_factory=list)
+    provenance: Dict[str, Any] = Field(default_factory=dict)
+
+    # Backward compatibility fields
     state: ModelState
     is_extrapolated: bool
+    uncertainty_notes: List[str] = Field(default_factory=list)
+
+    # Configuration echo
     workload_profile: str
     cpu_quota_cores: float
     concurrency: int
@@ -69,10 +144,6 @@ class EmpiricalPostgresPrediction(BaseModel):
     wal_bytes_per_sec: Optional[MetricPrediction] = None
     wal_sync_time_ms: Optional[MetricPrediction] = None
     observed_lock_waits: Optional[MetricPrediction] = None
-
-    # Provenance and scientific integrity controls
-    provenance: Dict[str, Any] = Field(default_factory=dict)
-    uncertainty_notes: List[str] = Field(default_factory=list)
 
 
 class TrialObservation(BaseModel):
@@ -108,3 +179,4 @@ class EvaluationMetrics(BaseModel):
     per_condition_errors: Dict[str, float] = Field(default_factory=dict)
     replication_variability_cv: Dict[str, float] = Field(default_factory=dict)
     notes: List[str] = Field(default_factory=list)
+

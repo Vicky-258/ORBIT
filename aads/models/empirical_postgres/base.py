@@ -15,18 +15,35 @@ from aads.modeling.model_interface import ComponentPerformanceModel
 from aads.models.empirical_postgres.schemas import (
     EmpiricalPostgresPrediction,
     EmpiricalPostgresQuery,
+    EvidenceStatus,
     MetricPrediction,
     ModelState,
     TrialObservation,
+    UncertaintyType,
     WorkloadProfile,
 )
 
 logger = logging.getLogger(__name__)
 
 
+class ServiceTimeResult(tuple):
+    """
+    Backward-compatible 3-tuple (service_time_ms, uncertainty_std_ms, is_extrapolated)
+    extended with explicit evidence_status attribute for Phase 4F.5.1 prediction contract.
+    """
+    def __new__(cls, service_time_ms: float, uncertainty_std_ms: float, is_extrapolated: bool, evidence_status: str = "OBSERVED"):
+        instance = super().__new__(cls, (service_time_ms, uncertainty_std_ms, is_extrapolated))
+        instance.service_time_ms = service_time_ms
+        instance.uncertainty_std_ms = uncertainty_std_ms
+        instance.is_extrapolated = is_extrapolated
+        instance.evidence_status = evidence_status
+        return instance
+
+
 class BaseEmpiricalPostgresModel(ComponentPerformanceModel):
     """
     Abstract base class for all empirical PostgreSQL candidate performance models.
+    Enforces Phase 4F.5.1 scientific prediction evidence contracts.
     """
 
     def __init__(
@@ -58,11 +75,31 @@ class BaseEmpiricalPostgresModel(ComponentPerformanceModel):
         """Computes full multi-metric performance prediction with uncertainty bounds."""
         pass
 
-    def check_input_boundaries(self, query: EmpiricalPostgresQuery) -> Tuple[ModelState, bool, List[str]]:
+    def get_measured_support(self) -> Dict[str, Any]:
+        """Returns the exact empirical support envelope for this model."""
+        return {
+            "workload_profile": self.workload_profile.value if hasattr(self.workload_profile, "value") else str(self.workload_profile),
+            "cpu_quotas": [self.min_cpu_quota, self.max_cpu_quota],
+            "concurrency": self.supported_concurrency,
+            "scale_factor": self.supported_scale_factor,
+            "memory_mb": self.supported_memory_mb,
+            "postgres_version": "16.15-alpine",
+            "image_digest": "sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685",
+            "replications_per_condition": 3,
+            "measurement_duration_seconds": 30.0,
+            "warmup_duration_seconds": 10.0,
+        }
+
+    def check_input_boundaries(self, query: EmpiricalPostgresQuery) -> Tuple[EvidenceStatus, bool, List[str]]:
         """
         Validates input configuration against empirical pilot boundaries.
+        Explicitly distinguishes:
+        - OBSERVED: Exact match to empirical support endpoints (1.0 or 2.0 vCPU).
+        - INTERPOLATED: Between support endpoints (e.g. 1.5 vCPU); NEVER OBSERVED or IN_RANGE.
+        - OUT_OF_RANGE: Beyond measured support or violating environmental dimensions.
+        - INSUFFICIENT_EVIDENCE: Missing required fields or unsupported workload.
         Returns:
-            (model_state, is_extrapolated, boundary_notes)
+            (evidence_status, is_extrapolated, boundary_notes)
         """
         notes: List[str] = []
         is_extrapolated = False
@@ -72,46 +109,64 @@ class BaseEmpiricalPostgresModel(ComponentPerformanceModel):
         actual_profile = query.workload_profile.value if isinstance(query.workload_profile, WorkloadProfile) else str(query.workload_profile)
         if actual_profile != expected_profile:
             notes.append(f"Workload profile '{actual_profile}' unsupported by model '{self.model_id}' (supports '{expected_profile}').")
-            return ModelState.INSUFFICIENT_EVIDENCE, True, notes
+            return EvidenceStatus.INSUFFICIENT_EVIDENCE, True, notes
 
-        # 2. CPU quota check
+        # 2. Required CPU dimension check
+        if query.cpu_quota_cores is None:
+            notes.append("Required dimension 'cpu_quota_cores' is missing.")
+            return EvidenceStatus.INSUFFICIENT_EVIDENCE, True, notes
+
+        # 3. CPU quota range check
         if query.cpu_quota_cores < self.min_cpu_quota or query.cpu_quota_cores > self.max_cpu_quota:
             notes.append(
                 f"CPU quota {query.cpu_quota_cores:.2f} is outside empirically validated range [{self.min_cpu_quota:.1f}, {self.max_cpu_quota:.1f}] vCPU."
             )
             is_extrapolated = True
 
-        # 3. Concurrency check
+        # 4. Concurrency check
         if query.concurrency != self.supported_concurrency:
             notes.append(
                 f"Concurrency {query.concurrency} deviates from benchmarked concurrency {self.supported_concurrency}."
             )
             is_extrapolated = True
 
-        # 4. Scale factor check
+        # 5. Scale factor check
         if query.scale_factor != self.supported_scale_factor:
             notes.append(
                 f"Scale factor SF{query.scale_factor} deviates from benchmarked scale SF{self.supported_scale_factor}."
             )
             is_extrapolated = True
 
-        # 5. Memory check
+        # 6. Memory check
         if abs(query.memory_mb - self.supported_memory_mb) > 1.0:
             notes.append(
                 f"Memory {query.memory_mb:.1f} MB deviates from benchmarked container memory {self.supported_memory_mb:.1f} MB."
             )
             is_extrapolated = True
 
-        state = ModelState.OUT_OF_RANGE if is_extrapolated else ModelState.IN_RANGE
-        return state, is_extrapolated, notes
+        if is_extrapolated:
+            return EvidenceStatus.OUT_OF_RANGE, True, notes
+
+        # Within envelope: check whether directly observed or interpolated
+        is_exact_anchor = (
+            abs(query.cpu_quota_cores - self.min_cpu_quota) < 1e-4 or
+            abs(query.cpu_quota_cores - self.max_cpu_quota) < 1e-4
+        )
+        if is_exact_anchor:
+            return EvidenceStatus.OBSERVED, False, notes
+
+        # Strictly interpolated between measured anchors
+        notes.append(
+            f"CPU quota {query.cpu_quota_cores:.2f} is interpolated between observed support endpoints "
+            f"[{self.min_cpu_quota:.1f}, {self.max_cpu_quota:.1f}] vCPU. This is an unmeasured interpolation estimate."
+        )
+        return EvidenceStatus.INTERPOLATED, False, notes
 
     # --------------------------------------------------------------------------
     # ComponentPerformanceModel Interface Implementation (Simulation Engine)
     # --------------------------------------------------------------------------
     def get_supported_ranges(self) -> Dict[str, Tuple[float, float]]:
         """Returns supported ranges compatible with AADS ComponentPerformanceModel."""
-        # For read_only_select, throughput range is approx [18,000, 39,000] RPS
-        # For balanced_oltp_tpcb, throughput range is approx [1,200, 1,700] RPS
         if self.workload_profile == WorkloadProfile.READ_ONLY_SELECT:
             rps_range = (18000.0, 39000.0)
         else:
@@ -132,10 +187,16 @@ class BaseEmpiricalPostgresModel(ComponentPerformanceModel):
         """
         Predicts discrete event service time in milliseconds.
         Compatible with SimPy discrete-event simulation engine.
+
+        IMPORTANT — Queueing Double-Counting Guard:
+        SimPy simulates queueing and contention delays explicitly via simpy.Resource.
+        To avoid double-counting queueing delays, this method outputs pure service demand
+        (p50 per transaction / concurrency), NOT end-to-end queued latency.
+        Analytical queries needing end-to-end percentiles should call model.predict() directly.
+
         Returns:
-            (service_time_ms, uncertainty_std_ms, is_extrapolated)
+            ServiceTimeResult(service_time_ms, uncertainty_std_ms, is_extrapolated, evidence_status)
         """
-        # Determine CPU quota equivalent or default to 2.0 vCPU
         cpu_quota = 2.0
         query = EmpiricalPostgresQuery(
             workload_profile=self.workload_profile,
@@ -146,9 +207,9 @@ class BaseEmpiricalPostgresModel(ComponentPerformanceModel):
         )
         pred = self.predict(query)
 
-        # In SimPyEngine, pure service time per discrete event corresponds to p50 / mean service demand
-        service_time_ms = pred.p50_ms.point_estimate
-        uncertainty_ms = pred.p50_ms.uncertainty_std
+        # In SimPyEngine, pure service time corresponds to p50 / mean service demand
+        service_time_ms = pred.p50_ms.point_estimate or 1.0
+        uncertainty_ms = pred.p50_ms.uncertainty_std or 0.1
 
         # Adjust for write ops if called in mixed context
         if op_type == "write" and self.workload_profile == WorkloadProfile.READ_ONLY_SELECT:
@@ -159,7 +220,12 @@ class BaseEmpiricalPostgresModel(ComponentPerformanceModel):
         if is_extrapolated:
             uncertainty_ms *= 2.0
 
-        return (round(service_time_ms, 3), round(uncertainty_ms, 3), is_extrapolated)
+        return ServiceTimeResult(
+            round(service_time_ms, 3),
+            round(uncertainty_ms, 3),
+            is_extrapolated,
+            pred.evidence_status.value,
+        )
 
     # --------------------------------------------------------------------------
     # Serialization and Persistence

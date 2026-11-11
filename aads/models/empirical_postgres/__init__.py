@@ -10,6 +10,8 @@ Provides bounded, reproducible performance models developed from Phase 4F.4.5 em
 - ReplicationAwareEvaluator: Leave-One-Replication-Out (LORO) validation framework
 """
 from aads.models.empirical_postgres.schemas import (
+    EvidenceStatus,
+    UncertaintyType,
     ModelState,
     WorkloadProfile,
     EmpiricalPostgresQuery,
@@ -27,6 +29,8 @@ from aads.models.empirical_postgres.mechanistic_candidate import EmpiricalMechan
 from aads.models.empirical_postgres.evaluator import ReplicationAwareEvaluator, calculate_metrics_safely
 
 __all__ = [
+    "EvidenceStatus",
+    "UncertaintyType",
     "ModelState",
     "WorkloadProfile",
     "EmpiricalPostgresQuery",

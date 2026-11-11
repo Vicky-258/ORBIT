@@ -3,6 +3,12 @@
   "manifest_sha256": "69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
   "total_observations": 12,
   "evaluation_strategy": "Leave-One-Replication-Out (LORO) Cross-Validation",
+  "evaluation_type": "REPLICATION_HOLDOUT",
+  "scope_limitations": [
+    "Evaluates repeatability across independent replications at observed configurations only.",
+    "Does NOT evaluate configuration holdout (unseen CPU quotas), workload holdout, or environment holdout.",
+    "Lookup, Linear, and Piecewise models produce mathematically indistinguishable predictions at observed support points (1.0 and 2.0 vCPU)."
+  ],
   "workloads": {
     "read_only_select": {
       "lookup": {

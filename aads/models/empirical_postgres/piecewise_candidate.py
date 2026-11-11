@@ -15,9 +15,11 @@ from aads.models.empirical_postgres.base import BaseEmpiricalPostgresModel
 from aads.models.empirical_postgres.schemas import (
     EmpiricalPostgresPrediction,
     EmpiricalPostgresQuery,
+    EvidenceStatus,
     MetricPrediction,
     ModelState,
     TrialObservation,
+    UncertaintyType,
     WorkloadProfile,
 )
 
@@ -81,8 +83,24 @@ class EmpiricalPiecewiseModel(BaseEmpiricalPostgresModel):
 
         return self
 
-    def _predict_piecewise(self, key: str, cpu_quota: float, is_extrapolated: bool) -> MetricPrediction:
-        """Evaluates piecewise linear curve with knee saturation."""
+    def _predict_piecewise(
+        self,
+        key: str,
+        cpu_quota: float,
+        evidence_status: EvidenceStatus,
+        is_extrapolated: bool,
+    ) -> MetricPrediction:
+        """Evaluates piecewise linear curve with knee saturation and explicit uncertainty types."""
+        if evidence_status == EvidenceStatus.INSUFFICIENT_EVIDENCE:
+            return MetricPrediction(
+                point_estimate=None,
+                uncertainty_std=None,
+                uncertainty_type=UncertaintyType.UNAVAILABLE,
+                is_heuristic=False,
+                confidence_interval_95=None,
+                notes=["Prediction unavailable due to insufficient evidence."],
+            )
+
         q1 = self.min_cpu_quota
         q2 = self.max_cpu_quota
         v1 = self.anchors[q1][key]["mean"]
@@ -90,14 +108,31 @@ class EmpiricalPiecewiseModel(BaseEmpiricalPostgresModel):
         s1 = self.anchors[q1][key]["sample_std"]
         s2 = self.anchors[q2][key]["sample_std"]
 
+        metric_notes: List[str] = []
+
+        if evidence_status == EvidenceStatus.OBSERVED:
+            q_matched = q1 if abs(cpu_quota - q1) < 1e-4 else q2
+            val = self.anchors[q_matched][key]["mean"]
+            s_obs = self.anchors[q_matched][key]["sample_std"]
+            ci_lower = max(0.0, val - 1.96 * s_obs)
+            ci_upper = val + 1.96 * s_obs
+            return MetricPrediction(
+                point_estimate=round(val, 4),
+                uncertainty_std=round(s_obs, 4),
+                uncertainty_type=UncertaintyType.REPLICATION_SAMPLE_STD,
+                is_heuristic=False,
+                confidence_interval_95=(round(ci_lower, 4), round(ci_upper, 4)),
+                heuristic_interval=None,
+                heuristic_multiplier=None,
+                notes=["Replication uncertainty measured from N=3 independent trials (ddof=1)."],
+            )
+
+        # Interpolated or Extrapolated
         if self.workload_profile == WorkloadProfile.READ_ONLY_SELECT:
-            # Linear scaling across [1.0, 2.0]
             alpha = (cpu_quota - q1) / max(0.001, (q2 - q1))
             val = (1.0 - alpha) * v1 + alpha * v2
             uncertainty = math.sqrt(((1.0 - alpha) ** 2) * (s1 ** 2) + (alpha ** 2) * (s2 ** 2))
         else:
-            # Balanced OLTP: Steep gain up to knee_cpu, then plateau
-            # Point at knee: 70% of the gain between 1.0 and 2.0 is captured by knee_cpu (1.25)
             knee = self.knee_cpu
             v_knee = v1 + 0.70 * (v2 - v1)
             s_knee = math.sqrt(0.5 * s1 ** 2 + 0.5 * s2 ** 2)
@@ -108,40 +143,108 @@ class EmpiricalPiecewiseModel(BaseEmpiricalPostgresModel):
                 uncertainty = math.sqrt(((1.0 - alpha) ** 2) * (s1 ** 2) + (alpha ** 2) * (s_knee ** 2))
             else:
                 alpha = (cpu_quota - knee) / max(0.001, (q2 - knee))
-                # Beyond knee, asymptotic saturation toward v2
                 val = (1.0 - alpha) * v_knee + alpha * v2
                 uncertainty = math.sqrt(((1.0 - alpha) ** 2) * (s_knee ** 2) + (alpha ** 2) * (s2 ** 2))
 
         val = max(0.0, val)
-        if is_extrapolated:
+
+        if evidence_status == EvidenceStatus.INTERPOLATED:
+            h_lower = max(0.0, val - 1.96 * uncertainty)
+            h_upper = val + 1.96 * uncertainty
+            metric_notes.append(
+                f"Interpolated estimate with hypothesized knee at {self.knee_cpu:.2f} vCPU. Not a calibrated statistical confidence interval."
+            )
+            return MetricPrediction(
+                point_estimate=round(val, 4),
+                uncertainty_std=round(uncertainty, 4),
+                uncertainty_type=UncertaintyType.INTERPOLATION_HEURISTIC,
+                is_heuristic=True,
+                confidence_interval_95=None,
+                heuristic_interval=(round(h_lower, 4), round(h_upper, 4)),
+                heuristic_multiplier=1.0,
+                notes=metric_notes,
+            )
+
+        else:  # OUT_OF_RANGE
             distance = max(0.0, q1 - cpu_quota, cpu_quota - q2)
-            uncertainty *= (2.0 + distance * 1.5)
-
-        ci_lower = max(0.0, val - 1.96 * uncertainty)
-        ci_upper = val + 1.96 * uncertainty
-
-        return MetricPrediction(
-            point_estimate=round(val, 4),
-            uncertainty_std=round(uncertainty, 4),
-            confidence_interval_95=(round(ci_lower, 4), round(ci_upper, 4)),
-        )
+            penalty_factor = 2.0 + distance * 1.5
+            uncertainty *= penalty_factor
+            h_lower = max(0.0, val - 1.96 * uncertainty)
+            h_upper = val + 1.96 * uncertainty
+            metric_notes.append(
+                f"Extrapolated estimate outside measured support. Applied heuristic distance multiplier ({penalty_factor:.2f}x). Not a statistical confidence interval."
+            )
+            return MetricPrediction(
+                point_estimate=round(val, 4),
+                uncertainty_std=round(uncertainty, 4),
+                uncertainty_type=UncertaintyType.EXTRAPOLATION_HEURISTIC,
+                is_heuristic=True,
+                confidence_interval_95=None,
+                heuristic_interval=(round(h_lower, 4), round(h_upper, 4)),
+                heuristic_multiplier=round(penalty_factor, 4),
+                notes=metric_notes,
+            )
 
     def predict(self, query: EmpiricalPostgresQuery) -> EmpiricalPostgresPrediction:
         """Executes piecewise model prediction."""
         if not self.anchors:
             raise RuntimeError("Model must be fitted before calling predict().")
 
-        state, is_extrapolated, notes = self.check_input_boundaries(query)
+        evidence_status, is_extrapolated, notes = self.check_input_boundaries(query)
 
-        tps = self._predict_piecewise("throughput_tps", query.cpu_quota_cores, is_extrapolated)
-        lat_mean = self._predict_piecewise("latency_mean_ms", query.cpu_quota_cores, is_extrapolated)
-        p50 = self._predict_piecewise("p50_ms", query.cpu_quota_cores, is_extrapolated)
-        p90 = self._predict_piecewise("p90_ms", query.cpu_quota_cores, is_extrapolated)
-        p95 = self._predict_piecewise("p95_ms", query.cpu_quota_cores, is_extrapolated)
-        p99 = self._predict_piecewise("p99_ms", query.cpu_quota_cores, is_extrapolated)
-        p999 = self._predict_piecewise("p999_ms", query.cpu_quota_cores, is_extrapolated)
-        max_lat = self._predict_piecewise("max_ms", query.cpu_quota_cores, is_extrapolated)
-        cpu_util = self._predict_piecewise("cpu_utilization_pct", query.cpu_quota_cores, is_extrapolated)
+        def _empty_metric() -> MetricPrediction:
+            return MetricPrediction(
+                point_estimate=None,
+                uncertainty_std=None,
+                uncertainty_type=UncertaintyType.UNAVAILABLE,
+                is_heuristic=False,
+                confidence_interval_95=None,
+                heuristic_interval=None,
+                notes=notes,
+            )
+
+        if evidence_status == EvidenceStatus.INSUFFICIENT_EVIDENCE:
+            return EmpiricalPostgresPrediction(
+                evidence_status=EvidenceStatus.INSUFFICIENT_EVIDENCE,
+                prediction_method="piecewise_linear",
+                measured_support=self.get_measured_support(),
+                requested_configuration=query.model_dump(),
+                uncertainty=None,
+                uncertainty_type=UncertaintyType.UNAVAILABLE,
+                limitations=notes,
+                identifiability_notes=["Piecewise saturation model; knee point is an unvalidated engineering hypothesis."],
+                provenance={
+                    **self.provenance,
+                    "model_type": "EmpiricalPiecewiseModel",
+                },
+                state=ModelState.INSUFFICIENT_EVIDENCE,
+                is_extrapolated=True,
+                uncertainty_notes=notes,
+                workload_profile=str(query.workload_profile.value if hasattr(query.workload_profile, "value") else query.workload_profile),
+                cpu_quota_cores=query.cpu_quota_cores if query.cpu_quota_cores is not None else 0.0,
+                concurrency=query.concurrency,
+                scale_factor=query.scale_factor,
+                memory_mb=query.memory_mb,
+                throughput_tps=_empty_metric(),
+                latency_mean_ms=_empty_metric(),
+                p50_ms=_empty_metric(),
+                p90_ms=_empty_metric(),
+                p95_ms=_empty_metric(),
+                p99_ms=_empty_metric(),
+                p999_ms=_empty_metric(),
+                max_ms=_empty_metric(),
+                cpu_utilization_pct=_empty_metric(),
+            )
+
+        tps = self._predict_piecewise("throughput_tps", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        lat_mean = self._predict_piecewise("latency_mean_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p50 = self._predict_piecewise("p50_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p90 = self._predict_piecewise("p90_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p95 = self._predict_piecewise("p95_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p99 = self._predict_piecewise("p99_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        p999 = self._predict_piecewise("p999_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        max_lat = self._predict_piecewise("max_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+        cpu_util = self._predict_piecewise("cpu_utilization_pct", query.cpu_quota_cores, evidence_status, is_extrapolated)
 
         throt_freq = None
         throt_sec = None
@@ -150,24 +253,51 @@ class EmpiricalPiecewiseModel(BaseEmpiricalPostgresModel):
         locks = None
 
         if self.workload_profile == WorkloadProfile.READ_ONLY_SELECT:
-            throt_freq = self._predict_piecewise("throttling_frequency_pct", query.cpu_quota_cores, is_extrapolated)
-            throt_sec = self._predict_piecewise("throttled_seconds", query.cpu_quota_cores, is_extrapolated)
+            throt_freq = self._predict_piecewise("throttling_frequency_pct", query.cpu_quota_cores, evidence_status, is_extrapolated)
+            throt_sec = self._predict_piecewise("throttled_seconds", query.cpu_quota_cores, evidence_status, is_extrapolated)
         else:
-            wal_bytes = self._predict_piecewise("wal_bytes", query.cpu_quota_cores, is_extrapolated)
+            wal_bytes = self._predict_piecewise("wal_bytes", query.cpu_quota_cores, evidence_status, is_extrapolated)
             wal_sec = MetricPrediction(
-                point_estimate=round(wal_bytes.point_estimate / 30.0, 2),
-                uncertainty_std=round(wal_bytes.uncertainty_std / 30.0, 2),
+                point_estimate=round(wal_bytes.point_estimate / 30.0, 2) if wal_bytes.point_estimate is not None else None,
+                uncertainty_std=round(wal_bytes.uncertainty_std / 30.0, 2) if wal_bytes.uncertainty_std is not None else None,
+                uncertainty_type=wal_bytes.uncertainty_type,
+                is_heuristic=wal_bytes.is_heuristic,
                 confidence_interval_95=(
                     round(wal_bytes.confidence_interval_95[0] / 30.0, 2),
                     round(wal_bytes.confidence_interval_95[1] / 30.0, 2),
-                ),
+                ) if wal_bytes.confidence_interval_95 else None,
+                heuristic_interval=(
+                    round(wal_bytes.heuristic_interval[0] / 30.0, 2),
+                    round(wal_bytes.heuristic_interval[1] / 30.0, 2),
+                ) if wal_bytes.heuristic_interval else None,
+                heuristic_multiplier=wal_bytes.heuristic_multiplier,
+                notes=wal_bytes.notes,
             )
-            wal_sync = self._predict_piecewise("wal_sync_time_ms", query.cpu_quota_cores, is_extrapolated)
-            locks = self._predict_piecewise("observed_lock_waits", query.cpu_quota_cores, is_extrapolated)
+            wal_sync = self._predict_piecewise("wal_sync_time_ms", query.cpu_quota_cores, evidence_status, is_extrapolated)
+            locks = self._predict_piecewise("observed_lock_waits", query.cpu_quota_cores, evidence_status, is_extrapolated)
+
+        legacy_state = ModelState(evidence_status.value)
 
         return EmpiricalPostgresPrediction(
-            state=state,
+            evidence_status=evidence_status,
+            prediction_method="piecewise_linear",
+            measured_support=self.get_measured_support(),
+            requested_configuration=query.model_dump(),
+            uncertainty=lat_mean.uncertainty_std,
+            uncertainty_type=lat_mean.uncertainty_type,
+            limitations=notes,
+            identifiability_notes=[
+                f"Piecewise model with knee at {self.knee_cpu:.2f} vCPU. Note: Knee location is an engineering hypothesis; "
+                "the 2-point empirical dataset cannot distinguish linear from piecewise transition shapes."
+            ],
+            provenance={
+                **self.provenance,
+                "model_type": "EmpiricalPiecewiseModel",
+                "knee_cpu": self.knee_cpu,
+            },
+            state=legacy_state,
             is_extrapolated=is_extrapolated,
+            uncertainty_notes=notes,
             workload_profile=self.workload_profile.value,
             cpu_quota_cores=query.cpu_quota_cores,
             concurrency=query.concurrency,
@@ -187,12 +317,6 @@ class EmpiricalPiecewiseModel(BaseEmpiricalPostgresModel):
             wal_bytes_per_sec=wal_sec,
             wal_sync_time_ms=wal_sync,
             observed_lock_waits=locks,
-            provenance={
-                **self.provenance,
-                "model_type": "EmpiricalPiecewiseModel",
-                "knee_cpu": self.knee_cpu,
-            },
-            uncertainty_notes=notes,
         )
 
     def to_dict(self) -> Dict[str, Any]:

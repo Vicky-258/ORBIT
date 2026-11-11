@@ -87,6 +87,12 @@ def main() -> int:
         "manifest_sha256": provenance.get("manifest_sha256"),
         "total_observations": len(observations),
         "evaluation_strategy": "Leave-One-Replication-Out (LORO) Cross-Validation",
+        "evaluation_type": "REPLICATION_HOLDOUT",
+        "scope_limitations": [
+            "Evaluates repeatability across independent replications at observed configurations only.",
+            "Does NOT evaluate configuration holdout (unseen CPU quotas), workload holdout, or environment holdout.",
+            "Lookup, Linear, and Piecewise models produce mathematically indistinguishable predictions at observed support points (1.0 and 2.0 vCPU).",
+        ],
         "workloads": {},
     }
 

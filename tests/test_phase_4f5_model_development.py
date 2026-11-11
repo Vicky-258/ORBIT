@@ -43,10 +43,12 @@ from aads.models.empirical_postgres import (
     EmpiricalPiecewiseModel,
     EmpiricalPostgresQuery,
     EvaluationMetrics,
+    EvidenceStatus,
     ModelState,
     ReconciledEvidenceLoader,
     ReplicationAwareEvaluator,
     TrialObservation,
+    UncertaintyType,
     WorkloadProfile,
     calculate_metrics_safely,
 )
@@ -110,7 +112,8 @@ def test_03_workload_separation():
     # Valid read-only query
     q_ro = EmpiricalPostgresQuery(workload_profile=WorkloadProfile.READ_ONLY_SELECT, cpu_quota_cores=1.0)
     p_ro = ro_model.predict(q_ro)
-    assert p_ro.state == ModelState.IN_RANGE
+    assert p_ro.evidence_status == EvidenceStatus.OBSERVED
+    assert p_ro.state in [ModelState.OBSERVED, ModelState.IN_RANGE]
 
     # Invalid query: pass balanced_oltp_tpcb to read_only model
     q_invalid = EmpiricalPostgresQuery(workload_profile=WorkloadProfile.BALANCED_OLTP_TPCB, cpu_quota_cores=1.0)
@@ -139,7 +142,8 @@ def test_04_candidate_model_training():
         q = EmpiricalPostgresQuery(workload_profile=WorkloadProfile.READ_ONLY_SELECT, cpu_quota_cores=2.0)
         pred = model.predict(q)
         assert pred.throughput_tps.point_estimate > 30000.0
-        assert pred.state == ModelState.IN_RANGE
+        assert pred.evidence_status == EvidenceStatus.OBSERVED
+        assert pred.state in [ModelState.OBSERVED, ModelState.IN_RANGE]
 
 
 # ==============================================================================
@@ -246,39 +250,67 @@ def test_10_mape_handling_near_zero():
 # 11. Prediction uncertainty
 # ==============================================================================
 def test_11_prediction_uncertainty():
-    """Verifies that point predictions have non-zero uncertainty and valid 95% confidence intervals."""
+    """Verifies that point predictions have non-zero uncertainty, valid CIs at anchors, and heuristic intervals when interpolated."""
     loader = ReconciledEvidenceLoader("artifacts/phase_4f46/reconciliation")
     obs = loader.load_trial_observations()
 
     model = EmpiricalLookupModel("test_unc", WorkloadProfile.READ_ONLY_SELECT).fit(obs)
-    q = EmpiricalPostgresQuery(workload_profile=WorkloadProfile.READ_ONLY_SELECT, cpu_quota_cores=1.5)
-    pred = model.predict(q)
 
-    assert pred.throughput_tps.uncertainty_std > 0
-    ci = pred.throughput_tps.confidence_interval_95
-    assert ci[0] <= pred.throughput_tps.point_estimate <= ci[1]
+    # Directly observed anchor: statistical confidence interval supported
+    q_obs = EmpiricalPostgresQuery(workload_profile=WorkloadProfile.READ_ONLY_SELECT, cpu_quota_cores=1.0)
+    pred_obs = model.predict(q_obs)
+    assert pred_obs.evidence_status == EvidenceStatus.OBSERVED
+    assert pred_obs.throughput_tps.uncertainty_std > 0
+    ci = pred_obs.throughput_tps.confidence_interval_95
+    assert ci is not None
+    assert ci[0] <= pred_obs.throughput_tps.point_estimate <= ci[1]
+
+    # Interpolated query: heuristic interval, confidence_interval_95 is None
+    q_interp = EmpiricalPostgresQuery(workload_profile=WorkloadProfile.READ_ONLY_SELECT, cpu_quota_cores=1.5)
+    pred_interp = model.predict(q_interp)
+    assert pred_interp.evidence_status == EvidenceStatus.INTERPOLATED
+    assert pred_interp.throughput_tps.uncertainty_std > 0
+    assert pred_interp.throughput_tps.confidence_interval_95 is None
+    h_int = pred_interp.throughput_tps.heuristic_interval
+    assert h_int is not None
+    assert h_int[0] <= pred_interp.throughput_tps.point_estimate <= h_int[1]
 
 
 # ==============================================================================
 # 12. In-range prediction
 # ==============================================================================
 def test_12_in_range_prediction():
-    """Verifies in-range prediction behavior for valid queries within [1.0, 2.0] vCPU."""
+    """Verifies evidence status classification for valid queries within [1.0, 2.0] vCPU."""
     loader = ReconciledEvidenceLoader("artifacts/phase_4f46/reconciliation")
     obs = loader.load_trial_observations()
 
     model = EmpiricalLookupModel("test_in_range", WorkloadProfile.BALANCED_OLTP_TPCB).fit(obs)
-    q = EmpiricalPostgresQuery(
+
+    # Exact anchor query is OBSERVED
+    q_obs = EmpiricalPostgresQuery(
+        workload_profile=WorkloadProfile.BALANCED_OLTP_TPCB,
+        cpu_quota_cores=1.0,
+        concurrency=8,
+        scale_factor=2,
+        memory_mb=1024.0,
+    )
+    pred_obs = model.predict(q_obs)
+    assert pred_obs.evidence_status == EvidenceStatus.OBSERVED
+    assert pred_obs.is_extrapolated is False
+
+    # Intermediate query is INTERPOLATED, never OBSERVED
+    q_interp = EmpiricalPostgresQuery(
         workload_profile=WorkloadProfile.BALANCED_OLTP_TPCB,
         cpu_quota_cores=1.5,
         concurrency=8,
         scale_factor=2,
         memory_mb=1024.0,
     )
-    pred = model.predict(q)
-    assert pred.state == ModelState.IN_RANGE
-    assert pred.is_extrapolated is False
-    assert len(pred.uncertainty_notes) == 0
+    pred_interp = model.predict(q_interp)
+    assert pred_interp.evidence_status == EvidenceStatus.INTERPOLATED
+    assert pred_interp.state == ModelState.INTERPOLATED
+    assert pred_interp.is_extrapolated is False
+    assert any("interpolated" in note.lower() for note in pred_interp.uncertainty_notes)
 
 
 # ==============================================================================

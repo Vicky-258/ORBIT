@@ -76,6 +76,15 @@ def calculate_metrics_safely(
 class ReplicationAwareEvaluator:
     """
     Evaluates candidate models using Leave-One-Replication-Out (LORO) cross-validation.
+
+    Epistemological Classification:
+    - This is a REPLICATION HOLDOUT EVALUATION.
+    - It tests repeatability across independent benchmark replications at already-observed configurations.
+    - It does NOT evaluate or establish generalization to:
+      * Unseen CPU quotas (Configuration Holdout)
+      * Unseen concurrency levels (Workload Holdout)
+      * Unseen database scales or memory limits (Environment Holdout)
+      * Unseen PostgreSQL versions or workload profiles
     """
 
     def __init__(self, observations: List[TrialObservation]):
@@ -179,6 +188,12 @@ class ReplicationAwareEvaluator:
             "workload_profile": profile_str,
             "target_metric": target_metric,
             "cross_validation_method": "Leave-One-Replication-Out (LORO)",
+            "evaluation_type": "REPLICATION_HOLDOUT",
+            "scope_limitations": [
+                "Evaluates repeatability across independent replications at observed configurations only.",
+                "Does NOT evaluate configuration holdout (unseen CPU quotas), workload holdout, or environment holdout.",
+                "Lookup, Linear, and Piecewise models produce mathematically indistinguishable predictions at observed support points (1.0 and 2.0 vCPU).",
+            ],
             "folds_evaluated": len(fold_results),
             "overall_metrics": overall_eval.model_dump(),
             "per_condition_errors": per_cond_errors,
