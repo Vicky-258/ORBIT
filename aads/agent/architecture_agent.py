@@ -49,7 +49,7 @@ class SoftPreferences(BaseModel):
 
 class UserFactItem(BaseModel):
     key: str = Field(description="Parameter key e.g. request_rate_rps, p95_latency_target_ms, read_ratio")
-    value: str = Field(description="Stated value from user")
+    value: Any = Field(description="Stated value from user")
 
 
 class WorkloadExtractionResult(BaseModel):
@@ -152,7 +152,7 @@ class ArchitectureAgent:
             agent_assumptions.append("Peak burst headroom assumed: 2.0x")
 
         # 2. Latency Target (p95 ms)
-        lat_match = re.search(r"(?:p95|latency|sla|response\s*time)?\s*(?:under|<=|<|below|of)?\s*(\d+(?:\.\d+)?)\s*ms", text)
+        lat_match = re.search(r"(?:p95|latency|sla|response\s*time)?\s*(?:under|<=|<|below|of|target:?|is)?\s*(\d+(?:\.\d+)?)\s*ms", text)
         if lat_match:
             p95 = float(lat_match.group(1))
             user_facts["p95_latency_target_ms"] = p95
@@ -175,8 +175,18 @@ class ArchitectureAgent:
         write_ratio = 0.10
         ratio_match = re.search(r"(\d+)\s*/\s*(\d+)", text)
         read_pct_match = re.search(r"(\d+)%\s*(?:reads?|read)", text)
+        write_pct_match = re.search(r"(\d+)%\s*(?:writes?|write)", text)
 
-        if read_pct_match:
+        if read_pct_match and write_pct_match:
+            r_pct = float(read_pct_match.group(1))
+            w_pct = float(write_pct_match.group(1))
+            total = r_pct + w_pct
+            if total > 0:
+                read_ratio = round(r_pct / total, 2)
+                write_ratio = round(w_pct / total, 2)
+                user_facts["read_ratio"] = read_ratio
+                user_facts["write_ratio"] = write_ratio
+        elif read_pct_match:
             r_pct = float(read_pct_match.group(1))
             read_ratio = max(0.01, min(0.99, r_pct / 100.0))
             write_ratio = round(1.0 - read_ratio, 2)
@@ -190,19 +200,45 @@ class ArchitectureAgent:
                 write_ratio = round(1.0 - read_ratio, 2)
                 user_facts["read_ratio"] = read_ratio
                 user_facts["write_ratio"] = write_ratio
+        elif "read-heavy" in text or "read heavy" in text:
+            read_ratio = 0.90
+            write_ratio = 0.10
+            user_facts["read_ratio"] = read_ratio
+            user_facts["write_ratio"] = write_ratio
+        elif "write-heavy" in text or "write heavy" in text:
+            read_ratio = 0.40
+            write_ratio = 0.60
+            user_facts["read_ratio"] = read_ratio
+            user_facts["write_ratio"] = write_ratio
         else:
             agent_assumptions.append("Default read/write split: 90% Reads / 10% Writes")
 
         # 5. Domain / App type
         app_type = "social_media_feed"
-        if "ecommerce" in text or "shop" in text or "store" in text:
+        if "ecommerce" in text or "e-commerce" in text or "shop" in text or "store" in text:
             app_type = "ecommerce"
+            user_facts["app_type"] = app_type
+        elif "transactional" in text or "payment" in text or "banking" in text or "financial" in text or "oltp" in text:
+            app_type = "transactional"
+            user_facts["app_type"] = app_type
+        elif "background" in text or "async" in text or "worker" in text or "queue" in text or "batch" in text:
+            app_type = "background_processing"
             user_facts["app_type"] = app_type
         elif "analytics" in text or "logging" in text or "telemetry" in text:
             app_type = "analytics_pipeline"
             user_facts["app_type"] = app_type
         else:
             agent_assumptions.append("Application domain defaulted to Social Media Feed")
+
+        # Tailor soft preferences by domain requirements
+        if app_type == "background_processing":
+            soft_prefs = {"cost": 0.25, "latency": 0.65, "simplicity": 0.10}
+        elif app_type == "transactional":
+            soft_prefs = {"cost": 0.40, "latency": 0.35, "simplicity": 0.25}
+        elif app_type == "ecommerce":
+            soft_prefs = {"cost": 0.30, "latency": 0.50, "simplicity": 0.20}
+        else:
+            soft_prefs = {"cost": 0.35, "latency": 0.45, "simplicity": 0.20}
 
         agent_assumptions.append("Cache hit rate expectation: 85%")
 
@@ -217,7 +253,7 @@ class ArchitectureAgent:
             min_throughput_rps=round(rps * 0.9, 1),
             max_monthly_budget_usd=budget,
             cache_assumed_hit_rate=0.85,
-            soft_preferences={"cost": 0.35, "latency": 0.45, "simplicity": 0.20},
+            soft_preferences=soft_prefs,
             user_facts=user_facts,
             agent_assumptions=agent_assumptions,
             clarification_questions=[],

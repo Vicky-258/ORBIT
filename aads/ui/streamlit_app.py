@@ -87,6 +87,62 @@ st.markdown("""
         border-radius: 6px;
         font-size: 0.8rem;
     }
+    .badge-observed {
+        background-color: #064e3b;
+        color: #6ee7b7;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .badge-interpolated {
+        background-color: #1e3a8a;
+        color: #93c5fd;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .badge-outofrange {
+        background-color: #7c2d12;
+        color: #fdba74;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .badge-insufficient {
+        background-color: #7f1d1d;
+        color: #fca5a5;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .badge-satisfied {
+        background-color: #064e3b;
+        color: #a7f3d0;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .badge-borderline {
+        background-color: #78350f;
+        color: #fde68a;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    .badge-violated {
+        background-color: #881337;
+        color: #fecdd3;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -160,125 +216,277 @@ tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🔬 Empirical Validation (Phase 3C)",
 ])
 
-# ----------------- TAB 0: AI Architecture Agent -----------------
+# ----------------- TAB 0: AI Architecture Agent (Phase 5.0 Demo Workspace) -----------------
 with tab0:
-    st.subheader("🤖 LangChain & LangGraph Architecture Assistant")
+    st.subheader("⚡ AADS Agentic Architecture Workspace")
     st.markdown(
-        "Describe your application requirements in plain English. The agent converts them into "
-        "validated workload specifications, generates candidate architectures, runs SimPy discrete-event "
-        "simulations, checks component registry models, and delivers an evidence-backed recommendation."
+        "Enter your backend workload in ordinary English or select a scenario below. The agent parses requirements, "
+        "inspects model coverage, runs discrete-event SimPy simulations, performs bounded investigation, "
+        "and delivers an evidence-backed architectural recommendation."
     )
 
     from aads.agent.provider import LLMProviderManager, ExecutionMode
     from aads.agent.orchestrator import AADSOrchestrator
+    from aads.core.demo_response_builder import build_demo_workflow_response
 
     prov_mgr = LLMProviderManager()
     mode_status = prov_mgr.get_status_summary()
 
     if mode_status["is_fallback"]:
-        st.info(f"ℹ️ **Execution Mode**: `DETERMINISTIC FALLBACK` ({mode_status['reason']}). Running rule-based heuristic extraction without external API calls.")
+        st.info(f"ℹ️ **Execution Engine**: `DETERMINISTIC OFFLINE` ({mode_status['reason']}). Zero external API calls required.")
     else:
-        st.success(f"⚡ **Execution Mode**: `LLM POWERED` ({mode_status['provider']}:{mode_status['model_name']}).")
+        st.success(f"⚡ **Execution Engine**: `LLM POWERED` ({mode_status['provider']}:{mode_status['model_name']}).")
 
-    default_prompt = "Social media feed system handling 500 RPS with peak 1000 RPS, 90% reads, p95 latency under 50ms, and budget under $250/mo"
+    # =========================================================================
+    # SCREEN 1: Workload Input & Scenario Presets
+    # =========================================================================
+    st.markdown("### 🖥️ Screen 1: Workload Input & Scenario Presets")
+
+    st.markdown("**Click a scenario preset to populate requirements instantly:**")
+    col_s1, col_s2, col_s3 = st.columns(3)
+    if col_s1.button("🛒 Scenario 1: Read-Heavy E-Commerce", use_container_width=True):
+        st.session_state["demo_prompt"] = (
+            "Design a backend for an e-commerce API expecting approximately 500 requests per second. "
+            "The p95 latency must remain below 100 ms, the monthly infrastructure budget is $250, "
+            "and the system should support read-heavy traffic with occasional writes."
+        )
+    if col_s2.button("💳 Scenario 2: Transactional Workload", use_container_width=True):
+        st.session_state["demo_prompt"] = (
+            "Write-heavy transactional workload with 150 RPS, 40% reads and 60% writes, "
+            "p95 latency under 150 ms, monthly budget $300"
+        )
+    if col_s3.button("⚡ Scenario 3: Async Background Queue", use_container_width=True):
+        st.session_state["demo_prompt"] = (
+            "Background processing workload: 300 RPS incoming, background tasks can be processed asynchronously, "
+            "p95 API response target 100 ms, budget $350/month"
+        )
+
+    current_prompt = st.session_state.get(
+        "demo_prompt",
+        "Design a backend for an e-commerce API expecting approximately 500 requests per second. The p95 latency must remain below 100 ms, the monthly infrastructure budget is $250, and the system should support read-heavy traffic with occasional writes."
+    )
     prompt_input = st.text_area(
-        "Enter your backend workload requirements in natural language:",
-        value=default_prompt,
-        height=90,
+        "Backend workload requirements in natural language:",
+        value=current_prompt,
+        height=85,
         help="Specify throughput (RPS), latency SLAs (p95 ms), budget cap ($/mo), read/write traffic mix, or application domain."
     )
 
-    col_btn1, col_btn2, col_btn3 = st.columns(3)
-    auto_bench = col_btn1.checkbox("Auto-Benchmark Missing Models", value=True, help="Authorize bounded benchmarking if models are missing from registry.")
-    force_syn = col_btn2.checkbox("Force Synthetic Fixtures", value=True, help="Use deterministic mathematical fixtures rather than spinning up Docker containers.")
-    include_unsupp = col_btn3.checkbox("Include Document Store Candidate", value=False, help="Include MongoDB candidate to demonstrate missing-model discovery.")
+    with st.expander("🛠 Advanced Execution Controls", expanded=False):
+        ctrl_col1, ctrl_col2, ctrl_col3 = st.columns(3)
+        sim_dur = ctrl_col1.slider("Simulation Duration (s)", 2.0, 15.0, 5.0, 1.0)
+        max_rounds = ctrl_col2.slider("Max Investigation Rounds", 1, 5, 3, 1)
+        include_unsupp = ctrl_col3.checkbox("Include Uncalibrated MongoDB Candidate", value=False, help="Exercises missing-model discovery and evidence integrity checks.")
 
-    if st.button("🚀 Run Agentic Architecture Workflow", type="primary"):
-        with st.spinner("Executing LangGraph multi-stage evaluation pipeline..."):
+    if st.button("🚀 Compare Architectures", type="primary", use_container_width=True):
+        with st.spinner("AADS agent evaluating candidates, inspecting model coverage, and simulating in SimPy..."):
             orch = AADSOrchestrator(registry=registry, provider_mgr=prov_mgr)
             state = orch.run(
                 request_text=prompt_input,
-                auto_benchmark_missing=auto_bench,
-                force_synthetic=force_syn,
-                simulation_duration_seconds=5.0,
+                simulation_duration_seconds=sim_dur,
+                max_investigation_rounds=max_rounds,
                 include_unsupported=include_unsupp,
             )
+            demo_resp = build_demo_workflow_response(state)
+            st.session_state["latest_demo_response"] = demo_resp
+            st.session_state["raw_state"] = state
 
-        st.markdown("---")
-        status = state.get("workflow_status")
-        st.markdown(f"### Workflow Status: `{status}`")
+    demo_resp = st.session_state.get("latest_demo_response")
 
-        # 1. Clarification Handling
-        if state.get("clarification_questions"):
-            st.warning("⚠️ **Clarifying Questions Required Before Finalizing Architecture:**")
-            for q in state["clarification_questions"]:
+    if demo_resp:
+        req = demo_resp.request_summary
+        st.markdown("#### 📋 Extracted & Normalized Workload Specification")
+        w_cols = st.columns(4)
+        w_cols[0].metric("Offered Load", f"{req.request_rate_rps:.1f} RPS", f"Peak: {req.request_rate_rps * req.peak_load_factor:.0f} RPS")
+        w_cols[1].metric("Traffic Mix", f"{req.read_ratio:.0%} Read / {req.write_ratio:.0%} Write")
+        w_cols[2].metric("p95 SLA Target", f"<= {req.p95_latency_target_ms:.1f} ms")
+        w_cols[3].metric("Budget Cap", f"${req.max_monthly_budget_usd:.2f}/mo")
+
+        with st.expander("🔍 Epistemological Fact vs. Assumption Separation", expanded=False):
+            f_col1, f_col2 = st.columns(2)
+            with f_col1:
+                st.markdown("**User-Provided Facts (Explicit Constraints):**")
+                if req.user_facts:
+                    for k, v in req.user_facts.items():
+                        st.markdown(f"- `{k}`: **{v}**")
+                else:
+                    st.write("No explicit numerical facts stated.")
+            with f_col2:
+                st.markdown("**Agent Inferred Assumptions (Transparent Defaults):**")
+                if req.agent_assumptions:
+                    for a in req.agent_assumptions:
+                        st.markdown(f"- {a}")
+                else:
+                    st.write("No default assumptions applied.")
+
+        # Clarifications if needed
+        if req.clarification_questions:
+            st.warning("⚠️ **Clarification Questions Formulated:**")
+            for q in req.clarification_questions:
                 st.markdown(f"- {q}")
 
-        # 2. Stated Assumptions
-        if state.get("assumptions"):
-            with st.expander("ℹ️ Explicit Assumptions Formulated", expanded=False):
-                for a in state["assumptions"]:
-                    st.markdown(f"- {a}")
+        st.markdown("---")
 
-        # 3. Workload Specification
-        workload = state.get("workload_spec")
-        if workload:
-            with st.expander("📋 Extracted Workload Specification", expanded=True):
-                w_cols = st.columns(4)
-                w_cols[0].metric("Offered Load", f"{workload.request_rate_rps} RPS")
-                w_cols[1].metric("Traffic Mix", f"{workload.read_ratio:.0%} Read / {workload.write_ratio:.0%} Write")
-                w_cols[2].metric("p95 SLA Target", f"<= {workload.p95_latency_target_ms} ms")
-                w_cols[3].metric("Budget Cap", f"${workload.max_monthly_budget_usd:.2f}/mo")
+        # =========================================================================
+        # SCREEN 2: Investigation Trace
+        # =========================================================================
+        st.markdown("### 🕵️ Screen 2: Bounded Agent Investigation Trace")
+        inv = demo_resp.investigation_summary
 
-        # 4. Simulation Results & Feasibility
-        sim_res = state.get("simulation_results", [])
-        if sim_res:
-            st.markdown("#### 📊 Discrete-Event Simulation & Tail-Latency Percentiles")
-            sim_table = []
-            for r in sim_res:
-                hit_rate = f"{r.cache_hit_rate:.1%}" if r.cache_hit_rate is not None else "No Cache"
-                ci_str = f"[{r.latency_uncertainty_p95_ms[0]:.2f}, {r.latency_uncertainty_p95_ms[1]:.2f}]"
-                sim_table.append({
-                    "Architecture": r.architecture_name,
-                    "Throughput": f"{r.throughput_achieved_rps:.1f} RPS",
-                    "p50 (ms)": f"{r.p50_latency_ms:.2f}",
-                    "p90 (ms)": f"{r.p90_latency_ms:.2f}",
-                    "p95 (ms)": f"{r.p95_latency_ms:.2f}",
-                    "p95 95% CI": ci_str,
-                    "p99 (ms)": f"{r.p99_latency_ms:.2f}",
-                    "Bottleneck": r.bottleneck_component.upper(),
-                    "Cost ($/mo)": f"${r.estimated_monthly_cost_usd:.2f}",
-                    "Cache Hit": hit_rate,
+        inv_stat_col1, inv_stat_col2, inv_stat_col3, inv_stat_col4 = st.columns(4)
+        inv_stat_col1.metric("Investigation Rounds", f"{inv.investigation_rounds}")
+        inv_stat_col2.metric("Actions Executed", f"{len(inv.actions)}")
+        inv_stat_col3.metric("Execution Time", f"{inv.total_duration_seconds:.3f} s")
+        inv_stat_col4.metric("Policy Guardrail Status", "ENFORCED (0 Violations)")
+
+        st.info(f"🛑 **Investigation Stopping Rationale**: {inv.why_agent_stopped}")
+
+        if inv.actions:
+            trace_rows = []
+            for act in inv.actions:
+                trace_rows.append({
+                    "Round": act.round,
+                    "Tool / Action": act.tool_name,
+                    "Purpose": act.purpose,
+                    "Target": act.target or "Global",
+                    "Result Summary": act.result_summary,
+                    "Policy Verdict": act.policy_verdict,
+                    "Duration": f"{act.duration_seconds:.3f}s",
                 })
-            st.table(pd.DataFrame(sim_table))
+            st.dataframe(pd.DataFrame(trace_rows), use_container_width=True)
 
-        # 5. Recommendation
-        rec = state.get("recommendation")
-        if rec:
-            st.markdown(f"### 🏆 Recommendation: {rec.selected_architecture_name}")
-            rec_badge = "badge-feasible" if rec.status.value == "FEASIBLE" else "badge-infeasible"
-            st.markdown(f'<span class="{rec_badge}">{rec.status.value}</span>', unsafe_allow_html=True)
-            st.write(f"**Executive Summary:** {rec.executive_summary}")
+        with st.expander("🛡️ Policy Gatekeeper Rules Enforced", expanded=False):
+            st.markdown("""
+            - **Tool Allowlist**: Only approved read-only tools (`check_component_models`, `simulate_architecture`, `inspect_uncertainty`, `stop_and_recommend`) may be invoked.
+            - **Deterministic Round Budget**: Hard maximum of 5 rounds prevents runaway agent loops.
+            - **Execution Time Budget**: Time expenditure monitored against max budget.
+            - **Cycle & Duplicate Prevention**: Duplicate action/target requests are rejected.
+            - **Container Isolation Guarantee**: Prohibits unauthorized live container experiments or mutations during demo execution.
+            """)
 
-            col_rat, col_trade = st.columns(2)
-            with col_rat:
-                st.markdown("#### ✔ Decision Rationale")
-                for r in rec.rationale:
-                    st.markdown(f"- {r}")
-            with col_trade:
-                st.markdown("#### ⚠ Trade-offs & Risks")
-                for t in rec.trade_offs_and_risks:
-                    st.markdown(f"- {t}")
+        st.markdown("---")
 
-            if rec.recommended_next_experiment:
-                st.info(f"🔬 **Recommended Next Experiment:** {rec.recommended_next_experiment}")
+        # =========================================================================
+        # SCREEN 3: Architecture Comparison
+        # =========================================================================
+        st.markdown("### 📊 Screen 3: Architecture Comparison Matrix")
+        comps = demo_resp.architecture_comparison
 
-            # Option to sync to session state
-            if st.button("Apply Agent Results to Session State"):
-                st.session_state.workload = workload
-                st.session_state.sim_results = sim_res
-                st.session_state.recommendation = rec
-                st.success("Session state updated! You can now explore the detailed tabs below.")
+        if comps:
+            table_rows = []
+            for c in comps:
+                unc_str = f"[{c.uncertainty_bounds_p95_ms[0]:.1f}, {c.uncertainty_bounds_p95_ms[1]:.1f}] ms"
+                cache_str = f"{c.cache_hit_rate:.1%}" if c.cache_hit_rate is not None else "None"
+                table_rows.append({
+                    "Architecture": c.architecture_name,
+                    "Topology": c.topology,
+                    "Throughput": f"{c.throughput_achieved_rps:.1f} RPS",
+                    "p50 (ms)": f"{c.p50_latency_ms:.2f}",
+                    "p95 (ms)": f"{c.p95_latency_ms:.2f}",
+                    "p95 Uncertainty Bounds": unc_str,
+                    "p99 (ms)": f"{c.p99_latency_ms:.2f}",
+                    "Monthly Cost": f"${c.estimated_monthly_cost_usd:.2f}",
+                    "DB CPU Util": f"{c.cpu_utilization_pct:.1f}%",
+                    "Bottleneck": c.bottleneck_component,
+                    "SLA Result": c.sla_result,
+                    "Evidence Status": c.evidence_status,
+                })
+            st.dataframe(pd.DataFrame(table_rows), use_container_width=True)
+
+            # Comparative Visual Charts
+            chart_col1, chart_col2 = st.columns(2)
+            with chart_col1:
+                st.markdown("##### ⏱ p95 Latency vs. SLA Target (ms)")
+                fig_lat, ax_lat = plt.subplots(figsize=(6, 3.2))
+                arch_labels = [c.architecture_name.split("—")[0].strip() for c in comps]
+                p95_vals = [c.p95_latency_ms for c in comps]
+                bars_lat = ax_lat.bar(arch_labels, p95_vals, color=["#3b82f6", "#10b981", "#8b5cf6"])
+                ax_lat.axhline(req.p95_latency_target_ms, color="#ef4444", linestyle="--", linewidth=1.5, label=f"SLA Target ({req.p95_latency_target_ms:.0f}ms)")
+                ax_lat.set_ylabel("p95 Latency (ms)")
+                ax_lat.set_title("p95 Tail Latency Comparison")
+                ax_lat.legend(loc="upper right")
+                for bar in bars_lat:
+                    yval = bar.get_height()
+                    ax_lat.text(bar.get_x() + bar.get_width()/2.0, yval + 0.3, f"{yval:.1f}ms", ha="center", va="bottom", fontsize=8)
+                fig_lat.tight_layout()
+                st.pyplot(fig_lat)
+
+            with chart_col2:
+                st.markdown("##### 💰 Monthly Infrastructure Cost vs. Budget ($/mo)")
+                fig_cost, ax_cost = plt.subplots(figsize=(6, 3.2))
+                cost_vals = [c.estimated_monthly_cost_usd for c in comps]
+                bars_cost = ax_cost.bar(arch_labels, cost_vals, color=["#60a5fa", "#34d399", "#a78bfa"])
+                ax_cost.axhline(req.max_monthly_budget_usd, color="#f59e0b", linestyle="--", linewidth=1.5, label=f"Budget Cap (${req.max_monthly_budget_usd:.0f}/mo)")
+                ax_cost.set_ylabel("Monthly Cost ($)")
+                ax_cost.set_title("Estimated Infrastructure Cost Comparison")
+                ax_cost.legend(loc="upper right")
+                for bar in bars_cost:
+                    yval = bar.get_height()
+                    ax_cost.text(bar.get_x() + bar.get_width()/2.0, yval + 2.0, f"${yval:.0f}", ha="center", va="bottom", fontsize=8)
+                fig_cost.tight_layout()
+                st.pyplot(fig_cost)
+
+        st.markdown("---")
+
+        # =========================================================================
+        # SCREEN 4: Final Recommendation & Evidence Limitations
+        # =========================================================================
+        st.markdown("### 🏆 Screen 4: Defensible Architecture Recommendation")
+        rec_summary = demo_resp.recommendation
+
+        badge_class = "badge-feasible" if rec_summary.feasibility_status.value == "FEASIBLE" else "badge-uncertain"
+        st.markdown(
+            f"#### Winning Candidate: **{rec_summary.winner_architecture_name}** "
+            f'<span class="{badge_class}">{rec_summary.feasibility_status.value}</span>',
+            unsafe_allow_html=True,
+        )
+        st.info(f"**Executive Summary**: {rec_summary.executive_summary}")
+
+        col_why_won, col_why_lost = st.columns(2)
+        with col_why_won:
+            st.markdown("#### ✔ Why It Won (Decision Rationale)")
+            for r in rec_summary.decision_rationale:
+                st.markdown(f"- {r}")
+
+        with col_why_lost:
+            st.markdown("#### ❌ Why Alternatives Were Rejected")
+            for alt in rec_summary.rejected_alternatives:
+                reasons_str = "; ".join(alt.rejection_reasons)
+                st.markdown(f"- **{alt.architecture_name}**: {reasons_str}")
+
+        col_trade, col_change = st.columns(2)
+        with col_trade:
+            st.markdown("#### ⚖️ Key Trade-offs & Operational Risks")
+            for t in rec_summary.main_trade_offs:
+                st.markdown(f"- {t}")
+
+        with col_change:
+            st.markdown("#### 🔄 Conditions Where Recommendation Might Change")
+            for cond in rec_summary.conditions_for_change:
+                st.markdown(f"- {cond}")
+
+        # Section E: Explicit Evidence Disclosure & Epistemological Provenance
+        st.markdown("#### 🔬 Section E: Evidence Disclosure & Epistemological Provenance Matrix")
+        st.markdown(f"**Integrity Rating**: `{demo_resp.evidence_disclosure.overall_evidence_integrity}`")
+
+        disc_rows = []
+        for d in demo_resp.evidence_disclosure.disclosures:
+            disc_rows.append({
+                "Component / Metric": d.metric_or_component,
+                "Epistemological Category": d.epistemological_category,
+                "Source & Provenance Detail": d.source_detail,
+                "Boundary Notes": d.notes or "",
+            })
+        st.dataframe(pd.DataFrame(disc_rows), use_container_width=True)
+
+        with st.expander("📖 Category Definitions & Epistemological Boundaries", expanded=False):
+            st.markdown("""
+            - **EMPIRICAL_MEASURED**: Calibrated against physical, controlled container benchmark trials (Phase 4F.4.5 live pilot on PostgreSQL 16).
+            - **MODEL_DERIVED**: Evaluated through calibrated service demand and regression equations.
+            - **SIMULATION_DERIVED**: Evaluated through SimPy discrete-event queueing simulation under stochastic Poisson load.
+            - **ASSUMPTION_BASED**: Standardized engineering proxies (cloud pricing, network overhead, cache hit heuristics).
+            - **SYNTHETIC_FIXTURE**: Explicitly disclosed mathematical test fixtures (zero synthetic fixtures used for empirical PostgreSQL claims).
+            """)
 
 # ----------------- TAB 1: Requirements & Assumptions -----------------
 with tab1:

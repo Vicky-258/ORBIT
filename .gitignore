@@ -9,3 +9,5 @@ data/experiments/
 .env
 *.env
 *.log
+*.zip
+artifacts/**/*.zip

@@ -10,6 +10,56 @@ A working proof-of-concept for an AI agent that designs, benchmarks, simulates, 
 
 ---
 
+## ⚡ Quick Start: Running the Phase 5.0 Product Demo
+
+AADS includes an end-to-end demonstrable prototype that translates natural-language backend workload descriptions into simulated, evidence-backed architectural recommendations.
+
+### 1. Launch the Complete Demo (Backend + Frontend)
+
+```bash
+# Starts FastAPI backend (port 8000) and Streamlit workspace (port 8501)
+./scripts/run_demo.sh
+```
+
+Open your browser to **http://localhost:8501** to interact with the 4-Screen Architecture Decision Workspace.
+
+### 2. Run the 3 Canonical Demo Scenarios via CLI
+
+```bash
+# Runs all 3 demonstration scenarios end-to-end with full assertion verification
+./scripts/run_demo.sh --scenarios
+# Or: .venv/bin/python scripts/run_demo_scenarios.py
+```
+
+The three scenarios demonstrate distinct architectural trade-offs:
+1. **Scenario 1 (Read-Heavy E-Commerce)**: 500 RPS, 90/10 R/W, p95 $\le$ 100ms, $250 budget $\rightarrow$ **Architecture B (Cached Reads: API $\rightarrow$ Redis $\rightarrow$ PostgreSQL)** wins.
+2. **Scenario 2 (Write-Heavy Transactional)**: 150 RPS, 40/60 R/W, p95 $\le$ 150ms, $300 budget $\rightarrow$ **Architecture A (Simple: API $\rightarrow$ PostgreSQL)** wins; cache overhead is unjustified.
+3. **Scenario 3 (Background Worker Processing)**: 300 RPS incoming, async processing, p95 $\le$ 100ms, $350 budget $\rightarrow$ **Architecture C (Async: API $\rightarrow$ Queue $\rightarrow$ Worker $\rightarrow$ PostgreSQL)** wins for lowest API response latency.
+
+### 3. REST API Usage
+
+Execute the agent workflow via curl:
+
+```bash
+# Query the standardized Phase 5.0 demo endpoint
+curl -X POST "http://localhost:8000/api/demo/run" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "prompt": "Design a backend for an e-commerce API expecting approximately 500 requests per second. The p95 latency must remain below 100 ms, the monthly infrastructure budget is $250, and the system should support read-heavy traffic with occasional writes.",
+       "simulation_duration_seconds": 5.0
+     }'
+```
+
+Returns the standardized `DemoWorkflowResponse` containing Sections A through E.
+
+### 4. Offline & LLM Dual-Mode Execution
+
+- **Offline / Deterministic Fallback (Default)**: Runs 100% locally with zero external API calls or network access using deterministic regex parsers and template synthesizers.
+- **LLM-Powered Mode**: If `GROQ_API_KEY`, `OPENAI_API_KEY`, or `ANTHROPIC_API_KEY` is configured in `.env`, AADS uses live structured outputs for natural language extraction and synthesis.
+- **Empirical Freeze**: Autonomous live container benchmarks, Docker execution, and model registry promotions remain frozen; predictions are grounded in reconciled Phase 4F.4.5 / 4F.4.6 empirical PostgreSQL benchmarks and SimPy discrete-event queueing simulations.
+
+---
+
 ## 1. Mission & Core Principle
 
 **Core Principle:** *The objective is architecture comparison and recommendation, not perfect performance prediction. Performance estimates are evidence used to make a better architectural decision.*

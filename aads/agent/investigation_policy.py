@@ -229,6 +229,32 @@ class InvestigationPolicy:
                     details={"disallowed_component": comp_name},
                 )
 
+        if action_type == InvestigationActionType.EXECUTE_EXPERIMENT:
+            auth = state.get("experiment_authorization")
+            auto_auth = state.get("auto_authorize_synthetic", False)
+            auth_granted = False
+            if auth is not None:
+                status_val = auth.status.value if hasattr(auth.status, "value") else str(getattr(auth, "status", ""))
+                if status_val in ("AUTHORIZED", "GRANTED"):
+                    auth_granted = True
+            elif auto_auth:
+                auth_granted = True
+
+            if not auth_granted:
+                sanitized = InvestigationDecision(
+                    action=InvestigationActionType.STOP_AND_RECOMMEND if sim_results else InvestigationActionType.STOP_INCONCLUSIVE,
+                    reason="Experiment execution denied: missing valid AUTHORIZED authorization record.",
+                    stop_reason="Unauthorized benchmark execution blocked by policy.",
+                    evidence_reference=decision.evidence_reference,
+                )
+                return PolicyEvaluationResult(
+                    verdict=PolicyVerdict.REJECTED,
+                    allowed=False,
+                    sanitized_decision=sanitized,
+                    reason="Action execute_experiment rejected: no valid GRANTED authorization record provided.",
+                    details={"authorization_status": "DENIED_OR_MISSING"},
+                )
+
         # 6. Duplicate action prevention
         action_str = action_type.value
         target_str = str(decision.target or "")

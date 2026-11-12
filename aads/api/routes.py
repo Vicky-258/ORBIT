@@ -13,7 +13,9 @@ from aads.core.schemas import (
     RecommendationResult,
     ModelRecord,
     ExperimentRecord,
+    DemoWorkflowResponse,
 )
+from aads.core.demo_response_builder import build_demo_workflow_response
 from aads.generator.candidate_generator import ArchitectureGenerator
 from aads.registry.component_registry import ComponentRegistry
 from aads.benchmark.experiment_manager import AdaptiveExperimentManager
@@ -272,7 +274,8 @@ class AgentPromptRequest(BaseModel):
 def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
     """
     Natural-language architecture design & simulation agent endpoint.
-    Orchestrates LangChain parsing and LangGraph multi-stage evaluation.
+    Orchestrates LangChain parsing, SimPy simulation, bounded investigation,
+    and returns both backward-compatible fields and standardized Sections A-E.
     """
     from aads.agent.orchestrator import AADSOrchestrator
     orchestrator = AADSOrchestrator(registry=registry)
@@ -287,7 +290,24 @@ def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
         max_investigation_rounds=req.max_investigation_rounds,
         investigation_budget_seconds=req.investigation_budget_seconds,
     )
-    return {
+    demo_resp = build_demo_workflow_response(state)
+    resp_dict = demo_resp.model_dump()
+    raw_rec = state.get("recommendation")
+    if raw_rec is not None:
+        rec_val = demo_resp.recommendation.model_dump()
+        rec_val.update({
+            "status": raw_rec.status.value if hasattr(raw_rec.status, "value") else str(raw_rec.status),
+            "rationale": raw_rec.rationale,
+            "predicted_metrics": raw_rec.predicted_metrics,
+            "trade_offs_and_risks": raw_rec.trade_offs_and_risks,
+            "assumptions_cited": raw_rec.assumptions_cited,
+            "validation_gaps": raw_rec.validation_gaps,
+            "recommended_next_experiment": raw_rec.recommended_next_experiment,
+        })
+    else:
+        rec_val = None
+
+    resp_dict.update({
         "workflow_status": state.get("workflow_status"),
         "execution_mode": state.get("execution_mode"),
         "workload_spec": state.get("workload_spec"),
@@ -299,7 +319,7 @@ def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
         "benchmark_results": state.get("benchmark_results", []),
         "model_fit_results": state.get("model_fit_results", []),
         "simulation_results": state.get("simulation_results", []),
-        "recommendation": state.get("recommendation"),
+        "recommendation": rec_val,
         "provenance": state.get("provenance", {}),
         "errors": state.get("errors", []),
         "explanation_source": state.get("explanation_source"),
@@ -307,4 +327,28 @@ def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
         "investigation_trace": state.get("investigation_trace", []),
         "investigation_rounds": state.get("investigation_round", 0),
         "benchmark_proposals": state.get("benchmark_proposals", []),
-    }
+        "demo_response": demo_resp.model_dump(),
+    })
+    return resp_dict
+
+
+@router.post("/demo/run", response_model=DemoWorkflowResponse)
+def run_demo_workflow(req: AgentPromptRequest) -> DemoWorkflowResponse:
+    """
+    Direct Phase 5.0 Demo endpoint returning strictly validated DemoWorkflowResponse
+    containing Sections A through E.
+    """
+    from aads.agent.orchestrator import AADSOrchestrator
+    orchestrator = AADSOrchestrator(registry=registry)
+    state = orchestrator.run(
+        request_text=req.prompt,
+        auto_benchmark_missing=req.auto_benchmark_missing,
+        force_synthetic=req.force_synthetic,
+        simulation_duration_seconds=req.simulation_duration_seconds,
+        random_seed=req.random_seed,
+        include_async=req.include_async,
+        include_unsupported=req.include_unsupported,
+        max_investigation_rounds=req.max_investigation_rounds,
+        investigation_budget_seconds=req.investigation_budget_seconds,
+    )
+    return build_demo_workflow_response(state)

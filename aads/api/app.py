@@ -39,6 +39,7 @@ def root():
             "/api/evaluate",
             "/api/workflow/run",
             "/api/agent/run",
+            "/api/demo/run",
         ],
     }
 

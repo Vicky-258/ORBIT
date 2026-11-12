@@ -234,3 +234,129 @@ class RecommendationResult(BaseModel):
     recommended_next_experiment: Optional[str] = None
     explanation_source: Optional[str] = "deterministic"
     structured_explanation: Optional[Dict[str, Any]] = None
+
+
+# =============================================================================
+# Phase 5.0 Standardized Demo Response Schemas (Sections A - E)
+# =============================================================================
+
+class RequestSummary(BaseModel):
+    """Section A: Normalized workload requirements, constraints, and facts/assumptions."""
+    app_type: str
+    request_rate_rps: float
+    peak_load_factor: float
+    read_ratio: float
+    write_ratio: float
+    p95_latency_target_ms: float
+    min_throughput_rps: float
+    max_monthly_budget_usd: float
+    hard_constraints: List[str]
+    soft_preferences: Dict[str, float]
+    user_facts: Dict[str, Any]
+    agent_assumptions: List[str]
+    clarification_questions: List[str] = Field(default_factory=list)
+
+
+class InvestigationActionRecord(BaseModel):
+    """Record of a single investigation action taken by the agent."""
+    round: int
+    tool_name: str
+    purpose: str
+    target: Optional[str] = None
+    relevant_arguments: Dict[str, Any] = Field(default_factory=dict)
+    result_summary: str
+    status: str
+    duration_seconds: float = 0.0
+    policy_verdict: str = "APPROVED"
+    provenance: str = "agent_decision"
+
+
+class InvestigationSummary(BaseModel):
+    """Section B: Investigation summary including rounds, tools, verdicts, and stopping rationale."""
+    investigation_rounds: int
+    actions: List[InvestigationActionRecord]
+    why_agent_stopped: str
+    total_duration_seconds: float
+    budget_spent_seconds: float
+    policy_violations_prevented: int = 0
+
+
+class ArchitectureComparisonRecord(BaseModel):
+    """Section C: Structured candidate record with metrics, constraints, cost, and evidence status."""
+    architecture_id: str
+    architecture_name: str
+    topology: str
+    description: str
+    throughput_achieved_rps: float
+    p50_latency_ms: float
+    p95_latency_ms: float
+    p99_latency_ms: float
+    estimated_monthly_cost_usd: float
+    cpu_utilization_pct: float
+    memory_utilization_mb: float
+    bottleneck_component: str
+    cache_hit_rate: Optional[float] = None
+    sla_result: str  # "SATISFIED", "BORDERLINE", "VIOLATED"
+    feasibility_status: FeasibilityStatus
+    feasibility_checks: List[FeasibilityCheck]
+    evidence_status: str  # "OBSERVED", "INTERPOLATED", "OUT_OF_RANGE", "INSUFFICIENT_EVIDENCE"
+    model_provenance: str
+    uncertainty_bounds_p95_ms: Tuple[float, float]
+    limitations: List[str] = Field(default_factory=list)
+
+
+class RejectedAlternative(BaseModel):
+    """Explains why a non-winning candidate was rejected."""
+    architecture_id: str
+    architecture_name: str
+    feasibility_status: FeasibilityStatus
+    rejection_reasons: List[str]
+    trade_off_vs_winner: str
+
+
+class RecommendationSummary(BaseModel):
+    """Section D: Defensible architecture recommendation with rationale and alternatives."""
+    winner_architecture_id: Optional[str]
+    winner_architecture_name: str
+    selected_architecture_id: Optional[str] = None
+    selected_architecture_name: Optional[str] = None
+    is_conclusive: bool
+    feasibility_status: FeasibilityStatus
+    executive_summary: str
+    decision_rationale: List[str]
+    main_trade_offs: List[str]
+    rejected_alternatives: List[RejectedAlternative]
+    evidence_limitations: List[str]
+    conditions_for_change: List[str]
+    evaluations: List[CandidateEvaluation] = Field(default_factory=list)
+
+
+class EvidenceItemDisclosure(BaseModel):
+    """Item-level evidence disclosure classifying metric provenance."""
+    metric_or_component: str
+    epistemological_category: str  # "EMPIRICAL_MEASURED", "MODEL_DERIVED", "SIMULATION_DERIVED", "ASSUMPTION_BASED", "SYNTHETIC_FIXTURE"
+    source_detail: str
+    notes: Optional[str] = None
+
+
+class EvidenceDisclosure(BaseModel):
+    """Section E: Explicit evidence categorization distinguishing measured, simulated, and assumed metrics."""
+    empirical_calibrated_components: List[str]
+    model_derived_metrics: List[str]
+    simulation_derived_metrics: List[str]
+    assumed_parameters: List[str]
+    synthetic_fixtures_used: List[str]
+    disclosures: List[EvidenceItemDisclosure]
+    overall_evidence_integrity: str
+
+
+class DemoWorkflowResponse(BaseModel):
+    """Standardized Phase 5.0 End-to-End Workflow Response Schema."""
+    request_summary: RequestSummary
+    investigation_summary: InvestigationSummary
+    architecture_comparison: List[ArchitectureComparisonRecord]
+    recommendation: RecommendationSummary
+    evidence_disclosure: EvidenceDisclosure
+    workflow_status: str
+    execution_mode: str
+
