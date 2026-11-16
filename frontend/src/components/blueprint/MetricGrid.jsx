@@ -10,17 +10,32 @@ export default function MetricGrid({ winner, workload = {} }) {
     ? `[${bounds[0].toFixed(1)}, ${bounds[1].toFixed(1)} ms] heuristic range`
     : null;
 
+  // Latency calculation
+  const p95Val = winner?.p95;
+  const latencyProgress = p95Val != null && slaMs ? Math.min(100, (p95Val / slaMs) * 100) : null;
+  const isSlaMet = p95Val != null && slaMs ? p95Val <= slaMs : true;
+
+  // Cost calculation
+  const costVal = winner?.cost;
+  const costProgress = costVal != null && budgetUsd ? Math.min(100, (costVal / budgetUsd) * 100) : null;
+  const isBudgetMet = costVal != null && budgetUsd ? costVal <= budgetUsd : true;
+
+  // CPU calculation
+  const cpuVal = winner?.cpu;
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Metric 1: p95 Latency */}
       <MetricCard
         title="Predicted p95 Latency"
-        value={winner?.p95 != null ? `~${winner.p95}` : '—'}
+        value={p95Val != null ? `~${p95Val}` : '—'}
         unit="ms"
         provenance={winner?.latency_provenance || 'SIMULATED'}
         targetComparison={slaMs ? `Target: < ${slaMs} ms` : null}
         uncertaintyRange={uncertaintyText}
-        statusColor={winner?.p95 != null && winner.p95 <= slaMs ? 'text-emerald-400' : 'text-rose-400'}
+        statusColor={isSlaMet ? 'text-emerald-400' : 'text-rose-400'}
+        progressPercent={latencyProgress}
+        progressColor={isSlaMet ? 'bg-emerald-500' : 'bg-rose-500'}
       />
 
       {/* Metric 2: Simulated Throughput */}
@@ -30,56 +45,70 @@ export default function MetricGrid({ winner, workload = {} }) {
         unit="req/sec"
         provenance={winner?.throughput_provenance || 'SIMULATED'}
         targetComparison="Offered load tested"
-        statusColor="text-slate-100"
+        statusColor="text-white"
+        progressPercent={100}
+        progressColor="bg-indigo-500"
       />
 
       {/* Metric 3: Estimated Monthly Cost */}
       <MetricCard
         title="Estimated Monthly Cost"
-        value={winner?.cost != null ? `$${winner.cost}` : 'Cost not modelled'}
-        unit={winner?.cost != null ? '/mo' : ''}
-        provenance={winner?.cost != null ? (winner.cost_provenance || 'ASSUMED') : 'NOT_MODELLED'}
+        value={costVal != null ? `$${costVal}` : 'Cost not modelled'}
+        unit={costVal != null ? '/mo' : ''}
+        provenance={costVal != null ? (winner?.cost_provenance || 'ASSUMED') : 'NOT_MODELLED'}
         targetComparison={
-          winner?.cost != null && budgetUsd
-            ? winner.cost <= budgetUsd
-              ? `$${budgetUsd - winner.cost} under budget`
-              : `$${winner.cost - budgetUsd} over budget`
+          costVal != null && budgetUsd
+            ? costVal <= budgetUsd
+              ? `$${budgetUsd - costVal} under budget`
+              : `$${costVal - budgetUsd} over budget`
             : budgetUsd
             ? `Budget cap: < $${budgetUsd}/mo`
             : 'Unconstrained'
         }
         statusColor={
-          winner?.cost != null
-            ? budgetUsd && winner.cost > budgetUsd
+          costVal != null
+            ? budgetUsd && costVal > budgetUsd
               ? 'text-rose-400'
-              : 'text-slate-100'
+              : 'text-white'
             : 'text-slate-400'
         }
+        progressPercent={costProgress}
+        progressColor={isBudgetMet ? 'bg-indigo-400' : 'bg-rose-500'}
       />
 
       {/* Metric 4: Database CPU Load */}
       <MetricCard
         title="Database CPU Load"
-        value={winner?.cpu != null ? `${winner.cpu}%` : 'Not modelled'}
-        unit={winner?.cpu != null ? 'CPU' : ''}
-        provenance={winner?.cpu != null ? (winner.cpu_provenance || 'ESTIMATED') : 'NOT_MODELLED'}
+        value={cpuVal != null ? `${cpuVal}%` : 'Not modelled'}
+        unit={cpuVal != null ? 'CPU' : ''}
+        provenance={cpuVal != null ? (winner?.cpu_provenance || 'ESTIMATED') : 'NOT_MODELLED'}
         targetComparison={
-          winner?.cpu != null
-            ? winner.cpu < 60
+          cpuVal != null
+            ? cpuVal < 60
               ? 'Safe headroom (<60%)'
-              : winner.cpu < 85
+              : cpuVal < 85
               ? 'Moderate load'
               : 'High contention risk'
             : 'Hardware model pending'
         }
         statusColor={
-          winner?.cpu != null
-            ? winner.cpu < 60
+          cpuVal != null
+            ? cpuVal < 60
               ? 'text-emerald-400'
-              : winner.cpu < 85
+              : cpuVal < 85
               ? 'text-amber-400'
               : 'text-rose-400'
             : 'text-slate-400'
+        }
+        progressPercent={cpuVal != null ? Math.min(100, cpuVal) : null}
+        progressColor={
+          cpuVal != null
+            ? cpuVal < 60
+              ? 'bg-emerald-500'
+              : cpuVal < 85
+              ? 'bg-amber-500'
+              : 'bg-rose-500'
+            : 'bg-slate-600'
         }
       />
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, ChevronRight, HelpCircle } from 'lucide-react';
+import { AlertTriangle, ChevronRight, HelpCircle, ShieldAlert } from 'lucide-react';
 
 export default function ReconsiderConditions({ conditions = [] }) {
   const defaultConditions = [
@@ -23,12 +23,19 @@ export default function ReconsiderConditions({ conditions = [] }) {
   const displayConditions = conditions.length > 0 ? conditions : defaultConditions;
 
   return (
-    <div className="rounded-2xl bg-[#0c101a] border border-white/[0.08] p-6 space-y-4">
-      <div className="flex items-center gap-2 pb-3 border-b border-white/[0.06]">
-        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-          When Should You Reconsider This Architecture?
-        </h2>
+    <div className="saas-card p-6 space-y-4">
+      <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.06]">
+        <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-sm">
+          <AlertTriangle className="w-4 h-4" />
+        </div>
+        <div>
+          <h2 className="text-sm font-bold text-slate-100 tracking-tight">
+            Operational Reconsideration Triggers
+          </h2>
+          <p className="text-[11px] text-slate-400">
+            Concrete scale or traffic shifts that would require modifying this design
+          </p>
+        </div>
       </div>
 
       <p className="text-xs text-slate-400 leading-relaxed">
@@ -43,19 +50,22 @@ export default function ReconsiderConditions({ conditions = [] }) {
           const type = isObj ? item.type : 'Model-supported boundary';
 
           return (
-            <div key={idx} className="p-3.5 rounded-xl bg-black/25 border border-white/[0.04] text-xs text-slate-300 space-y-1">
+            <div
+              key={idx}
+              className="p-4 rounded-xl bg-slate-900/50 border border-white/[0.08] hover:border-white/[0.14] transition-all space-y-2 shadow-sm"
+            >
               <div className="flex items-center justify-between gap-2">
-                <div className="font-semibold text-slate-200 flex items-center gap-1.5">
+                <div className="font-semibold text-slate-200 text-xs flex items-center gap-1.5">
                   <ChevronRight className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span>{category}</span>
                 </div>
                 {type && (
-                  <span className="badge badge-zinc text-[9px] font-mono py-0 px-1.5">
+                  <span className="badge-saas bg-white/[0.04] text-slate-300 border border-white/[0.08] text-[10px]">
                     {type}
                   </span>
                 )}
               </div>
-              <p className="text-slate-400 leading-relaxed pl-5">
+              <p className="text-slate-300 text-xs leading-relaxed pl-5">
                 {text}
               </p>
             </div>
@@ -64,10 +74,10 @@ export default function ReconsiderConditions({ conditions = [] }) {
       </div>
 
       {/* Extrapolation Warning Banner */}
-      <div className="p-3 rounded-xl bg-black/30 border border-white/[0.04] flex items-start gap-2.5 text-xs text-slate-400">
+      <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-2.5 text-xs text-slate-400">
         <HelpCircle className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-        <span className="leading-relaxed">
-          <strong>Validation Boundary Notice:</strong> Performance figures represent discrete-event queueing simulation (SimPy). Traffic beyond validated ranges should be empirically benchmarked before relying on this design at higher scale.
+        <span className="leading-relaxed text-[11px]">
+          <strong className="text-slate-300">Validation Boundary Notice:</strong> Performance figures represent discrete-event queueing simulation (SimPy). Traffic beyond validated ranges should be empirically benchmarked before relying on this design at higher scale.
         </span>
       </div>
     </div>

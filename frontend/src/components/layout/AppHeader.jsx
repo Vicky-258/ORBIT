@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { RotateCcw, ChevronDown } from 'lucide-react';
+import { RotateCcw, ChevronDown, Sparkles, Check } from 'lucide-react';
 import { CANONICAL_PRESETS } from '../../constants/presets';
 
 export default function AppHeader() {
@@ -12,70 +12,71 @@ export default function AppHeader() {
   } = useApp();
 
   return (
-    <header className="h-13 border-b border-white/[0.08] bg-[#0c101a] px-5 sm:px-6 flex items-center justify-between shrink-0 z-20">
+    <header className="h-14 border-b border-white/[0.06] bg-[#080b12]/90 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-20">
       {/* Brand: Logo & Product Title */}
       <div className="flex items-center gap-3">
-        <div className="w-6 h-6 rounded-md bg-indigo-600 flex items-center justify-center font-bold text-white text-xs shadow-sm">
-          A
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 flex items-center justify-center font-bold text-white text-xs shadow-[0_0_12px_rgba(99,102,241,0.4)] border border-white/20">
+          <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
         </div>
-        <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-sm text-slate-100 tracking-tight">AADS</span>
-          <span className="text-xs text-slate-400 font-normal">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-sm text-white tracking-tight">AADS</span>
+          <span className="text-[11px] font-medium text-slate-400 border-l border-white/[0.1] pl-2">
             Architecture Copilot
           </span>
         </div>
       </div>
 
-      {/* Center: Compact Scenario Selector */}
-      <div className="flex items-center gap-2">
-        <div className="relative inline-block text-left">
-          <select
-            value={selectedPresetId || 'custom'}
-            onChange={(e) => {
-              const matched = CANONICAL_PRESETS.find((p) => p.id === e.target.value);
-              if (matched) loadPreset(matched);
-            }}
-            className="text-xs font-medium bg-[#141b2d] border border-white/[0.1] hover:border-white/[0.2] text-slate-200 rounded-lg px-3 py-1.5 cursor-pointer appearance-none pr-8 transition-all"
-          >
-            {CANONICAL_PRESETS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title} ({p.badge})
-              </option>
-            ))}
-            {!selectedPresetId && (
-              <option value="custom">Custom Workload Specification</option>
-            )}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-            <ChevronDown className="w-3.5 h-3.5" />
-          </div>
-        </div>
+      {/* Center: Scenario Quick Switcher */}
+      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+        {CANONICAL_PRESETS.map((p) => {
+          const isSelected = selectedPresetId === p.id;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => loadPreset(p)}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                isSelected
+                  ? 'bg-white/10 text-white shadow-sm border border-white/10'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
+              }`}
+            >
+              {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
+              <span>{p.title.replace(/Scenario \d+: /, '')}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Right: Backend Status & Reset */}
       <div className="flex items-center gap-3">
         {/* Backend readiness indicator */}
-        <div className="flex items-center gap-1.5 text-xs text-slate-400" title={backendConnected ? 'FastAPI Backend Connected' : 'Backend Disconnected'}>
+        <div
+          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06] text-xs"
+          title={backendConnected ? 'FastAPI Backend Ready' : 'Backend Offline'}
+        >
           <span
             className={`w-2 h-2 rounded-full ${
-              backendConnected ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]' : 'bg-rose-400'
+              backendConnected
+                ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                : 'bg-rose-400'
             }`}
           />
-          <span className="hidden md:inline text-[11px] font-medium text-slate-400">
-            {backendConnected ? 'Ready' : 'Offline'}
+          <span className="hidden md:inline text-[11px] font-medium text-slate-400 font-mono">
+            {backendConnected ? 'API Ready' : 'Offline'}
           </span>
         </div>
 
-        <div className="h-3.5 w-px bg-white/[0.08]" />
+        <div className="h-4 w-px bg-white/[0.08]" />
 
         {/* Reset Action */}
         <button
           type="button"
           onClick={resetToDefault}
-          className="btn btn-ghost text-xs py-1 px-2 text-slate-400 hover:text-slate-200"
+          className="btn-saas-secondary text-xs py-1 px-2.5 rounded-lg flex items-center gap-1.5 text-slate-400 hover:text-white"
           title="Reset to default baseline"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <RotateCcw className="w-3 h-3" />
           <span className="hidden sm:inline text-xs">Reset</span>
         </button>
       </div>
