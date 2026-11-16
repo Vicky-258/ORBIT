@@ -11,3 +11,5 @@ data/experiments/
 *.log
 *.zip
 artifacts/**/*.zip
+frontend/node_modules/
+frontend/dist/

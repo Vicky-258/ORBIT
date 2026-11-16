@@ -26,15 +26,16 @@ export PYTHONPATH="${WORKSPACE_ROOT}:${PYTHONPATH}"
 # Default hosts and ports
 API_HOST="${AADS_API_HOST:-127.0.0.1}"
 API_PORT="${AADS_API_PORT:-8000}"
-UI_PORT="${AADS_UI_PORT:-8501}"
+REACT_PORT="${AADS_REACT_PORT:-3000}"
+STREAMLIT_PORT="${AADS_STREAMLIT_PORT:-8501}"
 
 echo "======================================================================"
 echo "⚡ AADS: Agentic Architecture Design & Simulation — Demo Launcher"
 echo "======================================================================"
-echo "Workspace Root: ${WORKSPACE_ROOT}"
-echo "Python Binary:  ${PYTHON}"
-echo "API Endpoint:   http://${API_HOST}:${API_PORT}"
-echo "UI Dashboard:   http://${API_HOST}:${UI_PORT}"
+echo "Workspace Root:  ${WORKSPACE_ROOT}"
+echo "Python Binary:   ${PYTHON}"
+echo "API Endpoint:    http://${API_HOST}:${API_PORT}"
+echo "React Frontend:  http://${API_HOST}:${REACT_PORT}"
 echo "======================================================================"
 
 # Handle command-line arguments
@@ -51,20 +52,29 @@ if [ "${MODE}" = "--api-only" ] || [ "${MODE}" = "api" ]; then
     exec "${PYTHON}" -m uvicorn aads.api.app:app --host "${API_HOST}" --port "${API_PORT}" --reload
 fi
 
-if [ "${MODE}" = "--ui-only" ] || [ "${MODE}" = "ui" ]; then
-    echo "Starting Streamlit UI on http://${API_HOST}:${UI_PORT}..."
-    exec "${STREAMLIT}" run aads/ui/streamlit_app.py --server.port "${UI_PORT}" --server.address "${API_HOST}"
+if [ "${MODE}" = "--react-only" ] || [ "${MODE}" = "react" ]; then
+    echo "Starting React Vite frontend on http://${API_HOST}:${REACT_PORT}..."
+    cd "${WORKSPACE_ROOT}/frontend"
+    exec yarn dev
 fi
 
-# Default: Start both API and UI
+if [ "${MODE}" = "--streamlit" ] || [ "${MODE}" = "streamlit" ]; then
+    echo "Starting legacy Streamlit UI on http://${API_HOST}:${STREAMLIT_PORT}..."
+    exec "${STREAMLIT}" run aads/ui/streamlit_app.py --server.port "${STREAMLIT_PORT}" --server.address "${API_HOST}"
+fi
+
+# Default: Start both FastAPI backend and React frontend
 API_PID=""
+FRONTEND_PID=""
 
 cleanup() {
     echo ""
     echo "Shutting down AADS demo services..."
+    if [ -n "${FRONTEND_PID}" ] && kill -0 "${FRONTEND_PID}" 2>/dev/null; then
+        kill "${FRONTEND_PID}" 2>/dev/null || true
+    fi
     if [ -n "${API_PID}" ] && kill -0 "${API_PID}" 2>/dev/null; then
         kill "${API_PID}" 2>/dev/null || true
-        wait "${API_PID}" 2>/dev/null || true
     fi
     echo "Demo stopped gracefully."
     exit 0
@@ -75,7 +85,6 @@ trap cleanup INT TERM
 echo "1. Starting FastAPI backend in background..."
 "${PYTHON}" -m uvicorn aads.api.app:app --host "${API_HOST}" --port "${API_PORT}" > /tmp/aads_api.log 2>&1 &
 API_PID=$!
-
 echo "   Backend PID: ${API_PID} (Logs: /tmp/aads_api.log)"
 
 # Wait for API health check
@@ -90,8 +99,9 @@ for i in {1..30}; do
 done
 
 echo ""
-echo "3. Starting Streamlit frontend on http://${API_HOST}:${UI_PORT}..."
+echo "3. Starting React frontend on http://${API_HOST}:${REACT_PORT}..."
 echo "   Press Ctrl+C to terminate both backend and frontend."
 echo "======================================================================"
 
-"${STREAMLIT}" run aads/ui/streamlit_app.py --server.port "${UI_PORT}" --server.address "${API_HOST}"
+cd "${WORKSPACE_ROOT}/frontend"
+exec yarn dev

@@ -1,29 +1,49 @@
 # Agentic Architecture Design & Simulation (AADS) POC
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![SimPy](https://img.shields.io/badge/simulation-SimPy-orange.svg)](https://simpy.readthedocs.io/)
+[![React](https://img.shields.io/badge/UI-React%2018%20%2B%20Vite-61DAFB.svg)](frontend/)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-[![Streamlit](https://img.shields.io/badge/UI-Streamlit-FF4B4B.svg)](https://streamlit.io/)
-[![Tests](https://img.shields.io/badge/tests-53%20passed-brightgreen.svg)](tests/)
+[![SimPy](https://img.shields.io/badge/simulation-SimPy-orange.svg)](https://simpy.readthedocs.io/)
+[![Streamlit](https://img.shields.io/badge/UI-Streamlit%20(Legacy)-FF4B4B.svg)](aads/ui/streamlit_app.py)
+[![Tests](https://img.shields.io/badge/tests-337%20passed-brightgreen.svg)](tests/)
 
-A working proof-of-concept for an AI agent that designs, benchmarks, simulates, and recommends backend system architectures based on empirical evidence and discrete-event simulation.
+A working platform for an AI agent that designs, benchmarks, simulates, and recommends backend system architectures based on empirical evidence, bounded investigation cycles, and discrete-event simulation.
 
 ---
 
 ## ⚡ Quick Start: Running the Phase 5.0 Product Demo
 
-AADS includes an end-to-end demonstrable prototype that translates natural-language backend workload descriptions into simulated, evidence-backed architectural recommendations.
+AADS includes an end-to-end demonstrable prototype that translates natural-language backend workload descriptions into simulated, evidence-backed architectural recommendations with a modern, modular **React frontend**.
 
-### 1. Launch the Complete Demo (Backend + Frontend)
+### 1. Launch the Complete Demo (Backend + React Frontend)
 
 ```bash
-# Starts FastAPI backend (port 8000) and Streamlit workspace (port 8501)
+# Starts FastAPI backend (port 8000) and React frontend (port 3000)
 ./scripts/run_demo.sh
 ```
 
-Open your browser to **http://localhost:8501** to interact with the 4-Screen Architecture Decision Workspace.
+- Open your browser to **http://localhost:3000** to interact with the modular React Architecture Decision Workspace.
+- FastAPI REST documentation is accessible at **http://localhost:8000/docs**.
+- *(Optional legacy UI)*: Run `./scripts/run_demo.sh --streamlit` to launch the legacy Streamlit interface on port 8501.
 
-### 2. Run the 3 Canonical Demo Scenarios via CLI
+### 2. Modular Feature Architecture & Customization
+
+The React frontend uses a **Feature Registry / Slot Architecture** (`frontend/src/features/registry.js`):
+- **1-Click Feature Manager**: Open the "Features" drawer in the top navigation to enable or disable any feature in real-time.
+- **Dual Display Modes**: Toggle between **Flow** (continuous vertical dashboard) and **Tabs** (tabbed workspace).
+- **Adding New Features**: Drop a component into `frontend/src/features/YourFeature/index.jsx` and add an entry in `frontend/src/features/registry.js`. It instantly mounts, integrates into the state tree, and appears in the Feature Manager!
+- **Removing Features**: Set `defaultEnabled: false` or remove the registry entry.
+
+Built-in features:
+1. `workload-input` (Section A): Natural language input, canonical presets, constraint sliders.
+2. `investigation-trace` (Section B): Chronological agent action logs, elapsed time, policy gatekeeper badges.
+3. `architecture-comparison` (Section C): Candidate simulation matrix, p50/p95/p99 latency, QPS, CPU load, and cost.
+4. `recommendation` (Section D): Winner hero card, why it won, why alternatives lost, trade-offs, and conditions for change.
+5. `evidence-disclosure` (Section E): Epistemic taxonomy table (Measured vs Model-Derived vs Simulation-Derived vs Assumed).
+6. `model-registry`: Interactive browser for the 24 active empirical models in `data/registry.db`.
+7. `cost-sensitivity`: Scale multiplier simulator projecting costs and latencies under 0.5x to 5.0x traffic growth.
+
+### 3. Run the 3 Canonical Demo Scenarios via CLI
 
 ```bash
 # Runs all 3 demonstration scenarios end-to-end with full assertion verification
@@ -36,7 +56,7 @@ The three scenarios demonstrate distinct architectural trade-offs:
 2. **Scenario 2 (Write-Heavy Transactional)**: 150 RPS, 40/60 R/W, p95 $\le$ 150ms, $300 budget $\rightarrow$ **Architecture A (Simple: API $\rightarrow$ PostgreSQL)** wins; cache overhead is unjustified.
 3. **Scenario 3 (Background Worker Processing)**: 300 RPS incoming, async processing, p95 $\le$ 100ms, $350 budget $\rightarrow$ **Architecture C (Async: API $\rightarrow$ Queue $\rightarrow$ Worker $\rightarrow$ PostgreSQL)** wins for lowest API response latency.
 
-### 3. REST API Usage
+### 4. REST API Usage
 
 Execute the agent workflow via curl:
 
