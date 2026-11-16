@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from './context/AppContext';
 
-import AppHeader from './components/layout/AppHeader';
-import WorkloadSummary from './components/layout/WorkloadSummary';
-import MainNavigation from './components/layout/MainNavigation';
+import PromptStudio from './components/prompt/PromptStudio';
+import ResultsHeader from './components/layout/ResultsHeader';
 
 import WorkloadDrawer from './components/workload/WorkloadDrawer';
 import ImplementationPromptModal from './components/blueprint/ImplementationPromptModal';
@@ -19,34 +18,52 @@ import FeatureManager from './features/FeatureManager';
 
 export default function App() {
   const {
+    viewMode,
+    goToPrompt,
     activeTab,
     loading,
     error,
     response,
     handleRunWorkflow,
-    loadPreset,
   } = useApp();
 
+  // Keyboard shortcut: Esc returns to Prompt Studio if on results page
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && viewMode === 'results') {
+        goToPrompt();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [viewMode, goToPrompt]);
+
+  // Stage 1: Prompt-Focused Studio
+  if (viewMode === 'prompt') {
+    return (
+      <div className="h-screen w-screen flex flex-col bg-[#0b0f17] text-slate-100 overflow-hidden font-sans">
+        <PromptStudio />
+        <ImplementationPromptModal />
+        <FeatureManager />
+      </div>
+    );
+  }
+
+  // Stage 2: Architecture Blueprint & Results
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#f8fafc] text-slate-900 overflow-hidden font-sans">
-      {/* 1. Global Application Header */}
-      <AppHeader />
+    <div className="h-screen w-screen flex flex-col bg-[#0b0f17] text-slate-100 overflow-hidden font-sans">
+      {/* 1. Results Navigation & Context Header */}
+      <ResultsHeader />
 
-      {/* 2. Compact Workload Summary Bar */}
-      <WorkloadSummary />
-
-      {/* 3. Main Navigation (01 Blueprint, 02 Compare, 03 Technical) */}
-      <MainNavigation />
-
-      {/* 4. Main Scrollable Content Canvas */}
-      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 min-h-0 bg-[#f8fafc]">
+      {/* 2. Main Scrollable Content Canvas */}
+      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 min-h-0 bg-[#0b0f17]">
         <div className="max-w-6xl mx-auto">
           {loading ? (
-            <LoadingState message="Simulating Architectures & Evaluating Constraints..." />
+            <LoadingState message="Simulating Candidate Topologies & Evaluating Constraints..." />
           ) : error ? (
             <ErrorState error={error} onRetry={() => handleRunWorkflow()} />
           ) : !response ? (
-            <EmptyState />
+            <EmptyState onGoToPrompt={goToPrompt} />
           ) : (
             <>
               {activeTab === 'blueprint' && <ArchitectureBlueprint />}
@@ -57,7 +74,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* 5. Drawers and Modals */}
+      {/* 3. Global Drawers and Modals */}
       <WorkloadDrawer />
       <ImplementationPromptModal />
       <FeatureManager />

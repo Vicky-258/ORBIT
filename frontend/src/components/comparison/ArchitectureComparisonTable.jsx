@@ -10,12 +10,12 @@ export default function ArchitectureComparisonTable({
   budgetUsd = 250,
 }) {
   return (
-    <div className="saas-card overflow-hidden shadow-xs border border-slate-200">
+    <div className="bg-[#111622] rounded-xl border border-white/[0.08] overflow-hidden shadow-xs">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-slate-500 w-1/4">
+            <tr className="border-b border-white/[0.08] bg-[#0d121c]">
+              <th className="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-slate-400 w-1/4">
                 Architecture Candidate
               </th>
               {candidates.map((cand) => {
@@ -25,27 +25,27 @@ export default function ArchitectureComparisonTable({
                     key={cand.id}
                     className={`py-4 px-6 text-xs ${
                       isWinner
-                        ? 'bg-emerald-50/70 border-x border-emerald-200'
-                        : 'text-slate-800'
+                        ? 'bg-emerald-950/20 border-x border-emerald-500/20'
+                        : 'text-white'
                     }`}
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {isWinner ? (
-                          <span className="badge-saas badge-emerald text-[9px] font-semibold flex items-center gap-1 shadow-2xs">
-                            <Award className="w-3 h-3 text-emerald-700" />
+                          <span className="badge-saas bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-semibold flex items-center gap-1">
+                            <Award className="w-3 h-3 text-emerald-400" />
                             <span>Recommended Winner</span>
                           </span>
                         ) : (
-                          <span className="badge-saas badge-zinc text-[9px]">
+                          <span className="badge-saas bg-white/[0.04] text-slate-400 border border-white/[0.08] text-[10px]">
                             Alternative
                           </span>
                         )}
                       </div>
-                      <div className="font-bold text-sm text-slate-900 tracking-tight">
+                      <div className="font-bold text-sm text-white tracking-tight">
                         {cand.name}
                       </div>
-                      <div className="text-xs text-slate-500 font-normal">
+                      <div className="text-xs text-slate-400 font-normal">
                         {cand.topology || cand.topology_summary}
                       </div>
                     </div>
@@ -55,12 +55,12 @@ export default function ArchitectureComparisonTable({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-100 text-xs">
+          <tbody className="divide-y divide-white/[0.05] text-xs">
             {/* Row 1: Response Time (p95) */}
-            <tr className="hover:bg-slate-50/50 transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-700">
-                <div className="font-semibold text-slate-800">Response Latency (p95)</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">SLA Target: &lt; {slaMs} ms</div>
+            <tr className="hover:bg-white/[0.02] transition-colors">
+              <td className="py-3.5 px-6 font-medium text-slate-300">
+                <div className="font-semibold text-white">Response Latency (p95)</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">SLA Target: &lt; {slaMs} ms</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -69,11 +69,11 @@ export default function ArchitectureComparisonTable({
                   <td
                     key={cand.id}
                     className={`py-3.5 px-6 ${
-                      isWinner ? 'bg-emerald-50/20 border-x border-emerald-200/50 font-bold' : ''
+                      isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20 font-bold' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm ${isSlaMet ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'}`}>
+                      <span className={`text-sm font-mono ${isSlaMet ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}`}>
                         {cand.p95 != null ? `${cand.p95} ms` : '—'}
                       </span>
                       <EvidenceBadge provenance={cand.latency_provenance || 'SIMULATED'} />
@@ -84,10 +84,10 @@ export default function ArchitectureComparisonTable({
             </tr>
 
             {/* Row 2: Throughput Achieved */}
-            <tr className="hover:bg-slate-50/50 transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-700">
-                <div className="font-semibold text-slate-800">Simulated Throughput</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Tested under offered load</div>
+            <tr className="hover:bg-white/[0.02] transition-colors">
+              <td className="py-3.5 px-6 font-medium text-slate-300">
+                <div className="font-semibold text-white">Simulated Throughput</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Tested under offered load</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -95,11 +95,11 @@ export default function ArchitectureComparisonTable({
                   <td
                     key={cand.id}
                     className={`py-3.5 px-6 ${
-                      isWinner ? 'bg-emerald-50/20 border-x border-emerald-200/50 font-bold' : ''
+                      isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20 font-bold' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-slate-900 font-bold text-sm">
+                      <span className="text-white font-mono font-semibold text-sm">
                         {cand.throughput != null ? `${cand.throughput} RPS` : '—'}
                       </span>
                       <EvidenceBadge provenance={cand.throughput_provenance || 'SIMULATED'} />
@@ -110,10 +110,10 @@ export default function ArchitectureComparisonTable({
             </tr>
 
             {/* Row 3: Estimated Monthly Cost */}
-            <tr className="hover:bg-slate-50/50 transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-700">
-                <div className="font-semibold text-slate-800">Estimated Monthly Cost</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Budget cap: {budgetUsd ? `< $${budgetUsd}/mo` : 'None'}</div>
+            <tr className="hover:bg-white/[0.02] transition-colors">
+              <td className="py-3.5 px-6 font-medium text-slate-300">
+                <div className="font-semibold text-white">Estimated Monthly Cost</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Budget cap: {budgetUsd ? `< $${budgetUsd}/mo` : 'None'}</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -122,11 +122,11 @@ export default function ArchitectureComparisonTable({
                   <td
                     key={cand.id}
                     className={`py-3.5 px-6 ${
-                      isWinner ? 'bg-emerald-50/20 border-x border-emerald-200/50 font-bold' : ''
+                      isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20 font-bold' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm ${isOverBudget ? 'text-rose-700 font-bold' : 'text-slate-900 font-bold'}`}>
+                      <span className={`text-sm font-mono ${isOverBudget ? 'text-rose-400 font-semibold' : 'text-white font-semibold'}`}>
                         {cand.cost != null ? `$${cand.cost}/mo` : 'Not modelled'}
                       </span>
                       <EvidenceBadge provenance={cand.cost != null ? (cand.cost_provenance || 'ASSUMED') : 'NOT_MODELLED'} />
@@ -137,10 +137,10 @@ export default function ArchitectureComparisonTable({
             </tr>
 
             {/* Row 4: Database CPU Utilization */}
-            <tr className="hover:bg-slate-50/50 transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-700">
-                <div className="font-semibold text-slate-800">Database CPU Load</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Hardware resource headroom</div>
+            <tr className="hover:bg-white/[0.02] transition-colors">
+              <td className="py-3.5 px-6 font-medium text-slate-300">
+                <div className="font-semibold text-white">Database CPU Load</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Hardware resource headroom</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -149,19 +149,19 @@ export default function ArchitectureComparisonTable({
                   <td
                     key={cand.id}
                     className={`py-3.5 px-6 ${
-                      isWinner ? 'bg-emerald-50/20 border-x border-emerald-200/50 font-bold' : ''
+                      isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20 font-bold' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-sm font-bold ${
+                        className={`text-sm font-mono font-semibold ${
                           cpuVal != null
                             ? cpuVal < 60
-                              ? 'text-emerald-700'
+                              ? 'text-emerald-400'
                               : cpuVal < 85
-                              ? 'text-amber-700'
-                              : 'text-rose-700'
-                            : 'text-slate-400'
+                              ? 'text-amber-400'
+                              : 'text-rose-400'
+                            : 'text-slate-500'
                         }`}
                       >
                         {cpuVal != null ? `${cpuVal}%` : 'Not modelled'}
@@ -174,10 +174,10 @@ export default function ArchitectureComparisonTable({
             </tr>
 
             {/* Row 5: Hard Constraint Status */}
-            <tr className="hover:bg-slate-50/50 transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-700">
-                <div className="font-semibold text-slate-800">Constraint Outcome</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">SLA &amp; budget compliance</div>
+            <tr className="hover:bg-white/[0.02] transition-colors">
+              <td className="py-3.5 px-6 font-medium text-slate-300">
+                <div className="font-semibold text-white">Constraint Outcome</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">SLA &amp; budget compliance</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -186,7 +186,7 @@ export default function ArchitectureComparisonTable({
                   <td
                     key={cand.id}
                     className={`py-3.5 px-6 ${
-                      isWinner ? 'bg-emerald-50/20 border-x border-emerald-200/50' : ''
+                      isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20' : ''
                     }`}
                   >
                     <StatusBadge status={status} type="constraint" />
@@ -196,10 +196,10 @@ export default function ArchitectureComparisonTable({
             </tr>
 
             {/* Row 6: Evidence Coverage Status */}
-            <tr className="hover:bg-slate-50/50 transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-700">
-                <div className="font-semibold text-slate-800">Evidence Coverage</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Empirical model support</div>
+            <tr className="hover:bg-white/[0.02] transition-colors">
+              <td className="py-3.5 px-6 font-medium text-slate-300">
+                <div className="font-semibold text-white">Evidence Coverage</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Empirical model support</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -208,7 +208,7 @@ export default function ArchitectureComparisonTable({
                   <td
                     key={cand.id}
                     className={`py-3.5 px-6 ${
-                      isWinner ? 'bg-emerald-50/20 border-x border-emerald-200/50' : ''
+                      isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20' : ''
                     }`}
                   >
                     <StatusBadge status={evStatus} type="evidence" />
@@ -218,10 +218,10 @@ export default function ArchitectureComparisonTable({
             </tr>
 
             {/* Row 7: Architecture Trade-Off */}
-            <tr className="hover:bg-slate-50/50 transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-700">
-                <div className="font-semibold text-slate-800">Primary Trade-Off</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Operational considerations</div>
+            <tr className="hover:bg-white/[0.02] transition-colors">
+              <td className="py-3.5 px-6 font-medium text-slate-300">
+                <div className="font-semibold text-white">Primary Trade-Off</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Operational considerations</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -237,8 +237,8 @@ export default function ArchitectureComparisonTable({
                 return (
                   <td
                     key={cand.id}
-                    className={`py-3.5 px-6 text-slate-600 text-xs leading-relaxed ${
-                      isWinner ? 'bg-emerald-50/20 border-x border-emerald-200/50 text-slate-800 font-medium' : ''
+                    className={`py-3.5 px-6 text-slate-300 text-xs leading-relaxed ${
+                      isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20 text-white font-medium' : ''
                     }`}
                   >
                     {tradeOffSummary}

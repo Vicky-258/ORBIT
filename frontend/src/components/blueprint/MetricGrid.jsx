@@ -33,7 +33,7 @@ export default function MetricGrid({ winner, workload = {} }) {
         provenance={winner?.latency_provenance || 'SIMULATED'}
         targetComparison={slaMs ? `Target: < ${slaMs} ms` : null}
         uncertaintyRange={uncertaintyText}
-        statusColor={isSlaMet ? 'text-emerald-700' : 'text-rose-700'}
+        statusColor={isSlaMet ? 'text-emerald-400' : 'text-rose-400'}
         progressPercent={latencyProgress}
         progressColor={isSlaMet ? 'bg-emerald-500' : 'bg-rose-500'}
       />
@@ -45,9 +45,9 @@ export default function MetricGrid({ winner, workload = {} }) {
         unit="req/sec"
         provenance={winner?.throughput_provenance || 'SIMULATED'}
         targetComparison="Offered load tested"
-        statusColor="text-slate-900"
+        statusColor="text-white"
         progressPercent={100}
-        progressColor="bg-slate-700"
+        progressColor="bg-indigo-500"
       />
 
       {/* Metric 3: Estimated Monthly Cost */}
@@ -68,12 +68,12 @@ export default function MetricGrid({ winner, workload = {} }) {
         statusColor={
           costVal != null
             ? budgetUsd && costVal > budgetUsd
-              ? 'text-rose-700'
-              : 'text-slate-900'
+              ? 'text-rose-400'
+              : 'text-white'
             : 'text-slate-500'
         }
         progressPercent={costProgress}
-        progressColor={isBudgetMet ? 'bg-slate-700' : 'bg-rose-500'}
+        progressColor={isBudgetMet ? 'bg-slate-600' : 'bg-rose-500'}
       />
 
       {/* Metric 4: Database CPU Load */}
@@ -94,21 +94,19 @@ export default function MetricGrid({ winner, workload = {} }) {
         statusColor={
           cpuVal != null
             ? cpuVal < 60
-              ? 'text-emerald-700'
+              ? 'text-emerald-400'
               : cpuVal < 85
-              ? 'text-amber-700'
-              : 'text-rose-700'
+              ? 'text-amber-400'
+              : 'text-rose-400'
             : 'text-slate-500'
         }
-        progressPercent={cpuVal != null ? Math.min(100, cpuVal) : null}
+        progressPercent={cpuVal != null ? cpuVal : null}
         progressColor={
-          cpuVal != null
-            ? cpuVal < 60
-              ? 'bg-emerald-500'
-              : cpuVal < 85
-              ? 'bg-amber-500'
-              : 'bg-rose-500'
-            : 'bg-slate-600'
+          cpuVal != null && cpuVal < 60
+            ? 'bg-emerald-500'
+            : cpuVal != null && cpuVal < 85
+            ? 'bg-amber-500'
+            : 'bg-rose-500'
         }
       />
     </div>

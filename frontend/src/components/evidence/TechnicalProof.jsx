@@ -20,18 +20,18 @@ export default function TechnicalProof() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Header and Sub-Tab Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
         <div>
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+          <h2 className="text-lg font-bold text-white tracking-tight">
             Technical Proof, Evidence &amp; Model Calibration
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Empirical measurements, discrete-event queueing traces, and model coverage bounds
           </p>
         </div>
 
         {/* Sub-tab pills */}
-        <div className="inline-flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200/80 overflow-x-auto shrink-0">
+        <div className="inline-flex items-center gap-1 bg-[#111622] p-1 rounded-lg border border-white/[0.08] overflow-x-auto shrink-0">
           {SUB_TABS.map((tab) => {
             const Icon = tab.icon;
             const isCurrent = subTab === tab.id;
@@ -43,11 +43,11 @@ export default function TechnicalProof() {
                 onClick={() => setSubTab(tab.id)}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   isCurrent
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/80 font-semibold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    ? 'bg-white text-slate-950 font-semibold shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isCurrent ? 'text-slate-900' : 'text-slate-400'}`} />
+                <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
               </button>
             );

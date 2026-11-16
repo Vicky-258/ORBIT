@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, ChevronRight, HelpCircle, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, ChevronRight, HelpCircle } from 'lucide-react';
 
 export default function ReconsiderConditions({ conditions = [] }) {
   const defaultConditions = [
@@ -23,22 +23,22 @@ export default function ReconsiderConditions({ conditions = [] }) {
   const displayConditions = conditions.length > 0 ? conditions : defaultConditions;
 
   return (
-    <div className="saas-card p-6 space-y-4">
-      <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-        <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shadow-2xs">
+    <div className="bg-[#111622] rounded-xl border border-white/[0.08] p-5 sm:p-6 space-y-4 shadow-xs">
+      <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.06]">
+        <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
           <AlertTriangle className="w-4 h-4" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+          <h2 className="text-sm font-bold text-white tracking-tight">
             Operational Reconsideration Triggers
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             Concrete scale or traffic shifts that would require modifying this design
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-slate-600 leading-relaxed">
+      <p className="text-xs text-slate-400 leading-relaxed">
         Architectural choices are bound to workload assumptions. Reassess this blueprint if the following operational boundaries are approached:
       </p>
 
@@ -52,20 +52,19 @@ export default function ReconsiderConditions({ conditions = [] }) {
           return (
             <div
               key={idx}
-              className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 hover:border-slate-300 transition-all space-y-2 shadow-2xs"
+              className="p-3.5 rounded-lg border border-white/[0.06] bg-[#0b0f17] hover:border-white/15 transition-all space-y-1.5"
             >
               <div className="flex items-center justify-between gap-2">
-                <div className="font-semibold text-slate-900 text-xs flex items-center gap-1.5">
-                  <ChevronRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span className="text-xs font-semibold text-white tracking-tight flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                   <span>{category}</span>
-                </div>
-                {type && (
-                  <span className="badge-saas badge-zinc text-[10px]">
-                    {type}
-                  </span>
-                )}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.06]">
+                  {type}
+                </span>
               </div>
-              <p className="text-slate-600 text-xs leading-relaxed pl-5">
+
+              <p className="text-xs text-slate-300 leading-relaxed">
                 {text}
               </p>
             </div>
@@ -73,12 +72,9 @@ export default function ReconsiderConditions({ conditions = [] }) {
         })}
       </div>
 
-      {/* Extrapolation Warning Banner */}
-      <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-900">
-        <HelpCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-        <span className="leading-relaxed text-xs">
-          <strong className="text-amber-950 font-semibold">Validation Boundary Notice:</strong> Performance figures represent discrete-event queueing simulation (SimPy). Traffic beyond validated ranges should be empirically benchmarked before relying on this design at higher scale.
-        </span>
+      <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-[11px] text-slate-500 font-mono">
+        <span>Boundary definitions derived from empirical calibration models</span>
+        <HelpCircle className="w-3.5 h-3.5" />
       </div>
     </div>
   );

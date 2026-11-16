@@ -17,16 +17,16 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
   const alternatives = recommendation.rejected_alternatives || [];
 
   return (
-    <div className="saas-card p-6 space-y-4">
-      <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-        <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-2xs">
+    <div className="bg-[#111622] rounded-xl border border-white/[0.08] p-5 sm:p-6 space-y-4 shadow-xs">
+      <div className="flex items-center gap-2.5 pb-3 border-b border-white/[0.06]">
+        <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
           <CheckCircle2 className="w-4 h-4" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-slate-900 tracking-tight">
+          <h2 className="text-sm font-bold text-white tracking-tight">
             Senior Architect Rationale
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             Why this topology wins under your latency and cost constraints
           </p>
         </div>
@@ -34,105 +34,122 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
 
       <div className="space-y-3">
         {/* Accordion 1: Why This Architecture Fits */}
-        <div className="rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden hover:border-slate-300 transition-all">
+        <div className="rounded-xl border border-white/[0.08] bg-[#0b0f17] overflow-hidden hover:border-white/15 transition-all">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'why' ? null : 'why')}
-            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-slate-800 hover:text-slate-900 transition-colors cursor-pointer"
+            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-slate-200 hover:text-white transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-sm font-semibold">1. Why this architecture fits your workload</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="text-sm font-semibold text-white">1. Why this architecture fits your workload</span>
             </div>
             {openSection === 'why' ? (
-              <ChevronUp className="w-4 h-4 text-slate-500" />
+              <ChevronUp className="w-4 h-4 text-slate-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-slate-500" />
             )}
           </button>
 
           {openSection === 'why' && (
-            <div className="p-4 pt-1 border-t border-slate-200/60 text-xs text-slate-700 space-y-2.5 leading-relaxed bg-white">
-              {rationale.map((r, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 text-slate-700">
-                  <div className="w-4 h-4 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 mt-0.5">
-                    <Check className="w-2.5 h-2.5" />
+            <div className="px-4 pb-4 pt-1 border-t border-white/[0.05] space-y-2 text-xs text-slate-300 leading-relaxed">
+              {rationale.map((item, idx) => (
+                <div key={idx} className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-500/20">
+                    <Check className="w-2.5 h-2.5 text-emerald-400" />
                   </div>
-                  <span className="text-slate-700 leading-normal">{r}</span>
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Accordion 2: Trade-Offs Introduced */}
-        <div className="rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden hover:border-slate-300 transition-all">
+        {/* Accordion 2: Trade-offs & Operational Risks */}
+        <div className="rounded-xl border border-white/[0.08] bg-[#0b0f17] overflow-hidden hover:border-white/15 transition-all">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'tradeoffs' ? null : 'tradeoffs')}
-            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-slate-800 hover:text-slate-900 transition-colors cursor-pointer"
+            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-slate-200 hover:text-white transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="text-sm font-semibold">2. What trade-offs does it introduce?</span>
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              <span className="text-sm font-semibold text-white">2. Trade-offs &amp; Operational Costs</span>
             </div>
             {openSection === 'tradeoffs' ? (
-              <ChevronUp className="w-4 h-4 text-slate-500" />
+              <ChevronUp className="w-4 h-4 text-slate-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-slate-500" />
             )}
           </button>
 
           {openSection === 'tradeoffs' && (
-            <div className="p-4 pt-1 border-t border-slate-200/60 text-xs text-slate-700 space-y-2.5 leading-relaxed bg-white">
-              {tradeOffs.map((t, idx) => (
-                <div key={idx} className="flex items-start gap-2.5 text-slate-700">
-                  <div className="w-4 h-4 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 mt-0.5">
-                    <AlertCircle className="w-2.5 h-2.5" />
+            <div className="px-4 pb-4 pt-1 border-t border-white/[0.05] space-y-2 text-xs text-slate-300 leading-relaxed">
+              {tradeOffs.map((item, idx) => (
+                <div key={idx} className="flex items-start gap-2.5">
+                  <div className="w-4 h-4 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-amber-500/20">
+                    <span className="text-[10px] font-bold text-amber-400">!</span>
                   </div>
-                  <span className="text-slate-700 leading-normal">{t}</span>
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Accordion 3: Alternatives Considered */}
-        <div className="rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden hover:border-slate-300 transition-all">
+        {/* Accordion 3: Architectural Alternatives Comparison */}
+        <div className="rounded-xl border border-white/[0.08] bg-[#0b0f17] overflow-hidden hover:border-white/15 transition-all">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'alternatives' ? null : 'alternatives')}
-            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-slate-800 hover:text-slate-900 transition-colors cursor-pointer"
+            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-slate-200 hover:text-white transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-2 rounded-full bg-slate-400" />
-              <span className="text-sm font-semibold">3. What alternatives were evaluated?</span>
+              <span className="w-2 h-2 rounded-full bg-slate-500" />
+              <span className="text-sm font-semibold text-white">3. When alternatives are appropriate</span>
             </div>
             {openSection === 'alternatives' ? (
-              <ChevronUp className="w-4 h-4 text-slate-500" />
+              <ChevronUp className="w-4 h-4 text-slate-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-slate-500" />
             )}
           </button>
 
           {openSection === 'alternatives' && (
-            <div className="p-4 pt-1 border-t border-slate-200/60 text-xs text-slate-700 space-y-3 leading-relaxed bg-white">
+            <div className="px-4 pb-4 pt-1 border-t border-white/[0.05] space-y-3 text-xs text-slate-300 leading-relaxed">
               {alternatives.length > 0 ? (
                 alternatives.map((alt, idx) => (
-                  <div key={idx} className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                    <div className="font-semibold text-slate-900 flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-slate-500" />
-                      <span>{alt.name || alt.architecture_name}</span>
+                  <div key={idx} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.05] space-y-1">
+                    <div className="font-semibold text-slate-200 flex items-center justify-between">
+                      <span>{alt.name || alt.candidate_id}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-white/[0.05] text-slate-400 font-mono">
+                        {alt.status || 'Evaluated'}
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-600 leading-normal pl-5">
-                      {alt.reason || alt.trade_off || alt.trade_off_vs_winner}
+                    <p className="text-slate-400 text-xs">
+                      {alt.reason_not_chosen || alt.why_not_selected || alt.summary}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-slate-500 text-xs">
-                  Candidate alternatives were evaluated against hard SLA constraints and multi-objective Pareto scoring.
-                </p>
+                <div className="space-y-2">
+                  <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.05] space-y-1">
+                    <div className="font-semibold text-slate-200">
+                      When direct PostgreSQL stops being sufficient:
+                    </div>
+                    <p className="text-slate-400">
+                      Direct PostgreSQL is operationally simpler and cost-effective under 150 RPS. Above 300 RPS read traffic, connection pool exhaustion and disk IOPS latency degrade p95 response times beyond the 100ms threshold.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.05] space-y-1">
+                    <div className="font-semibold text-slate-200">
+                      When asynchronous queue processing is unnecessary:
+                    </div>
+                    <p className="text-slate-400">
+                      Kafka or RabbitMQ event buffers excel for write-heavy burst absorption (read ratio &lt; 20%), but introduce eventual consistency and unnecessary worker fleet complexity for read-heavy OLTP APIs.
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           )}

@@ -48,8 +48,12 @@ export function AppProvider({ children }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [viewMode, setViewMode] = useState('prompt'); // 'prompt' | 'results'
   const [activeTab, setActiveTab] = useState('blueprint'); // 'blueprint' | 'compare' | 'technical'
   const [backendConnected, setBackendConnected] = useState(true);
+
+  const goToPrompt = useCallback(() => setViewMode('prompt'), []);
+  const goToResults = useCallback(() => setViewMode('results'), []);
 
   // Modal / Drawer open states
   const [isWorkloadDrawerOpen, setIsWorkloadDrawerOpen] = useState(false);
@@ -160,6 +164,7 @@ export function AppProvider({ children }) {
     const queryOptions = overrideOptions || options;
     setLoading(true);
     setError(null);
+    setViewMode('results');
 
     try {
       const rawData = await runDemoWorkflow(queryPrompt, queryOptions);
@@ -206,6 +211,10 @@ export function AppProvider({ children }) {
         handleRunWorkflow,
         loadPreset,
         resetToDefault,
+        viewMode,
+        setViewMode,
+        goToPrompt,
+        goToResults,
         activeTab,
         setActiveTab,
         isWorkloadDrawerOpen,

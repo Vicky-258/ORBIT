@@ -31,9 +31,9 @@ export default function UncertaintyPanel() {
 
   return (
     <div className="space-y-4 text-xs">
-      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
-        <span className="font-semibold text-slate-900">Scientific Uncertainty &amp; Limitation Disclosures</span>
-        <p className="text-slate-600 leading-relaxed">
+      <div className="p-4 rounded-xl bg-[#111622] border border-white/[0.08] text-slate-300 space-y-1">
+        <span className="font-semibold text-white">Scientific Uncertainty &amp; Limitation Disclosures</span>
+        <p className="text-slate-400 leading-relaxed">
           In alignment with AADS empirical integrity guidelines, all heuristic bounds and model limitations are disclosed openly to prevent overconfident architectural conclusions.
         </p>
       </div>
@@ -42,18 +42,18 @@ export default function UncertaintyPanel() {
         {uncertaintyItems.map((item, idx) => (
           <div
             key={idx}
-            className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2 text-xs"
+            className="p-4 rounded-xl bg-[#111622] border border-white/[0.08] shadow-xs space-y-2 text-xs hover:border-white/15 transition-all"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-semibold text-slate-900 flex items-center gap-2">
-                <Info className="w-4 h-4 text-slate-500 shrink-0" />
+              <span className="font-semibold text-white flex items-center gap-2">
+                <Info className="w-4 h-4 text-slate-400 shrink-0" />
                 <span>{item.title}</span>
               </span>
-              <span className="badge-saas badge-zinc text-[10px] shrink-0">
+              <span className="badge-saas bg-white/[0.05] text-slate-300 border border-white/10 text-[10px] shrink-0">
                 {item.badge}
               </span>
             </div>
-            <p className="text-slate-600 leading-relaxed pl-6">
+            <p className="text-slate-400 leading-relaxed pl-6">
               {item.description}
             </p>
           </div>
