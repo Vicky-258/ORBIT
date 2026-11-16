@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { runDemoWorkflow, checkBackendHealth } from '../api/client';
 import { getInitialFeatureStates } from '../features/registry';
 import { CANONICAL_PRESETS, DEFAULT_PROMPT } from '../constants/presets';
@@ -10,6 +10,26 @@ const AppContext = createContext(null);
 export function AppProvider({ children }) {
   const [selectedPresetId, setSelectedPresetId] = useState('ecommerce');
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
+
+  // Editable workload parameters
+  const [workloadInputs, setWorkloadInputs] = useState({
+    qps: 500,
+    p95_sla_ms: 100,
+    read_ratio: 0.90,
+    write_ratio: 0.10,
+    budget_usd: 250,
+  });
+
+  // Track the exact workload parameters that produced the current response
+  const [lastSimulatedWorkload, setLastSimulatedWorkload] = useState({
+    prompt: DEFAULT_PROMPT,
+    qps: 500,
+    p95_sla_ms: 100,
+    read_ratio: 0.90,
+    write_ratio: 0.10,
+    budget_usd: 250,
+  });
+
   const [options, setOptions] = useState({
     auto_benchmark_missing: true,
     force_synthetic: true,
@@ -21,17 +41,21 @@ export function AppProvider({ children }) {
     investigation_budget_seconds: 60.0,
   });
 
-  // Pre-load default Scenario 1 (E-commerce Catalog) so the studio is NEVER an empty void!
+  // Pre-load default Scenario 1 (E-commerce Catalog)
   const [response, setResponse] = useState(() => {
     return normalizeResponse(canonicalScenarios.scenario_1_ecommerce);
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('recommendation');
-  const [featureStates, setFeatureStates] = useState(getInitialFeatureStates);
+  const [activeTab, setActiveTab] = useState('blueprint'); // 'blueprint' | 'compare' | 'technical'
   const [backendConnected, setBackendConnected] = useState(true);
+
+  // Modal / Drawer open states
+  const [isWorkloadDrawerOpen, setIsWorkloadDrawerOpen] = useState(false);
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isFeatureManagerOpen, setIsFeatureManagerOpen] = useState(false);
+  const [featureStates, setFeatureStates] = useState(getInitialFeatureStates);
 
   // Check backend health periodically
   useEffect(() => {
@@ -47,6 +71,18 @@ export function AppProvider({ children }) {
       clearInterval(interval);
     };
   }, []);
+
+  // Determine if the current inputs have diverged from the last simulated result (Stale Detection)
+  const isStale = useMemo(() => {
+    if (!lastSimulatedWorkload) return false;
+    return (
+      prompt !== lastSimulatedWorkload.prompt ||
+      workloadInputs.qps !== lastSimulatedWorkload.qps ||
+      workloadInputs.p95_sla_ms !== lastSimulatedWorkload.p95_sla_ms ||
+      workloadInputs.read_ratio !== lastSimulatedWorkload.read_ratio ||
+      workloadInputs.budget_usd !== lastSimulatedWorkload.budget_usd
+    );
+  }, [prompt, workloadInputs, lastSimulatedWorkload]);
 
   const toggleFeature = (featureId) => {
     setFeatureStates((prev) => ({
@@ -66,12 +102,30 @@ export function AppProvider({ children }) {
     setFeatureStates(getInitialFeatureStates());
   };
 
-  const loadPreset = (preset) => {
+  // 1-Click Preset Loader
+  const loadPreset = useCallback((preset) => {
     setSelectedPresetId(preset.id);
     setPrompt(preset.prompt);
     setError(null);
 
-    // Immediately load pre-computed canonical scenario simulation data
+    // Extract default numbers from preset
+    const qpsNum = preset.id === 'ecommerce' ? 500 : preset.id === 'transactional' ? 150 : 300;
+    const slaNum = preset.id === 'transactional' ? 150 : 100;
+    const readNum = preset.id === 'ecommerce' ? 0.90 : preset.id === 'transactional' ? 0.40 : 0.10;
+    const writeNum = 1 - readNum;
+    const budgetNum = preset.id === 'ecommerce' ? 250 : preset.id === 'transactional' ? 300 : 350;
+
+    const newInputs = {
+      qps: qpsNum,
+      p95_sla_ms: slaNum,
+      read_ratio: readNum,
+      write_ratio: writeNum,
+      budget_usd: budgetNum,
+    };
+
+    setWorkloadInputs(newInputs);
+
+    // Load pre-computed canonical scenario simulation data
     const scenarioKey = preset.scenarioKey || (
       preset.id === 'ecommerce' ? 'scenario_1_ecommerce' :
       preset.id === 'transactional' ? 'scenario_2_transactional' :
@@ -80,14 +134,25 @@ export function AppProvider({ children }) {
 
     const fixture = canonicalScenarios[scenarioKey];
     if (fixture) {
-      setResponse(normalizeResponse(fixture));
+      const normalized = normalizeResponse(fixture);
+      setResponse(normalized);
+      setLastSimulatedWorkload({
+        prompt: preset.prompt,
+        ...newInputs,
+      });
     }
-  };
+  }, []);
 
-  const updatePrompt = (newPrompt) => {
-    setPrompt(newPrompt);
-    const matched = CANONICAL_PRESETS.find((p) => p.prompt === newPrompt);
-    setSelectedPresetId(matched ? matched.id : null);
+  const updateWorkloadField = (field, value) => {
+    setWorkloadInputs((prev) => {
+      const updated = { ...prev, [field]: value };
+      if (field === 'read_ratio') {
+        updated.write_ratio = parseFloat((1 - value).toFixed(2));
+      } else if (field === 'write_ratio') {
+        updated.read_ratio = parseFloat((1 - value).toFixed(2));
+      }
+      return updated;
+    });
   };
 
   const handleRunWorkflow = async (overridePrompt, overrideOptions) => {
@@ -100,25 +165,35 @@ export function AppProvider({ children }) {
       const rawData = await runDemoWorkflow(queryPrompt, queryOptions);
       const normalized = normalizeResponse(rawData);
       setResponse(normalized);
+      setLastSimulatedWorkload({
+        prompt: queryPrompt,
+        ...workloadInputs,
+      });
+      setIsWorkloadDrawerOpen(false);
     } catch (err) {
-      console.warn('API execution warning, falling back to local simulation:', err);
-      // If API fails or is unreachable, match nearest canonical preset or preserve current
-      const matched = CANONICAL_PRESETS.find((p) => p.id === selectedPresetId) || CANONICAL_PRESETS[0];
-      const fallbackData = canonicalScenarios[matched.scenarioKey];
-      if (fallbackData) {
-        setResponse(normalizeResponse(fallbackData));
-      }
-      setError(null); // Keep UI pristine and resilient
+      console.error('Simulation execution failed:', err);
+      setError(err.message || 'Simulation execution failed. Please verify API status and retry.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetToDefault = () => {
+    loadPreset(CANONICAL_PRESETS[0]);
+    setActiveTab('blueprint');
+    setError(null);
   };
 
   return (
     <AppContext.Provider
       value={{
         prompt,
-        setPrompt: updatePrompt,
+        setPrompt,
+        workloadInputs,
+        setWorkloadInputs,
+        updateWorkloadField,
+        lastSimulatedWorkload,
+        isStale,
         selectedPresetId,
         setSelectedPresetId,
         options,
@@ -127,17 +202,23 @@ export function AppProvider({ children }) {
         setResponse,
         loading,
         error,
+        setError,
         handleRunWorkflow,
         loadPreset,
+        resetToDefault,
         activeTab,
         setActiveTab,
+        isWorkloadDrawerOpen,
+        setIsWorkloadDrawerOpen,
+        isPromptModalOpen,
+        setIsPromptModalOpen,
+        isFeatureManagerOpen,
+        setIsFeatureManagerOpen,
         featureStates,
         toggleFeature,
         setFeatureEnabled,
         resetFeatures,
         backendConnected,
-        isFeatureManagerOpen,
-        setIsFeatureManagerOpen,
       }}
     >
       {children}
