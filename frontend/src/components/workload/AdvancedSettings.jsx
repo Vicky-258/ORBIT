@@ -11,28 +11,28 @@ export default function AdvancedSettings() {
   };
 
   return (
-    <div className="border border-white/[0.06] rounded-xl overflow-hidden bg-black/20">
+    <div className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2.5 flex items-center justify-between text-xs text-slate-400 hover:text-slate-200 transition-colors"
+        className="w-full px-4 py-2.5 flex items-center justify-between text-xs text-slate-600 hover:text-slate-900 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Sliders className="w-3.5 h-3.5 text-slate-400" />
+          <Sliders className="w-3.5 h-3.5 text-slate-500" />
           <span className="font-medium">Advanced Simulation Settings</span>
         </div>
         {isOpen ? (
-          <ChevronUp className="w-4 h-4 text-slate-500" />
+          <ChevronUp className="w-4 h-4 text-slate-400" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-slate-500" />
+          <ChevronDown className="w-4 h-4 text-slate-400" />
         )}
       </button>
 
       {isOpen && (
-        <div className="p-4 pt-1 border-t border-white/[0.04] space-y-3.5 text-xs">
+        <div className="p-4 pt-1 border-t border-slate-200 bg-white space-y-3.5 text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">
+              <label className="text-[11px] text-slate-600 block mb-1">
                 SimPy Duration (seconds)
               </label>
               <input
@@ -46,7 +46,7 @@ export default function AdvancedSettings() {
             </div>
 
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">
+              <label className="text-[11px] text-slate-600 block mb-1">
                 Random Seed
               </label>
               <input
@@ -60,7 +60,7 @@ export default function AdvancedSettings() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">
+              <label className="text-[11px] text-slate-600 block mb-1">
                 Investigation Rounds Cap
               </label>
               <input
@@ -74,7 +74,7 @@ export default function AdvancedSettings() {
             </div>
 
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1">
+              <label className="text-[11px] text-slate-600 block mb-1">
                 Agent Time Budget (sec)
               </label>
               <input
@@ -88,13 +88,13 @@ export default function AdvancedSettings() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 pt-1 text-slate-400">
+          <div className="flex items-center gap-3 pt-1 text-slate-600">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={options.include_async}
                 onChange={(e) => updateOption('include_async', e.target.checked)}
-                className="rounded border-white/[0.1] bg-black/40 text-indigo-500 focus:ring-0"
+                className="rounded border-slate-300 text-slate-900 focus:ring-0"
               />
               <span>Include Async Queues</span>
             </label>

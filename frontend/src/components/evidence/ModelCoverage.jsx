@@ -48,17 +48,17 @@ export default function ModelCoverage() {
 
   return (
     <div className="space-y-4 text-xs">
-      <div className="p-4 rounded-xl bg-black/30 border border-white/[0.06] text-slate-300 space-y-1">
-        <span className="font-semibold text-slate-200">Empirical Model Operating Ranges</span>
-        <p className="text-slate-400 leading-relaxed">
-          The table below indicates the validated boundaries for each empirical performance model registered in SQLite. Operating within the <strong className="text-emerald-400">OBSERVED</strong> range guarantees high fidelity.
+      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
+        <span className="font-semibold text-slate-900">Empirical Model Operating Ranges</span>
+        <p className="text-slate-600 leading-relaxed">
+          The table below indicates the validated boundaries for each empirical performance model registered in SQLite. Operating within the <strong className="text-emerald-700">OBSERVED</strong> range guarantees high fidelity.
         </p>
       </div>
 
-      <div className="rounded-xl border border-white/[0.06] bg-black/30 overflow-hidden">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-white/[0.06] bg-black/40 text-slate-400">
+            <tr className="border-b border-slate-200 bg-slate-50 text-slate-600">
               <th className="py-3 px-4 font-semibold">Component &amp; Version</th>
               <th className="py-3 px-4 font-semibold">Coverage Status</th>
               <th className="py-3 px-4 font-semibold">Validated Operating Range</th>
@@ -66,22 +66,22 @@ export default function ModelCoverage() {
               <th className="py-3 px-4 font-semibold">Validation Notes</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.04]">
+          <tbody className="divide-y divide-slate-100">
             {coverageData.map((row, idx) => (
-              <tr key={idx} className="hover:bg-white/[0.01]">
-                <td className="py-3 px-4 font-semibold text-slate-200 font-mono text-[11px]">
+              <tr key={idx} className="hover:bg-slate-50/50">
+                <td className="py-3 px-4 font-semibold text-slate-900 font-mono text-[11px]">
                   {row.component}
                 </td>
                 <td className="py-3 px-4">
                   <StatusBadge status={row.status} type="evidence" />
                 </td>
-                <td className="py-3 px-4 font-mono text-slate-300 text-[11px]">
+                <td className="py-3 px-4 font-mono text-slate-600 text-[11px]">
                   {row.range}
                 </td>
-                <td className="py-3 px-4 font-mono text-slate-300 text-[11px]">
+                <td className="py-3 px-4 font-mono text-slate-700 text-[11px]">
                   {row.r2}
                 </td>
-                <td className="py-3 px-4 text-slate-400 text-xs">
+                <td className="py-3 px-4 text-slate-600 text-xs">
                   {row.notes}
                 </td>
               </tr>

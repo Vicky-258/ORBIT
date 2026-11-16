@@ -31,9 +31,9 @@ export default function UncertaintyPanel() {
 
   return (
     <div className="space-y-4 text-xs">
-      <div className="p-4 rounded-xl bg-black/30 border border-white/[0.06] text-slate-300 space-y-1">
-        <span className="font-semibold text-slate-200">Scientific Uncertainty &amp; Limitation Disclosures</span>
-        <p className="text-slate-400 leading-relaxed">
+      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1">
+        <span className="font-semibold text-slate-900">Scientific Uncertainty &amp; Limitation Disclosures</span>
+        <p className="text-slate-600 leading-relaxed">
           In alignment with AADS empirical integrity guidelines, all heuristic bounds and model limitations are disclosed openly to prevent overconfident architectural conclusions.
         </p>
       </div>
@@ -42,18 +42,18 @@ export default function UncertaintyPanel() {
         {uncertaintyItems.map((item, idx) => (
           <div
             key={idx}
-            className="p-4 rounded-xl bg-black/25 border border-white/[0.04] space-y-2 text-xs"
+            className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2 text-xs"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-semibold text-slate-100 flex items-center gap-2">
-                <Info className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="font-semibold text-slate-900 flex items-center gap-2">
+                <Info className="w-4 h-4 text-slate-500 shrink-0" />
                 <span>{item.title}</span>
               </span>
-              <span className="badge badge-zinc text-[10px] font-mono py-0 px-2 shrink-0">
+              <span className="badge-saas badge-zinc text-[10px] shrink-0">
                 {item.badge}
               </span>
             </div>
-            <p className="text-slate-400 leading-relaxed pl-6">
+            <p className="text-slate-600 leading-relaxed pl-6">
               {item.description}
             </p>
           </div>

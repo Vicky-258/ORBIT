@@ -28,7 +28,7 @@ export default function App() {
   } = useApp();
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#080c16] text-slate-100 overflow-hidden font-sans">
+    <div className="h-screen w-screen flex flex-col bg-[#f8fafc] text-slate-900 overflow-hidden font-sans">
       {/* 1. Global Application Header */}
       <AppHeader />
 
@@ -38,12 +38,9 @@ export default function App() {
       {/* 3. Main Navigation (01 Blueprint, 02 Compare, 03 Technical) */}
       <MainNavigation />
 
-      {/* 4. Main Scrollable Content Canvas with SaaS Ambient Light */}
-      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 min-h-0 bg-[#080c16] relative">
-        {/* Subtle Ambient SaaS Spotlight */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[400px] bg-radial from-indigo-500/[0.12] via-violet-500/[0.04] to-transparent rounded-full blur-3xl pointer-events-none -mt-36" />
-
-        <div className="relative z-10">
+      {/* 4. Main Scrollable Content Canvas */}
+      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 min-h-0 bg-[#f8fafc]">
+        <div className="max-w-6xl mx-auto">
           {loading ? (
             <LoadingState message="Simulating Architectures & Evaluating Constraints..." />
           ) : error ? (
