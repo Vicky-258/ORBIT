@@ -11,7 +11,7 @@ export default function CandidateDetails({ candidate, isWinner }) {
       className={`rounded-xl border transition-all ${
         isWinner
           ? 'bg-emerald-950/20 border-emerald-500/30'
-          : 'bg-[#111622] border-white/[0.08] hover:border-white/15'
+          : 'bg-[#121215] border-white/[0.08] hover:border-zinc-700'
       }`}
     >
       <button
@@ -20,7 +20,7 @@ export default function CandidateDetails({ candidate, isWinner }) {
         className="w-full p-4 flex items-center justify-between text-left cursor-pointer"
       >
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-300">
+          <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300">
             <Layers className="w-3.5 h-3.5" />
           </div>
           <div>
@@ -32,7 +32,7 @@ export default function CandidateDetails({ candidate, isWinner }) {
                 </span>
               )}
             </div>
-            <span className="text-xs text-slate-400 font-normal">
+            <span className="text-xs text-zinc-400 font-normal">
               {candidate.topology || candidate.topology_summary}
             </span>
           </div>
@@ -44,9 +44,9 @@ export default function CandidateDetails({ candidate, isWinner }) {
             type="constraint"
           />
           {isExpanded ? (
-            <ChevronUp className="w-4 h-4 text-slate-400" />
+            <ChevronUp className="w-4 h-4 text-zinc-400" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-slate-500" />
+            <ChevronDown className="w-4 h-4 text-zinc-500" />
           )}
         </div>
       </button>
@@ -56,7 +56,7 @@ export default function CandidateDetails({ candidate, isWinner }) {
           {/* Feasibility Checks */}
           {checks.length > 0 && (
             <div className="space-y-2">
-              <span className="text-xs font-semibold text-slate-300 block">
+              <span className="text-xs font-semibold text-zinc-300 block">
                 Feasibility Constraint Checks
               </span>
               <div className="space-y-1.5">
@@ -65,7 +65,7 @@ export default function CandidateDetails({ candidate, isWinner }) {
                   return (
                     <div
                       key={idx}
-                      className="p-2.5 rounded-lg bg-[#0b0f17] border border-white/[0.06] flex items-center justify-between gap-3 text-xs"
+                      className="p-2.5 rounded-lg bg-[#09090b] border border-zinc-800 flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="flex items-center gap-2">
                         {passed ? (
@@ -73,10 +73,10 @@ export default function CandidateDetails({ candidate, isWinner }) {
                         ) : (
                           <XCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                         )}
-                        <span className="text-slate-200 capitalize font-medium">{fc.criterion?.replace('_', ' ')}</span>
+                        <span className="text-zinc-200 capitalize font-medium">{fc.criterion?.replace('_', ' ')}</span>
                       </div>
 
-                      <div className="flex items-center gap-3 text-slate-400 font-mono">
+                      <div className="flex items-center gap-3 text-zinc-400 font-mono">
                         <span>Predicted: <strong className="text-white">{fc.predicted_value}</strong></span>
                         <span>Target: <strong className="text-white">&lt;= {fc.target_value}</strong></span>
                         <StatusBadge status={fc.status} type="constraint" />

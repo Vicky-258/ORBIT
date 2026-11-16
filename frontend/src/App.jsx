@@ -41,7 +41,7 @@ export default function App() {
   // Stage 1: Prompt-Focused Studio
   if (viewMode === 'prompt') {
     return (
-      <div className="h-screen w-screen flex flex-col bg-[#0b0f17] text-slate-100 overflow-hidden font-sans">
+      <div className="h-screen w-screen flex flex-col bg-[#09090b] text-zinc-100 overflow-hidden font-sans">
         <PromptStudio />
         <ImplementationPromptModal />
         <FeatureManager />
@@ -51,12 +51,12 @@ export default function App() {
 
   // Stage 2: Architecture Blueprint & Results
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#0b0f17] text-slate-100 overflow-hidden font-sans">
+    <div className="h-screen w-screen flex flex-col bg-[#09090b] text-zinc-100 overflow-hidden font-sans">
       {/* 1. Results Navigation & Context Header */}
       <ResultsHeader />
 
       {/* 2. Main Scrollable Content Canvas */}
-      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 min-h-0 bg-[#0b0f17]">
+      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 min-h-0 bg-[#09090b]">
         <div className="max-w-6xl mx-auto">
           {loading ? (
             <LoadingState message="Simulating Candidate Topologies & Evaluating Constraints..." />

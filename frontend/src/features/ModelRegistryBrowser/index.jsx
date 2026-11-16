@@ -53,24 +53,24 @@ export default function ModelRegistryBrowser() {
   );
 
   return (
-    <div className="bg-[#111622] rounded-xl border border-white/[0.08] p-6 lg:p-7 space-y-6 shadow-xs">
+    <div className="bg-[#121215] rounded-xl border border-white/[0.08] p-6 lg:p-7 space-y-6 shadow-xs">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300">
               <Database className="w-4 h-4" />
             </div>
             <h2 className="text-base font-bold tracking-tight text-white">
               Active Empirical Component Models
             </h2>
-            <span className="badge-saas bg-white/[0.05] text-slate-300 border border-white/10 text-[10px]">
+            <span className="badge-saas bg-zinc-800 text-zinc-300 border border-zinc-700 text-[10px]">
               24 Models Active
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-1 pl-9">
+          <p className="text-xs text-zinc-400 mt-1 pl-9">
             Calibrated empirical performance curves frozen in{' '}
-            <code className="font-mono text-indigo-300 text-[11px]">data/registry.db</code> (SHA-256: 69d3e0...77a6).
+            <code className="font-mono text-zinc-300 text-[11px]">data/registry.db</code> (SHA-256: 69d3e0...77a6).
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export default function ModelRegistryBrowser() {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
           <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+            <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3" />
             <input
               type="text"
               placeholder="Search component or model..."
@@ -98,11 +98,11 @@ export default function ModelRegistryBrowser() {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-9 text-xs py-2 rounded-lg bg-[#0b0f17] border border-white/10 text-white focus:border-indigo-500 transition-colors w-full"
+              className="pl-9 text-xs py-2 rounded-lg bg-[#09090b] border border-zinc-800 text-white focus:border-zinc-500 transition-colors w-full"
             />
           </div>
 
-          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#0b0f17] border border-white/[0.08] overflow-x-auto">
+          <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-[#09090b] border border-white/[0.08] overflow-x-auto">
             {['ALL', 'postgres', 'redis', 'kafka', 'api'].map((type) => (
               <button
                 key={type}
@@ -113,8 +113,8 @@ export default function ModelRegistryBrowser() {
                 }}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium uppercase transition-all cursor-pointer ${
                   filterType === type
-                    ? 'bg-white text-slate-950 shadow-xs font-semibold'
-                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                    ? 'bg-white text-zinc-950 shadow-xs font-semibold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 {type}
@@ -123,28 +123,28 @@ export default function ModelRegistryBrowser() {
           </div>
         </div>
 
-        <div className="text-xs text-slate-400 font-sans self-end sm:self-auto font-medium">
+        <div className="text-xs text-zinc-400 font-sans self-end sm:self-auto font-medium">
           Showing <span className="text-white">{paginatedModels.length}</span> of <span className="text-white">{filteredModels.length}</span> models
         </div>
       </div>
 
       {/* Model Cards / Clean Data Table */}
       {loading ? (
-        <div className="py-16 text-center text-slate-400 space-y-3">
-          <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="py-16 text-center text-zinc-400 space-y-3">
+          <div className="w-8 h-8 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs">Loading registered empirical models from SQLite...</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-white/[0.08] overflow-hidden bg-[#111622] shadow-xs">
+        <div className="rounded-xl border border-white/[0.08] overflow-hidden bg-[#121215] shadow-xs">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-[#0d121c] border-b border-white/[0.08]">
-                <th className="py-3 px-4 text-xs font-semibold text-slate-400">Component</th>
-                <th className="py-3 px-4 text-xs font-semibold text-slate-400">Version</th>
-                <th className="py-3 px-4 text-xs font-semibold text-slate-400">Model Architecture</th>
-                <th className="py-3 px-4 text-xs font-semibold text-slate-400">Validation</th>
-                <th className="py-3 px-4 text-xs font-semibold text-slate-400">Fit Quality (R²)</th>
-                <th className="py-3 px-4 text-xs font-semibold text-slate-400">Supported Operating Bounds</th>
+              <tr className="bg-[#09090b] border-b border-white/[0.08]">
+                <th className="py-3 px-4 text-xs font-semibold text-zinc-400">Component</th>
+                <th className="py-3 px-4 text-xs font-semibold text-zinc-400">Version</th>
+                <th className="py-3 px-4 text-xs font-semibold text-zinc-400">Model Architecture</th>
+                <th className="py-3 px-4 text-xs font-semibold text-zinc-400">Validation</th>
+                <th className="py-3 px-4 text-xs font-semibold text-zinc-400">Fit Quality (R²)</th>
+                <th className="py-3 px-4 text-xs font-semibold text-zinc-400">Supported Operating Bounds</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.05]">
@@ -152,18 +152,18 @@ export default function ModelRegistryBrowser() {
                 <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
-                      <Server className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                      <Server className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
                       <span className="font-semibold text-white text-xs">
                         {m.component_name}
                       </span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-xs text-slate-300">
-                    <span className="badge-saas bg-white/[0.05] text-slate-300 border border-white/10 text-[11px] font-mono">
+                  <td className="py-3 px-4 text-xs text-zinc-300">
+                    <span className="badge-saas bg-zinc-800 text-zinc-300 border border-zinc-700 text-[11px] font-mono">
                       {m.version}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-xs text-slate-300 font-sans">
+                  <td className="py-3 px-4 text-xs text-zinc-300 font-sans">
                     {formatModelType(m.model_type)}
                   </td>
                   <td className="py-3 px-4">
@@ -183,12 +183,12 @@ export default function ModelRegistryBrowser() {
                       {m.r2_score != null ? `R² = ${m.r2_score.toFixed(3)}` : 'R² = 0.985'}
                     </span>
                     {m.validation_rmse_ms != null && (
-                      <span className="text-slate-500 text-[11px] font-mono ml-2">
+                      <span className="text-zinc-500 text-[11px] font-mono ml-2">
                         (RMSE {m.validation_rmse_ms.toFixed(2)}ms)
                       </span>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-xs text-slate-400 font-sans font-mono text-[11px]">
+                  <td className="py-3 px-4 text-xs text-zinc-400 font-sans font-mono text-[11px]">
                     {m.min_supported_rps != null && m.max_supported_rps != null
                       ? `${Math.round(m.min_supported_rps)} – ${Math.round(m.max_supported_rps)} RPS · 1 – 32 Concurrency`
                       : '100 – 5,000 QPS · 1 – 64 Concurrency'}
@@ -202,7 +202,7 @@ export default function ModelRegistryBrowser() {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-2 text-xs text-slate-400">
+        <div className="flex items-center justify-between pt-2 text-xs text-zinc-400">
           <div>
             Page <span className="font-semibold text-white">{currentPage}</span> of{' '}
             <span className="font-semibold text-white">{totalPages}</span>

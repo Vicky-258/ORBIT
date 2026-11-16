@@ -25,13 +25,13 @@ export default function TechnicalProof() {
           <h2 className="text-lg font-bold text-white tracking-tight">
             Technical Proof, Evidence &amp; Model Calibration
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-zinc-400 mt-0.5">
             Empirical measurements, discrete-event queueing traces, and model coverage bounds
           </p>
         </div>
 
         {/* Sub-tab pills */}
-        <div className="inline-flex items-center gap-1 bg-[#111622] p-1 rounded-lg border border-white/[0.08] overflow-x-auto shrink-0">
+        <div className="inline-flex items-center gap-1 bg-[#121215] p-1 rounded-lg border border-white/[0.08] overflow-x-auto shrink-0">
           {SUB_TABS.map((tab) => {
             const Icon = tab.icon;
             const isCurrent = subTab === tab.id;
@@ -43,8 +43,8 @@ export default function TechnicalProof() {
                 onClick={() => setSubTab(tab.id)}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
                   isCurrent
-                    ? 'bg-white text-slate-950 font-semibold shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                    ? 'bg-white text-zinc-950 font-semibold shadow-xs'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />

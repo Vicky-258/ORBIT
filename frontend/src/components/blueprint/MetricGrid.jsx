@@ -47,7 +47,7 @@ export default function MetricGrid({ winner, workload = {} }) {
         targetComparison="Offered load tested"
         statusColor="text-white"
         progressPercent={100}
-        progressColor="bg-indigo-500"
+        progressColor="bg-zinc-400"
       />
 
       {/* Metric 3: Estimated Monthly Cost */}

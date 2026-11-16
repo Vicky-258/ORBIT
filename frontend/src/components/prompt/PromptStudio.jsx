@@ -50,17 +50,17 @@ export default function PromptStudio() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30">
-      {/* Top Bar */}
-      <header className="h-14 border-b border-white/[0.08] px-6 flex items-center justify-between shrink-0 bg-[#0d121c]">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans selection:bg-zinc-700 selection:text-white">
+      {/* Top Header */}
+      <header className="h-16 border-b border-white/[0.08] px-6 sm:px-10 lg:px-12 flex items-center justify-between shrink-0 bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-30">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-xs">
-            <Layers className="w-3.5 h-3.5 stroke-[2.5]" />
+          <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-950 shadow-sm">
+            <Layers className="w-4 h-4 stroke-[2.5]" />
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-sm tracking-tight text-white">AADS</span>
-            <span className="text-[11px] font-medium text-slate-400 border-l border-white/10 pl-2">
+          <div className="flex items-center gap-2.5">
+            <span className="font-bold text-base tracking-tight text-white">AADS</span>
+            <span className="text-xs font-medium text-zinc-400 border-l border-white/10 pl-2.5">
               Architecture Copilot
             </span>
           </div>
@@ -69,58 +69,62 @@ export default function PromptStudio() {
         {/* Right Actions */}
         <div className="flex items-center gap-3">
           {/* Backend Status */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-slate-400">
-            <span className={`w-1.5 h-1.5 rounded-full ${backendConnected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-            <span>{backendConnected ? 'Engine Ready' : 'Local Mode'}</span>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-400">
+            <span className={`w-2 h-2 rounded-full ${backendConnected ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-amber-400'}`} />
+            <span>{backendConnected ? 'Simulation Engine Online' : 'Local Verification'}</span>
           </div>
 
           <button
             type="button"
             onClick={() => setIsFeatureManagerOpen(true)}
-            className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors text-xs font-medium flex items-center gap-1 cursor-pointer"
+            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors text-xs font-medium flex items-center gap-1.5 cursor-pointer border border-transparent hover:border-zinc-700"
             title="Configure Features & Flags"
           >
-            <Sliders className="w-3.5 h-3.5" />
-            <span className="hidden md:inline text-[11px]">Flags</span>
+            <Sliders className="w-4 h-4" />
+            <span className="hidden md:inline text-xs">Flags</span>
           </button>
 
           {response && (
             <button
               type="button"
               onClick={goToResults}
-              className="btn btn-secondary text-xs py-1 px-2.5 h-7.5 flex items-center gap-1.5 text-slate-200 hover:text-white"
+              className="btn btn-secondary text-xs py-1.5 px-3.5 h-8 flex items-center gap-2 text-zinc-200 hover:text-white"
             >
-              <span>View Current Blueprint</span>
+              <span>View Active Blueprint</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
       </header>
 
-      {/* Main Centered Studio Canvas */}
-      <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col items-center">
-        <div className="w-full max-w-3xl space-y-8 my-auto">
-          {/* Hero Heading */}
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-1">
-              <Sparkles className="w-3.5 h-3.5" />
+      {/* Main Expansive Studio Canvas */}
+      <main className="flex-1 overflow-y-auto px-6 sm:px-10 lg:px-12 py-10 sm:py-14 flex flex-col items-center">
+        <div className="w-full max-w-5xl space-y-10">
+          {/* Hero Section */}
+          <div className="text-center space-y-3.5 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-medium">
+              <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
               <span>Developer-First Architecture Copilot</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
               What backend are you building?
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
-              Describe your workload requirements to simulate candidate topologies, evaluate latency &amp; cost trade-offs, and generate implementation blueprints.
+            <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+              Describe your workload requirements to simulate candidate topologies, evaluate latency &amp; cost trade-offs, and generate implementation blueprints for your AI coding agents.
             </p>
           </div>
 
           {/* Primary Prompt Input Card */}
-          <div className="bg-[#111622] rounded-xl border border-white/[0.08] shadow-lg shadow-black/20 p-4 sm:p-5 space-y-4">
-            <div className="space-y-1.5">
-              <label htmlFor="prompt-input" className="text-xs font-medium text-slate-300 flex items-center justify-between">
-                <span>Workload Description &amp; Architecture Intent</span>
-                <span className="text-[11px] text-slate-500 font-mono">⌘ + Enter to simulate</span>
-              </label>
+          <div className="bg-[#121215] rounded-2xl border border-white/[0.08] shadow-2xl p-6 sm:p-8 space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="prompt-input" className="text-xs sm:text-sm font-medium text-zinc-300">
+                  Workload Requirements &amp; Architecture Intent
+                </label>
+                <span className="text-xs text-zinc-500 font-mono hidden sm:inline">
+                  Press ⌘ + Enter to simulate
+                </span>
+              </div>
 
               <div className="relative">
                 <textarea
@@ -130,17 +134,17 @@ export default function PromptStudio() {
                   onChange={(e) => setPrompt(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="e.g. An e-commerce backend expecting 500 requests/sec, 90% reads, p95 latency under 100ms, and monthly infrastructure budget under $250..."
-                  className="w-full bg-[#0b0f17] border border-white/10 rounded-lg p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-sans leading-relaxed resize-y min-h-[96px]"
+                  className="w-full bg-[#09090b] border border-zinc-800 rounded-xl p-4 sm:p-5 text-sm sm:text-base text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all font-sans leading-relaxed resize-y min-h-[110px]"
                 />
               </div>
             </div>
 
             {/* Quick 1-Click Scenario Chips */}
-            <div className="space-y-2 pt-1 border-t border-white/[0.05]">
-              <div className="text-[11px] font-medium text-slate-400">
+            <div className="space-y-2.5 pt-2 border-t border-white/[0.06]">
+              <div className="text-xs font-medium text-zinc-400">
                 Or select a realistic starting workload:
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {CANONICAL_PRESETS.map((preset) => {
                   const isSelected = selectedPresetId === preset.id;
                   return (
@@ -148,21 +152,24 @@ export default function PromptStudio() {
                       key={preset.id}
                       type="button"
                       onClick={() => loadPreset(preset)}
-                      className={`p-2.5 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                      className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? 'bg-indigo-950/40 border-indigo-500/50 text-white shadow-xs'
-                          : 'bg-[#0d121c] border-white/[0.06] hover:border-white/15 text-slate-300 hover:text-white'
+                          ? 'bg-zinc-800/90 border-zinc-600 text-white shadow-md'
+                          : 'bg-[#09090b] border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-900/60'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-1 mb-1">
-                        <span className="text-xs font-semibold tracking-tight">
+                      <div className="flex items-center justify-between gap-1.5 mb-1.5">
+                        <span className="text-xs sm:text-sm font-semibold tracking-tight">
                           {preset.title.replace(/Scenario \d+: /, '')}
                         </span>
                         {isSelected && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                         )}
                       </div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                      <p className="text-xs text-zinc-400 line-clamp-1 mb-2 font-sans">
+                        {preset.description}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-zinc-400 font-mono pt-2 border-t border-white/[0.06]">
                         <span>{preset.qps}</span>
                         <span>{preset.sla}</span>
                       </div>
@@ -173,54 +180,60 @@ export default function PromptStudio() {
             </div>
           </div>
 
-          {/* Workload Specifications (Directly Visible, Clean & Low Friction) */}
-          <div className="bg-[#111622] rounded-xl border border-white/[0.08] p-4 sm:p-5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.05] pb-3">
+          {/* Workload Parameters (Spacious 4-Card Responsive Grid) */}
+          <div className="bg-[#121215] rounded-2xl border border-white/[0.08] p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-4">
               <div>
-                <h3 className="text-xs font-semibold text-white tracking-tight flex items-center gap-2">
-                  <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+                <h3 className="text-sm sm:text-base font-semibold text-white tracking-tight flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-zinc-300" />
                   <span>Workload Parameters &amp; Target Constraints</span>
                 </h3>
-                <p className="text-[11px] text-slate-400">
-                  Explicit simulation parameters derived from your requirements
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Tune expected traffic volume, response time SLAs, and cloud budget:
                 </p>
               </div>
-              <span className="text-[11px] text-slate-400 font-mono">
-                {workloadInputs.qps} RPS · {workloadInputs.p95_sla_ms}ms SLA
-              </span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 font-mono">
+                <span>{workloadInputs.qps} RPS</span>
+                <span className="text-zinc-600">•</span>
+                <span>{workloadInputs.p95_sla_ms}ms SLA</span>
+                <span className="text-zinc-600">•</span>
+                <span>${workloadInputs.budget_usd}/mo</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
               {/* 1. Target RPS */}
-              <div className="bg-[#0b0f17] border border-white/[0.06] rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-                    <Zap className="w-3 h-3 text-amber-400" />
-                    <span>Throughput (RPS)</span>
-                  </label>
-                  <span className="text-xs font-mono font-semibold text-white">
-                    {workloadInputs.qps} req/s
-                  </span>
+              <div className="bg-[#09090b] border border-zinc-800 rounded-xl p-4 space-y-2.5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Traffic (RPS)</span>
+                    </label>
+                    <span className="text-xs font-mono font-bold text-white">
+                      {workloadInputs.qps} req/s
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    min="10"
+                    max="5000"
+                    step="25"
+                    value={workloadInputs.qps}
+                    onChange={(e) => updateWorkloadField('qps', parseFloat(e.target.value) || 100)}
+                    className="w-full bg-[#121215] border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-zinc-500"
+                  />
                 </div>
-                <input
-                  type="number"
-                  min="10"
-                  max="5000"
-                  step="25"
-                  value={workloadInputs.qps}
-                  onChange={(e) => updateWorkloadField('qps', parseFloat(e.target.value) || 100)}
-                  className="w-full bg-[#111622] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white font-mono"
-                />
                 <div className="flex items-center gap-1 pt-1">
                   {[100, 300, 500, 1000].map((val) => (
                     <button
                       key={val}
                       type="button"
                       onClick={() => updateWorkloadField('qps', val)}
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                      className={`flex-1 text-[11px] font-mono py-1 rounded border transition-colors cursor-pointer text-center ${
                         workloadInputs.qps === val
-                          ? 'bg-indigo-600/30 border-indigo-500/50 text-indigo-300'
-                          : 'bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-white'
+                          ? 'bg-zinc-800 border-zinc-500 text-white font-semibold'
+                          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800/60'
                       }`}
                     >
                       {val}
@@ -230,35 +243,37 @@ export default function PromptStudio() {
               </div>
 
               {/* 2. Latency SLA */}
-              <div className="bg-[#0b0f17] border border-white/[0.06] rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-                    <Clock className="w-3 h-3 text-sky-400" />
-                    <span>p95 Latency SLA</span>
-                  </label>
-                  <span className="text-xs font-mono font-semibold text-white">
-                    &lt; {workloadInputs.p95_sla_ms} ms
-                  </span>
+              <div className="bg-[#09090b] border border-zinc-800 rounded-xl p-4 space-y-2.5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-zinc-300" />
+                      <span>p95 Latency SLA</span>
+                    </label>
+                    <span className="text-xs font-mono font-bold text-white">
+                      &lt; {workloadInputs.p95_sla_ms} ms
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    min="10"
+                    max="2000"
+                    step="10"
+                    value={workloadInputs.p95_sla_ms}
+                    onChange={(e) => updateWorkloadField('p95_sla_ms', parseFloat(e.target.value) || 100)}
+                    className="w-full bg-[#121215] border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-zinc-500"
+                  />
                 </div>
-                <input
-                  type="number"
-                  min="10"
-                  max="2000"
-                  step="10"
-                  value={workloadInputs.p95_sla_ms}
-                  onChange={(e) => updateWorkloadField('p95_sla_ms', parseFloat(e.target.value) || 100)}
-                  className="w-full bg-[#111622] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white font-mono"
-                />
                 <div className="flex items-center gap-1 pt-1">
                   {[50, 100, 150, 300].map((val) => (
                     <button
                       key={val}
                       type="button"
                       onClick={() => updateWorkloadField('p95_sla_ms', val)}
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                      className={`flex-1 text-[11px] font-mono py-1 rounded border transition-colors cursor-pointer text-center ${
                         workloadInputs.p95_sla_ms === val
-                          ? 'bg-sky-600/30 border-sky-500/50 text-sky-300'
-                          : 'bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-white'
+                          ? 'bg-zinc-800 border-zinc-500 text-white font-semibold'
+                          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800/60'
                       }`}
                     >
                       {val}ms
@@ -268,29 +283,31 @@ export default function PromptStudio() {
               </div>
 
               {/* 3. Read / Write Split */}
-              <div className="bg-[#0b0f17] border border-white/[0.06] rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-                    <BarChart3 className="w-3 h-3 text-emerald-400" />
-                    <span>Read / Write Ratio</span>
-                  </label>
-                  <span className="text-xs font-mono font-semibold text-white">
-                    {Math.round(workloadInputs.read_ratio * 100)}% Read / {Math.round(workloadInputs.write_ratio * 100)}% Write
-                  </span>
-                </div>
+              <div className="bg-[#09090b] border border-zinc-800 rounded-xl p-4 space-y-2.5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                      <BarChart3 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Read / Write Ratio</span>
+                    </label>
+                    <span className="text-xs font-mono font-bold text-white">
+                      {Math.round(workloadInputs.read_ratio * 100)}% R / {Math.round(workloadInputs.write_ratio * 100)}% W
+                    </span>
+                  </div>
 
-                {/* Split Visual Indicator */}
-                <div className="h-2 w-full rounded-full overflow-hidden flex bg-slate-800">
-                  <div
-                    className="bg-emerald-500 transition-all duration-200"
-                    style={{ width: `${workloadInputs.read_ratio * 100}%` }}
-                    title={`Read: ${Math.round(workloadInputs.read_ratio * 100)}%`}
-                  />
-                  <div
-                    className="bg-amber-500 transition-all duration-200"
-                    style={{ width: `${workloadInputs.write_ratio * 100}%` }}
-                    title={`Write: ${Math.round(workloadInputs.write_ratio * 100)}%`}
-                  />
+                  {/* Dual color split indicator */}
+                  <div className="h-2 w-full rounded-full overflow-hidden flex bg-zinc-800 my-2">
+                    <div
+                      className="bg-emerald-500 transition-all duration-200"
+                      style={{ width: `${workloadInputs.read_ratio * 100}%` }}
+                      title={`Read: ${Math.round(workloadInputs.read_ratio * 100)}%`}
+                    />
+                    <div
+                      className="bg-amber-500 transition-all duration-200"
+                      style={{ width: `${workloadInputs.write_ratio * 100}%` }}
+                      title={`Write: ${Math.round(workloadInputs.write_ratio * 100)}%`}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-1 pt-1">
@@ -304,10 +321,10 @@ export default function PromptStudio() {
                       key={preset.label}
                       type="button"
                       onClick={() => updateWorkloadField('read_ratio', preset.read)}
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                      className={`flex-1 text-[11px] font-mono py-1 rounded border transition-colors cursor-pointer text-center ${
                         Math.abs(workloadInputs.read_ratio - preset.read) < 0.02
-                          ? 'bg-emerald-600/30 border-emerald-500/50 text-emerald-300'
-                          : 'bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-white'
+                          ? 'bg-zinc-800 border-zinc-500 text-white font-semibold'
+                          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800/60'
                       }`}
                     >
                       {preset.label}
@@ -317,35 +334,37 @@ export default function PromptStudio() {
               </div>
 
               {/* 4. Monthly Budget */}
-              <div className="bg-[#0b0f17] border border-white/[0.06] rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-                    <DollarSign className="w-3 h-3 text-purple-400" />
-                    <span>Monthly Budget Limit</span>
-                  </label>
-                  <span className="text-xs font-mono font-semibold text-white">
-                    ${workloadInputs.budget_usd} / mo
-                  </span>
+              <div className="bg-[#09090b] border border-zinc-800 rounded-xl p-4 space-y-2.5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                      <DollarSign className="w-3.5 h-3.5 text-zinc-300" />
+                      <span>Monthly Budget</span>
+                    </label>
+                    <span className="text-xs font-mono font-bold text-white">
+                      ${workloadInputs.budget_usd} / mo
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    min="50"
+                    max="5000"
+                    step="50"
+                    value={workloadInputs.budget_usd}
+                    onChange={(e) => updateWorkloadField('budget_usd', parseFloat(e.target.value) || 250)}
+                    className="w-full bg-[#121215] border border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono text-white focus:border-zinc-500"
+                  />
                 </div>
-                <input
-                  type="number"
-                  min="50"
-                  max="5000"
-                  step="50"
-                  value={workloadInputs.budget_usd}
-                  onChange={(e) => updateWorkloadField('budget_usd', parseFloat(e.target.value) || 250)}
-                  className="w-full bg-[#111622] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white font-mono"
-                />
                 <div className="flex items-center gap-1 pt-1">
                   {[100, 250, 500, 1000].map((val) => (
                     <button
                       key={val}
                       type="button"
                       onClick={() => updateWorkloadField('budget_usd', val)}
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                      className={`flex-1 text-[11px] font-mono py-1 rounded border transition-colors cursor-pointer text-center ${
                         workloadInputs.budget_usd === val
-                          ? 'bg-purple-600/30 border-purple-500/50 text-purple-300'
-                          : 'bg-white/[0.03] border-white/[0.06] text-slate-400 hover:text-white'
+                          ? 'bg-zinc-800 border-zinc-500 text-white font-semibold'
+                          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800/60'
                       }`}
                     >
                       ${val}
@@ -356,27 +375,27 @@ export default function PromptStudio() {
             </div>
 
             {/* Progressive Disclosure: Advanced Simulation Settings Accordion */}
-            <div className="pt-2 border-t border-white/[0.05]">
+            <div className="pt-2 border-t border-white/[0.06]">
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center justify-between w-full text-left text-xs font-medium text-slate-400 hover:text-slate-200 py-1 cursor-pointer transition-colors"
+                className="flex items-center justify-between w-full text-left text-xs font-medium text-zinc-400 hover:text-zinc-200 py-1.5 cursor-pointer transition-colors"
               >
-                <span className="flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Advanced Simulation Parameters</span>
+                <span className="flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-zinc-500" />
+                  <span>Advanced Simulation Parameters (SimPy queue duration, seeds, rounds)</span>
                 </span>
                 {showAdvanced ? (
-                  <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
+                  <ChevronUp className="w-4 h-4 text-zinc-400" />
                 ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                  <ChevronDown className="w-4 h-4 text-zinc-500" />
                 )}
               </button>
 
               {showAdvanced && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 mt-2 border-t border-white/[0.05]">
-                  <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 mt-2 border-t border-white/[0.06]">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-zinc-400 block">
                       SimPy Duration (s)
                     </label>
                     <input
@@ -386,13 +405,13 @@ export default function PromptStudio() {
                       step="0.5"
                       value={options.simulation_duration_seconds}
                       onChange={(e) => handleOptionChange('simulation_duration_seconds', parseFloat(e.target.value) || 5.0)}
-                      className="w-full bg-[#0b0f17] border border-white/10 rounded px-2 py-1 text-xs text-white font-mono"
+                      className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white font-mono"
                     />
                   </div>
 
-                  <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-1">
-                      Investigation Rounds
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-zinc-400 block">
+                      Max Investigation Rounds
                     </label>
                     <input
                       type="number"
@@ -400,19 +419,19 @@ export default function PromptStudio() {
                       max="5"
                       value={options.max_investigation_rounds}
                       onChange={(e) => handleOptionChange('max_investigation_rounds', parseInt(e.target.value) || 3)}
-                      className="w-full bg-[#0b0f17] border border-white/10 rounded px-2 py-1 text-xs text-white font-mono"
+                      className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white font-mono"
                     />
                   </div>
 
-                  <div>
-                    <label className="text-[11px] font-medium text-slate-400 block mb-1">
-                      Random Seed
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-zinc-400 block">
+                      Simulation Random Seed
                     </label>
                     <input
                       type="number"
                       value={options.random_seed}
                       onChange={(e) => handleOptionChange('random_seed', parseInt(e.target.value) || 42)}
-                      className="w-full bg-[#0b0f17] border border-white/10 rounded px-2 py-1 text-xs text-white font-mono"
+                      className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-3 py-2 text-xs text-white font-mono"
                     />
                   </div>
                 </div>
@@ -420,21 +439,21 @@ export default function PromptStudio() {
             </div>
           </div>
 
-          {/* Primary Action Button */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-            <div className="text-xs text-slate-400 flex items-center gap-1.5">
-              <span>Ready to evaluate 3 candidate architectures against your SLA.</span>
+          {/* Primary Action Button Bar */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+            <div className="text-xs sm:text-sm text-zinc-400 flex items-center gap-2">
+              <span>Ready to evaluate candidate architectures against discrete-event queue contention.</span>
             </div>
 
             <button
               type="button"
               disabled={loading}
               onClick={() => handleRunWorkflow()}
-              className="w-full sm:w-auto btn btn-primary px-6 py-2.5 text-sm font-semibold rounded-lg flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-white/5 disabled:opacity-50"
+              className="w-full sm:w-auto btn btn-primary px-8 py-3.5 text-sm sm:text-base font-semibold rounded-xl flex items-center justify-center gap-2.5 cursor-pointer shadow-lg hover:shadow-xl disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="w-4 h-4 animate-spin text-zinc-950" />
                   <span>Simulating Discrete Events...</span>
                 </>
               ) : (

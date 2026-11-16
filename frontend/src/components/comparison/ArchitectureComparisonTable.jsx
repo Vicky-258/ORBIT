@@ -10,12 +10,12 @@ export default function ArchitectureComparisonTable({
   budgetUsd = 250,
 }) {
   return (
-    <div className="bg-[#111622] rounded-xl border border-white/[0.08] overflow-hidden shadow-xs">
+    <div className="bg-[#121215] rounded-xl border border-white/[0.08] overflow-hidden shadow-xs">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-white/[0.08] bg-[#0d121c]">
-              <th className="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-slate-400 w-1/4">
+            <tr className="border-b border-white/[0.08] bg-[#09090b]">
+              <th className="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-zinc-400 w-1/4">
                 Architecture Candidate
               </th>
               {candidates.map((cand) => {
@@ -37,7 +37,7 @@ export default function ArchitectureComparisonTable({
                             <span>Recommended Winner</span>
                           </span>
                         ) : (
-                          <span className="badge-saas bg-white/[0.04] text-slate-400 border border-white/[0.08] text-[10px]">
+                          <span className="badge-saas bg-zinc-800 text-zinc-400 border border-zinc-700 text-[10px]">
                             Alternative
                           </span>
                         )}
@@ -45,7 +45,7 @@ export default function ArchitectureComparisonTable({
                       <div className="font-bold text-sm text-white tracking-tight">
                         {cand.name}
                       </div>
-                      <div className="text-xs text-slate-400 font-normal">
+                      <div className="text-xs text-zinc-400 font-normal">
                         {cand.topology || cand.topology_summary}
                       </div>
                     </div>
@@ -58,9 +58,9 @@ export default function ArchitectureComparisonTable({
           <tbody className="divide-y divide-white/[0.05] text-xs">
             {/* Row 1: Response Time (p95) */}
             <tr className="hover:bg-white/[0.02] transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-300">
+              <td className="py-3.5 px-6 font-medium text-zinc-300">
                 <div className="font-semibold text-white">Response Latency (p95)</div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">SLA Target: &lt; {slaMs} ms</div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">SLA Target: &lt; {slaMs} ms</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -85,9 +85,9 @@ export default function ArchitectureComparisonTable({
 
             {/* Row 2: Throughput Achieved */}
             <tr className="hover:bg-white/[0.02] transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-300">
+              <td className="py-3.5 px-6 font-medium text-zinc-300">
                 <div className="font-semibold text-white">Simulated Throughput</div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Tested under offered load</div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Tested under offered load</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -111,9 +111,9 @@ export default function ArchitectureComparisonTable({
 
             {/* Row 3: Estimated Monthly Cost */}
             <tr className="hover:bg-white/[0.02] transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-300">
+              <td className="py-3.5 px-6 font-medium text-zinc-300">
                 <div className="font-semibold text-white">Estimated Monthly Cost</div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Budget cap: {budgetUsd ? `< $${budgetUsd}/mo` : 'None'}</div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Budget cap: {budgetUsd ? `< $${budgetUsd}/mo` : 'None'}</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -138,9 +138,9 @@ export default function ArchitectureComparisonTable({
 
             {/* Row 4: Database CPU Utilization */}
             <tr className="hover:bg-white/[0.02] transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-300">
+              <td className="py-3.5 px-6 font-medium text-zinc-300">
                 <div className="font-semibold text-white">Database CPU Load</div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Hardware resource headroom</div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Hardware resource headroom</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -161,7 +161,7 @@ export default function ArchitectureComparisonTable({
                               : cpuVal < 85
                               ? 'text-amber-400'
                               : 'text-rose-400'
-                            : 'text-slate-500'
+                            : 'text-zinc-500'
                         }`}
                       >
                         {cpuVal != null ? `${cpuVal}%` : 'Not modelled'}
@@ -175,9 +175,9 @@ export default function ArchitectureComparisonTable({
 
             {/* Row 5: Hard Constraint Status */}
             <tr className="hover:bg-white/[0.02] transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-300">
+              <td className="py-3.5 px-6 font-medium text-zinc-300">
                 <div className="font-semibold text-white">Constraint Outcome</div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">SLA &amp; budget compliance</div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">SLA &amp; budget compliance</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -197,9 +197,9 @@ export default function ArchitectureComparisonTable({
 
             {/* Row 6: Evidence Coverage Status */}
             <tr className="hover:bg-white/[0.02] transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-300">
+              <td className="py-3.5 px-6 font-medium text-zinc-300">
                 <div className="font-semibold text-white">Evidence Coverage</div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Empirical model support</div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Empirical model support</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -219,9 +219,9 @@ export default function ArchitectureComparisonTable({
 
             {/* Row 7: Architecture Trade-Off */}
             <tr className="hover:bg-white/[0.02] transition-colors">
-              <td className="py-3.5 px-6 font-medium text-slate-300">
+              <td className="py-3.5 px-6 font-medium text-zinc-300">
                 <div className="font-semibold text-white">Primary Trade-Off</div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Operational considerations</div>
+                <div className="text-[10px] text-zinc-400 font-mono mt-0.5">Operational considerations</div>
               </td>
               {candidates.map((cand) => {
                 const isWinner = cand.id === winnerId;
@@ -237,7 +237,7 @@ export default function ArchitectureComparisonTable({
                 return (
                   <td
                     key={cand.id}
-                    className={`py-3.5 px-6 text-slate-300 text-xs leading-relaxed ${
+                    className={`py-3.5 px-6 text-zinc-300 text-xs leading-relaxed ${
                       isWinner ? 'bg-emerald-950/10 border-x border-emerald-500/20 text-white font-medium' : ''
                     }`}
                   >

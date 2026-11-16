@@ -5,7 +5,7 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
   const displayNodes = nodes.length > 0 ? nodes : deriveNodes(topologyStr);
 
   return (
-    <div className="p-4 sm:p-5 rounded-xl bg-[#0b0f17] border border-white/[0.06] relative overflow-hidden">
+    <div className="p-4 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 relative overflow-hidden">
       <div className="relative z-10 flex items-center justify-between gap-3 sm:gap-4 flex-wrap lg:flex-nowrap">
         {displayNodes.map((node, idx) => {
           const isLast = idx === displayNodes.length - 1;
@@ -15,7 +15,7 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
             <React.Fragment key={idx}>
               {/* Node Card */}
               <div
-                className="flex-1 min-w-[170px] p-3.5 sm:p-4 rounded-xl bg-[#111622] border border-white/[0.08] hover:border-white/20 transition-all shadow-xs"
+                className="flex-1 min-w-[170px] p-3.5 sm:p-4 rounded-xl bg-[#141417] border border-zinc-800 hover:border-zinc-700 transition-all shadow-xs"
               >
                 {/* Top Node Header: Icon + Type Badge */}
                 <div className="flex items-center justify-between gap-2 mb-2.5">
@@ -33,7 +33,7 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
                     <span>{node.name}</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Active & Calibrated" />
                   </div>
-                  <div className="text-xs text-slate-400 leading-snug">
+                  <div className="text-xs text-zinc-400 leading-snug">
                     {node.note || config.defaultNote}
                   </div>
                 </div>
@@ -43,13 +43,13 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
               {!isLast && (
                 <div className="flex flex-col items-center justify-center px-1 shrink-0">
                   <div className="flex items-center gap-1">
-                    <div className="w-3 sm:w-5 h-px bg-white/10" />
-                    <div className="w-5 h-5 rounded-full bg-[#161c28] border border-white/10 flex items-center justify-center text-slate-400">
-                      <ArrowRight className="w-3 h-3 text-slate-400 shrink-0" />
+                    <div className="w-3 sm:w-5 h-px bg-zinc-800" />
+                    <div className="w-5 h-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
+                      <ArrowRight className="w-3 h-3 text-zinc-400 shrink-0" />
                     </div>
-                    <div className="w-3 sm:w-5 h-px bg-white/10" />
+                    <div className="w-3 sm:w-5 h-px bg-zinc-800" />
                   </div>
-                  <span className="text-[10px] text-slate-500 mt-1 font-mono">
+                  <span className="text-[10px] text-zinc-500 mt-1 font-mono">
                     {idx === 0 ? 'sub-ms read' : 'sync fallback'}
                   </span>
                 </div>
@@ -67,36 +67,36 @@ function getNodeConfig(type) {
     case 'cache':
       return {
         icon: <Zap className="w-3.5 h-3.5 fill-current" />,
-        iconBg: 'bg-cyan-500/10',
-        iconColor: 'text-cyan-400',
-        iconBorder: 'border-cyan-500/20',
-        badgeBg: 'bg-cyan-500/10',
-        badgeColor: 'text-cyan-400',
-        badgeBorder: 'border-cyan-500/20',
+        iconBg: 'bg-zinc-800',
+        iconColor: 'text-zinc-200',
+        iconBorder: 'border-zinc-700',
+        badgeBg: 'bg-zinc-800',
+        badgeColor: 'text-zinc-300',
+        badgeBorder: 'border-zinc-700',
         roleLabel: 'In-Memory Cache',
         defaultNote: 'Sub-millisecond Read Shield',
       };
     case 'database':
       return {
         icon: <Database className="w-3.5 h-3.5 fill-current" />,
-        iconBg: 'bg-blue-500/10',
-        iconColor: 'text-blue-400',
-        iconBorder: 'border-blue-500/20',
-        badgeBg: 'bg-blue-500/10',
-        badgeColor: 'text-blue-400',
-        badgeBorder: 'border-blue-500/20',
+        iconBg: 'bg-zinc-800',
+        iconColor: 'text-zinc-200',
+        iconBorder: 'border-zinc-700',
+        badgeBg: 'bg-zinc-800',
+        badgeColor: 'text-zinc-300',
+        badgeBorder: 'border-zinc-700',
         roleLabel: 'Primary Database',
         defaultNote: 'ACID Persistence Store',
       };
     case 'queue':
       return {
         icon: <Layers className="w-3.5 h-3.5" />,
-        iconBg: 'bg-amber-500/10',
-        iconColor: 'text-amber-400',
-        iconBorder: 'border-amber-500/20',
-        badgeBg: 'bg-amber-500/10',
-        badgeColor: 'text-amber-400',
-        badgeBorder: 'border-amber-500/20',
+        iconBg: 'bg-zinc-800',
+        iconColor: 'text-zinc-200',
+        iconBorder: 'border-zinc-700',
+        badgeBg: 'bg-zinc-800',
+        badgeColor: 'text-zinc-300',
+        badgeBorder: 'border-zinc-700',
         roleLabel: 'Message Queue',
         defaultNote: 'Bursty Ingestion Buffer',
       };
@@ -116,12 +116,12 @@ function getNodeConfig(type) {
     default:
       return {
         icon: <Server className="w-3.5 h-3.5" />,
-        iconBg: 'bg-white/[0.05]',
-        iconColor: 'text-slate-300',
-        iconBorder: 'border-white/10',
-        badgeBg: 'bg-white/[0.05]',
-        badgeColor: 'text-slate-300',
-        badgeBorder: 'border-white/10',
+        iconBg: 'bg-zinc-800',
+        iconColor: 'text-zinc-300',
+        iconBorder: 'border-zinc-700',
+        badgeBg: 'bg-zinc-800',
+        badgeColor: 'text-zinc-300',
+        badgeBorder: 'border-zinc-700',
         roleLabel: 'API Ingress',
         defaultNote: 'HTTP Router & Controller',
       };

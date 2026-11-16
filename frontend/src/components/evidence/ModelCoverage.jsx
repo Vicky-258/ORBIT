@@ -48,17 +48,17 @@ export default function ModelCoverage() {
 
   return (
     <div className="space-y-4 text-xs">
-      <div className="p-4 rounded-xl bg-[#111622] border border-white/[0.08] text-slate-300 space-y-1">
+      <div className="p-4 rounded-xl bg-[#121215] border border-white/[0.08] text-zinc-300 space-y-1">
         <span className="font-semibold text-white">Empirical Model Operating Ranges</span>
-        <p className="text-slate-400 leading-relaxed">
+        <p className="text-zinc-400 leading-relaxed">
           The table below indicates the validated boundaries for each empirical performance model registered in SQLite. Operating within the <strong className="text-emerald-400">OBSERVED</strong> range guarantees high fidelity.
         </p>
       </div>
 
-      <div className="rounded-xl border border-white/[0.08] bg-[#111622] overflow-hidden shadow-xs">
+      <div className="rounded-xl border border-white/[0.08] bg-[#121215] overflow-hidden shadow-xs">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-white/[0.08] bg-[#0d121c] text-slate-400">
+            <tr className="border-b border-white/[0.08] bg-[#09090b] text-zinc-400">
               <th className="py-3 px-4 font-semibold">Component &amp; Version</th>
               <th className="py-3 px-4 font-semibold">Coverage Status</th>
               <th className="py-3 px-4 font-semibold">Validated Operating Range</th>
@@ -75,13 +75,13 @@ export default function ModelCoverage() {
                 <td className="py-3 px-4">
                   <StatusBadge status={row.status} type="evidence" />
                 </td>
-                <td className="py-3 px-4 font-mono text-slate-400 text-[11px]">
+                <td className="py-3 px-4 font-mono text-zinc-400 text-[11px]">
                   {row.range}
                 </td>
-                <td className="py-3 px-4 font-mono text-slate-300 text-[11px]">
+                <td className="py-3 px-4 font-mono text-zinc-300 text-[11px]">
                   {row.r2}
                 </td>
-                <td className="py-3 px-4 text-slate-400 text-xs">
+                <td className="py-3 px-4 text-zinc-400 text-xs">
                   {row.notes}
                 </td>
               </tr>

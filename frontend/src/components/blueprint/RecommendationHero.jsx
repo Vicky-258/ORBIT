@@ -11,7 +11,7 @@ export default function RecommendationHero({ winner, recommendation = {} }) {
   const nodes = winner?.topologyNodes || [];
 
   return (
-    <div className="bg-[#111622] rounded-xl border border-white/[0.08] p-6 sm:p-7 relative overflow-hidden shadow-lg shadow-black/20">
+    <div className="bg-[#121215] rounded-2xl border border-white/[0.08] p-6 sm:p-7 relative overflow-hidden shadow-xl">
       {/* Header Row: Badges, Title, and Primary CTA */}
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
         <div className="space-y-2.5">
@@ -21,7 +21,7 @@ export default function RecommendationHero({ winner, recommendation = {} }) {
               <span>Recommended Architecture</span>
             </span>
 
-            <span className="badge-saas bg-white/[0.04] text-slate-400 border border-white/[0.08] text-xs font-medium">
+            <span className="badge-saas bg-zinc-800/80 text-zinc-400 border border-zinc-700/60 text-xs font-medium">
               Empirical Baseline Verified
             </span>
           </div>
@@ -30,9 +30,9 @@ export default function RecommendationHero({ winner, recommendation = {} }) {
             {title}
           </h1>
 
-          <p className="text-xs text-slate-400 flex items-center gap-2 leading-relaxed">
-            <span className="text-slate-500 font-medium">Pipeline:</span>
-            <span className="text-slate-300 font-medium">{topology}</span>
+          <p className="text-xs text-zinc-400 flex items-center gap-2 leading-relaxed">
+            <span className="text-zinc-500 font-medium">Pipeline:</span>
+            <span className="text-zinc-300 font-medium">{topology}</span>
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export default function RecommendationHero({ winner, recommendation = {} }) {
           <button
             type="button"
             onClick={() => setIsPromptModalOpen(true)}
-            className="btn btn-primary text-xs py-2 px-4 rounded-lg flex items-center gap-2 cursor-pointer font-medium"
+            className="btn btn-primary text-xs py-2 px-4 rounded-xl flex items-center gap-2 cursor-pointer font-medium"
           >
             <Terminal className="w-3.5 h-3.5" />
             <span>Generate Implementation Prompt</span>
@@ -53,12 +53,12 @@ export default function RecommendationHero({ winner, recommendation = {} }) {
       <div className="relative z-10 pt-5 mt-5 border-t border-white/[0.06]">
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-300 tracking-tight">
+            <span className="text-xs font-semibold text-zinc-300 tracking-tight">
               System Topology Flow
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
           </div>
-          <span className="text-xs text-slate-500 font-mono">
+          <span className="text-xs text-zinc-500 font-mono">
             Component Data Flow
           </span>
         </div>
