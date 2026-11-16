@@ -49,7 +49,7 @@ export async function listCandidates() {
 
 export async function checkBackendHealth() {
   try {
-    const response = await fetch(`${API_BASE}/registry/models`);
+    const response = await fetch(`${API_BASE}/health`);
     return response.ok;
   } catch (err) {
     return false;

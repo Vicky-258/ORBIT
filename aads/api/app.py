@@ -22,6 +22,11 @@ app.add_middleware(
 app.include_router(router)
 
 
+@app.get("/api/health")
+def api_health():
+    return {"status": "ok", "service": "AADS API"}
+
+
 @app.get("/")
 def root():
     return {
