@@ -351,3 +351,69 @@ def test_api_endpoints_integration(api_client):
     demo_data = res_demo.json()
     assert demo_data["recommendation"]["winner_architecture_id"] == "arch_a_simple"
     assert demo_data["recommendation"]["is_conclusive"] is True
+    assert "decision_result" in demo_data
+    assert demo_data["decision_result"] is not None
+
+
+# =============================================================================
+# 9. Phase 5.1 Canonical ArchitectureDecisionResult Contract
+# =============================================================================
+
+def test_canonical_architecture_decision_result(api_client):
+    """
+    Verifies that DemoWorkflowResponse contains the canonical ArchitectureDecisionResult
+    satisfying all 8 required sections: workload, candidates, simulations, feasibility,
+    evidence, recommendation, explanation, and implementation.
+    """
+    res = api_client.post("/api/demo/run", json={
+        "prompt": "Design a backend for an e-commerce API expecting approximately 500 requests per second. The p95 latency must remain below 100 ms, the monthly infrastructure budget is $250.",
+        "simulation_duration_seconds": 1.5,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    decision = data.get("decision_result")
+    assert decision is not None
+
+    # Workload
+    assert decision["workload"]["app_type"] == "ecommerce"
+    assert decision["workload"]["request_rate_rps"] == 500.0
+
+    # Candidates & Simulations
+    assert len(decision["candidates"]) >= 2
+    for cand in decision["candidates"]:
+        cand_id = cand["id"]
+        assert cand_id in decision["simulations"]
+        sim = decision["simulations"][cand_id]
+        assert sim["throughput_provenance"] == "SIMULATED"
+        assert sim["latency_provenance"] == "SIMULATED_SIMPY"
+        assert sim["cost_provenance"] in ("ASSUMED", "NOT_MODELLED")
+
+    # Feasibility
+    for cand in decision["candidates"]:
+        cand_id = cand["id"]
+        assert cand_id in decision["feasibility"]
+        assert "is_feasible" in decision["feasibility"][cand_id]
+
+    # Evidence
+    assert decision["evidence"]["coverage_status"] == "CALIBRATED"
+    assert decision["evidence"]["manifest_sha256"] != ""
+
+    # Recommendation
+    assert decision["recommendation"]["winner_id"] is not None
+    assert decision["recommendation"]["is_conclusive"] is True
+
+    # Explanation (Senior Architect Q&A without traps)
+    assert len(decision["explanation"]["winner_rationale"]) >= 1
+    assert len(decision["explanation"]["conditions_for_reconsideration"]) >= 1
+
+    # Implementation (Prompt Generator Inputs)
+    impl = decision["implementation"]
+    assert impl["recommended_topology"] != ""
+    assert "postgres" in impl["component_versions"]
+    assert "connection_pooling" in impl
+    assert len(impl["failure_handling"]) >= 1
+    assert len(impl["observability_requirements"]) >= 1
+    assert len(impl["security_considerations"]) >= 1
+    assert len(impl["explicit_non_goals"]) >= 1
+    assert len(impl["evidence_limitations"]) >= 1
+

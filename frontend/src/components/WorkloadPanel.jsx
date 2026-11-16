@@ -37,11 +37,11 @@ export default function WorkloadPanel() {
   return (
     <aside className="w-full lg:w-[320px] xl:w-[340px] bg-[#0a0d15] border-r border-white/[0.08] flex flex-col shrink-0 h-full overflow-y-auto">
       <div className="p-4 lg:p-5 space-y-5 flex-1">
-        {/* Step 1: Scenarios */}
+        {/* Step 1: Scenarios / What are you building? */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              1. Select a Scenario
+              1. What are you building?
             </span>
             <span className="text-[10px] text-slate-500 font-medium">1-click presets</span>
           </div>
@@ -104,7 +104,7 @@ export default function WorkloadPanel() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              2. Workload Description
+              2. Describe Your Workload
             </span>
             <span className="text-[10px] text-slate-500 font-mono">{prompt.length} chars</span>
           </div>
@@ -113,7 +113,7 @@ export default function WorkloadPanel() {
             rows={3}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe your workload, target QPS, p95 latency requirements, and budget..."
+            placeholder="e.g. Building an e-commerce catalog API expecting 500 requests/sec with p95 latency under 100ms and a $250/mo cloud budget..."
             className="text-xs font-sans bg-black/30 border border-white/[0.08] focus:border-indigo-500 rounded-lg p-2.5 text-slate-100 placeholder:text-slate-600 transition-all resize-none w-full"
           />
         </div>
@@ -127,12 +127,12 @@ export default function WorkloadPanel() {
           >
             <div className="flex items-center gap-2">
               <Sliders className="w-3.5 h-3.5 text-slate-400" />
-              <span>Simulation Controls</span>
+              <span>Simulation Fine-Tuning</span>
             </div>
             {showAdvanced ? (
-              <ChevronUp className="w-3.5 h-3.5 text-slate-500" />
+              <ChevronUp className="w-4 h-4 text-slate-500" />
             ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+              <ChevronDown className="w-4 h-4 text-slate-500" />
             )}
           </button>
 
@@ -192,35 +192,35 @@ export default function WorkloadPanel() {
           )}
         </div>
 
-        {/* Extracted Specifications */}
+        {/* Extracted Specifications in Plain English */}
         {workload && (
           <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Parsed Specifications
+              Parsed Target Requirements
             </span>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="bg-black/30 p-2 rounded-lg border border-white/[0.04]">
-                <div className="text-[9px] text-slate-500 font-medium uppercase">Target QPS</div>
+                <div className="text-[9px] text-slate-500 font-medium uppercase">Expected Traffic</div>
                 <div className="font-semibold text-slate-200 font-mono text-xs mt-0.5">
-                  {workload.qps ? `${workload.qps.toLocaleString()} RPS` : '—'}
+                  {workload.qps ? `${workload.qps.toLocaleString()} req/sec` : '—'}
                 </div>
               </div>
               <div className="bg-black/30 p-2 rounded-lg border border-white/[0.04]">
-                <div className="text-[9px] text-slate-500 font-medium uppercase">p95 SLA Target</div>
+                <div className="text-[9px] text-slate-500 font-medium uppercase">Max Response Time</div>
                 <div className="font-semibold text-slate-200 font-mono text-xs mt-0.5">
-                  {workload.p95_sla_ms ? `${workload.p95_sla_ms} ms` : '—'}
+                  {workload.p95_sla_ms ? `< ${workload.p95_sla_ms} ms` : '—'}
                 </div>
               </div>
               <div className="bg-black/30 p-2 rounded-lg border border-white/[0.04]">
-                <div className="text-[9px] text-slate-500 font-medium uppercase">Traffic Mix</div>
+                <div className="text-[9px] text-slate-500 font-medium uppercase">Reads vs Writes</div>
                 <div className="font-semibold text-slate-200 font-mono text-xs mt-0.5">
                   {workload.read_ratio != null ? `${Math.round(workload.read_ratio * 100)}% R / ${Math.round(workload.write_ratio * 100)}% W` : '—'}
                 </div>
               </div>
               <div className="bg-black/30 p-2 rounded-lg border border-white/[0.04]">
-                <div className="text-[9px] text-slate-500 font-medium uppercase">Monthly Budget</div>
+                <div className="text-[9px] text-slate-500 font-medium uppercase">Max Cloud Budget</div>
                 <div className="font-semibold text-slate-200 font-mono text-xs mt-0.5">
-                  {workload.budget_usd ? `$${workload.budget_usd}/mo` : '—'}
+                  {workload.budget_usd ? `< $${workload.budget_usd}/mo` : '—'}
                 </div>
               </div>
             </div>
@@ -250,7 +250,7 @@ export default function WorkloadPanel() {
           ) : (
             <>
               <Play className="w-3.5 h-3.5 fill-white" />
-              <span>Run AADS Agent Simulation</span>
+              <span>Run Architecture Simulation</span>
             </>
           )}
         </button>

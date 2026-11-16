@@ -20,6 +20,14 @@ from aads.core.schemas import (
     EvidenceItemDisclosure,
     EvidenceDisclosure,
     DemoWorkflowResponse,
+    ArchitectureDecisionResult,
+    DecisionWorkload,
+    DecisionCandidate,
+    DecisionSimulationMetrics,
+    DecisionFeasibility,
+    DecisionEvidence,
+    DecisionExplanation,
+    DecisionImplementation,
 )
 from aads.evaluation.feasibility_filter import FeasibilityFilter
 
@@ -313,6 +321,175 @@ def build_demo_workflow_response(state: Dict[str, Any]) -> DemoWorkflowResponse:
         overall_evidence_integrity="HIGH_EMPIRICAL_INTEGRITY: PostgreSQL component calibrated from real physical container trials; SimPy simulation models queueing dynamics; no synthetic data substituted for empirical measurements.",
     )
 
+    # -------------------------------------------------------------------------
+    # Canonical ArchitectureDecisionResult (Phase 5.1 Single Source of Truth)
+    # -------------------------------------------------------------------------
+    d_workload = DecisionWorkload(
+        app_type=req_summary.app_type,
+        request_rate_rps=req_summary.request_rate_rps,
+        peak_load_factor=req_summary.peak_load_factor,
+        read_ratio=req_summary.read_ratio,
+        write_ratio=req_summary.write_ratio,
+        p95_latency_target_ms=req_summary.p95_latency_target_ms,
+        min_throughput_rps=req_summary.min_throughput_rps,
+        max_monthly_budget_usd=req_summary.max_monthly_budget_usd,
+        hard_constraints=req_summary.hard_constraints,
+        soft_preferences=req_summary.soft_preferences,
+        user_facts=req_summary.user_facts,
+        agent_assumptions=req_summary.agent_assumptions,
+    )
+
+    d_candidates = [
+        DecisionCandidate(
+            id=c.architecture_id,
+            name=c.architecture_name,
+            topology=c.topology,
+            description=c.description,
+            components=[c.topology],
+        )
+        for c in comparisons
+    ]
+
+    d_simulations = {
+        c.architecture_id: DecisionSimulationMetrics(
+            architecture_id=c.architecture_id,
+            throughput_achieved_rps=c.throughput_achieved_rps,
+            throughput_provenance="SIMULATED",
+            p50_latency_ms=c.p50_latency_ms,
+            p95_latency_ms=c.p95_latency_ms,
+            p99_latency_ms=c.p99_latency_ms,
+            latency_provenance="SIMULATED_SIMPY",
+            latency_uncertainty_p95_ms=c.uncertainty_bounds_p95_ms,
+            cpu_utilization_pct=c.cpu_utilization_pct,
+            cpu_provenance="ESTIMATED",
+            estimated_monthly_cost_usd=c.estimated_monthly_cost_usd,
+            cost_provenance="ASSUMED",
+            cache_hit_rate=c.cache_hit_rate,
+            bottleneck_component=c.bottleneck_component,
+        )
+        for c in comparisons
+    }
+
+    d_feasibility = {
+        c.architecture_id: DecisionFeasibility(
+            architecture_id=c.architecture_id,
+            is_feasible=c.feasibility_status == FeasibilityStatus.FEASIBLE,
+            status=c.feasibility_status,
+            sla_result=c.sla_result,
+            checks=c.feasibility_checks,
+            rejection_reasons=[fc.explanation for fc in c.feasibility_checks if fc.status == FeasibilityStatus.INFEASIBLE],
+        )
+        for c in comparisons
+    }
+
+    d_evidence = DecisionEvidence(
+        coverage_status="CALIBRATED",
+        manifest_sha256="69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6",
+        empirical_components=evidence_disclosure.empirical_calibrated_components,
+        simulation_metrics=evidence_disclosure.simulation_derived_metrics,
+        assumed_parameters=evidence_disclosure.assumed_parameters,
+        limitations=[d.notes for d in evidence_disclosure.disclosures if d.notes],
+    )
+
+    d_rec = {
+        "winner_id": rec_summary.winner_architecture_id,
+        "winner_name": rec_summary.winner_architecture_name,
+        "is_conclusive": rec_summary.is_conclusive,
+        "executive_summary": rec_summary.executive_summary,
+    }
+
+    d_explanation = DecisionExplanation(
+        winner_rationale=rec_summary.decision_rationale,
+        why_alternatives_lost=[
+            {
+                "id": a.architecture_id,
+                "name": a.architecture_name,
+                "reasons": a.rejection_reasons,
+                "trade_off": a.trade_off_vs_winner,
+            }
+            for a in rec_summary.rejected_alternatives
+        ],
+        conditions_for_reconsideration=rec_summary.conditions_for_change,
+        when_alternatives_apply={
+            "arch_a_simple": "When direct PostgreSQL stops being sufficient: Under low-concurrency or write-heavy loads where cache invalidation overhead exceeds caching benefits.",
+            "arch_c_async": "When asynchronous processing is unnecessary: When request-response flows require synchronous consistency and volume remains below database connection saturation.",
+        },
+    )
+
+    is_cached_winner = "cached" in (winner_id or "").lower() or "redis" in (winner_name or "").lower()
+    is_async_winner = "async" in (winner_id or "").lower() or "queue" in (winner_name or "").lower()
+
+    d_implementation = DecisionImplementation(
+        recommended_topology=rec_summary.winner_architecture_name,
+        component_versions={
+            "postgres": "postgres:16-alpine",
+            "redis": "redis:7.2-alpine" if is_cached_winner else "N/A",
+            "kafka": "kafka:3.6-alpine" if is_async_winner else "N/A",
+        },
+        cache_strategy={
+            "pattern": "cache-aside",
+            "default_ttl_seconds": 300,
+            "jitter": True,
+            "invalidation": "delete_on_write",
+        } if is_cached_winner else None,
+        connection_pooling={
+            "max_pool_size": 25,
+            "min_idle": 5,
+            "acquire_timeout_seconds": 2.0,
+            "overflow_policy": "queue_with_timeout",
+        },
+        failure_handling=[
+            "Fallback to primary relational database on cache miss or cache service outage without failing client requests.",
+            "Circuit breaker trips to direct query mode if cache error rate exceeds 5% over 10 seconds.",
+            "Dead-letter queues and poison-pill isolation for asynchronous consumers (if async enabled).",
+        ],
+        timeouts_and_retries={
+            "database_query_timeout_ms": 500,
+            "cache_lookup_timeout_ms": 50,
+            "max_query_retries": 2,
+            "backoff_policy": "exponential_jitter",
+        },
+        observability_requirements=[
+            "Emit p95 and p99 latency metrics grouped by HTTP route.",
+            "Track Redis cache hit/miss ratio gauge (target > 80%).",
+            "Monitor PostgreSQL connection pool saturation and queue depth.",
+            "Alert on database CPU utilization sustained above 75%.",
+        ],
+        security_considerations=[
+            "Enforce TLS encryption in transit for database and cache connections.",
+            "Use strict parameterized queries / ORM prepared statements to eliminate SQL injection.",
+            "Never store unencrypted secrets in code; inject credentials via environment variables or secret manager.",
+            "Bind Redis to private VPC loopback; require Redis AUTH token.",
+        ],
+        explicit_non_goals=[
+            "DO NOT implement Kafka or message queues unless asynchronous architecture is chosen.",
+            "DO NOT add multi-region distributed cache clustering before single-node limits are exceeded.",
+            "DO NOT introduce microservice decomposition or distributed sagas for this service.",
+            "DO NOT prematurely introduce complex database sharding.",
+        ],
+        evidence_limitations=[
+            "Performance estimates are derived from discrete-event queueing simulation (SimPy), not real physical production traffic.",
+            "Database CPU utilization estimates assume calibrated 2 vCPU hardware baseline.",
+            "Cost estimates are illustrative based on standard cloud provider list prices and assume continuous 730 hr/mo usage.",
+        ],
+        decisions_requiring_confirmation=[
+            "Confirm cache eviction policy (volatile-lru recommended for catalog items).",
+            "Confirm read replica provisioning trigger if read traffic expands beyond 650 RPS.",
+            "Confirm session consistency requirements for immediate read-after-write scenarios.",
+        ],
+    )
+
+    decision_result = ArchitectureDecisionResult(
+        workload=d_workload,
+        candidates=d_candidates,
+        simulations=d_simulations,
+        feasibility=d_feasibility,
+        evidence=d_evidence,
+        recommendation=d_rec,
+        explanation=d_explanation,
+        implementation=d_implementation,
+    )
+
     return DemoWorkflowResponse(
         request_summary=req_summary,
         investigation_summary=inv_summary,
@@ -321,4 +498,5 @@ def build_demo_workflow_response(state: Dict[str, Any]) -> DemoWorkflowResponse:
         evidence_disclosure=evidence_disclosure,
         workflow_status=workflow_status,
         execution_mode=execution_mode,
+        decision_result=decision_result,
     )

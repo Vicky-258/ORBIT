@@ -359,4 +359,108 @@ class DemoWorkflowResponse(BaseModel):
     evidence_disclosure: EvidenceDisclosure
     workflow_status: str
     execution_mode: str
+    decision_result: Optional["ArchitectureDecisionResult"] = None
+
+
+# =============================================================================
+# Phase 5.1 Canonical Architecture Decision Result Schema
+# =============================================================================
+
+class DecisionWorkload(BaseModel):
+    app_type: str
+    request_rate_rps: float
+    peak_load_factor: float
+    read_ratio: float
+    write_ratio: float
+    p95_latency_target_ms: float
+    min_throughput_rps: float
+    max_monthly_budget_usd: Optional[float] = None
+    hard_constraints: List[str] = Field(default_factory=list)
+    soft_preferences: Dict[str, float] = Field(default_factory=dict)
+    user_facts: Dict[str, Any] = Field(default_factory=dict)
+    agent_assumptions: List[str] = Field(default_factory=list)
+
+
+class DecisionCandidate(BaseModel):
+    id: str
+    name: str
+    topology: str
+    description: str
+    components: List[str] = Field(default_factory=list)
+
+
+class DecisionSimulationMetrics(BaseModel):
+    architecture_id: str
+    throughput_achieved_rps: float
+    throughput_provenance: str = "SIMULATED"  # "SIMULATED" | "EMPIRICAL_MEASURED"
+    p50_latency_ms: float
+    p95_latency_ms: float
+    p99_latency_ms: float
+    latency_provenance: str = "SIMULATED_SIMPY"
+    latency_uncertainty_p95_ms: Tuple[float, float]
+    cpu_utilization_pct: Optional[float] = None
+    cpu_provenance: str = "ESTIMATED"  # "ESTIMATED" | "NOT_MODELLED"
+    estimated_monthly_cost_usd: Optional[float] = None
+    cost_provenance: str = "ASSUMED"  # "ASSUMED" | "NOT_MODELLED"
+    cache_hit_rate: Optional[float] = None
+    bottleneck_component: str = "DATABASE"
+
+
+class DecisionFeasibility(BaseModel):
+    architecture_id: str
+    is_feasible: bool
+    status: FeasibilityStatus
+    sla_result: str
+    checks: List[FeasibilityCheck] = Field(default_factory=list)
+    rejection_reasons: List[str] = Field(default_factory=list)
+
+
+class DecisionEvidence(BaseModel):
+    coverage_status: str
+    manifest_sha256: str
+    empirical_components: List[str] = Field(default_factory=list)
+    simulation_metrics: List[str] = Field(default_factory=list)
+    assumed_parameters: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+
+
+class DecisionExplanation(BaseModel):
+    winner_rationale: List[str]
+    why_alternatives_lost: List[Dict[str, Any]]
+    conditions_for_reconsideration: List[str]
+    when_alternatives_apply: Dict[str, str] = Field(default_factory=dict)
+
+
+class DecisionImplementation(BaseModel):
+    recommended_topology: str
+    component_versions: Dict[str, str] = Field(default_factory=dict)
+    cache_strategy: Optional[Dict[str, Any]] = None
+    connection_pooling: Dict[str, Any] = Field(default_factory=dict)
+    failure_handling: List[str] = Field(default_factory=list)
+    timeouts_and_retries: Dict[str, Any] = Field(default_factory=dict)
+    observability_requirements: List[str] = Field(default_factory=list)
+    security_considerations: List[str] = Field(default_factory=list)
+    explicit_non_goals: List[str] = Field(default_factory=list)
+    evidence_limitations: List[str] = Field(default_factory=list)
+    decisions_requiring_confirmation: List[str] = Field(default_factory=list)
+
+
+class ArchitectureDecisionResult(BaseModel):
+    """
+    Canonical decision object uniting Workload, Candidates, Simulations,
+    Feasibility, Evidence, Recommendation, Explanation, and Implementation.
+    """
+    workload: DecisionWorkload
+    candidates: List[DecisionCandidate]
+    simulations: Dict[str, DecisionSimulationMetrics]
+    feasibility: Dict[str, DecisionFeasibility]
+    evidence: DecisionEvidence
+    recommendation: Dict[str, Any]
+    explanation: DecisionExplanation
+    implementation: DecisionImplementation
+
+
+# Resolve forward references
+DemoWorkflowResponse.model_rebuild()
+
 
