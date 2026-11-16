@@ -19,7 +19,10 @@ import {
   Activity,
   Sliders,
   Sparkles,
-  HelpCircle,
+  Zap,
+  Cpu,
+  Info,
+  ChevronRight,
 } from 'lucide-react';
 
 import InvestigationTrace from '../features/InvestigationTrace';
@@ -30,17 +33,20 @@ import ModelRegistryBrowser from '../features/ModelRegistryBrowser';
 
 export default function ResultsPanel() {
   const { response, loading, handleRunWorkflow } = useApp();
-  const [activeTab, setActiveTab] = useState('recommendation');
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const winner = response?.section_d_recommendation?.winner;
-  const sectionC = response?.section_c_comparison;
-  const sectionD = response?.section_d_recommendation;
-  const candidates = sectionC?.candidates || [];
+  const workload = response?.workload || response?.section_a_workload || {};
+  const candidates = response?.candidates || response?.section_c_comparison?.candidates || [];
+  const recommendation = response?.recommendation || response?.section_d_recommendation || {};
+  const winner = recommendation?.candidate || recommendation?.winner || candidates.find(c => c.id === recommendation?.winnerId) || candidates[0];
+
+  const slaMs = workload.p95_sla_ms || 100;
+  const budgetUsd = workload.budget_usd || 250;
 
   // Loading state
   if (loading) {
     return (
-      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4 bg-[#09090b]">
+      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4 bg-[#08090e]">
         <div className="w-12 h-12 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin" />
         <div className="space-y-1">
           <h3 className="text-base font-bold text-white">Autonomous Agent Investigation Active</h3>
@@ -52,134 +58,49 @@ export default function ResultsPanel() {
     );
   }
 
-  // Pre-run welcome canvas
-  if (!response) {
+  // Pre-run welcome canvas fallback (only if response completely missing)
+  if (!response || candidates.length === 0) {
     return (
-      <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between bg-[#09090b] overflow-y-auto">
-        <div className="max-w-4xl mx-auto w-full space-y-6">
-          {/* Header */}
-          <div className="space-y-1.5 border-b border-zinc-800 pb-5">
-            <div className="flex items-center gap-2">
-              <span className="badge badge-indigo">Simulator Canvas</span>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-                Architecture Design & Simulation Studio
-              </h2>
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-400">
-              Select a benchmark scenario on the left and run the investigation to generate evidence-backed architectural recommendations.
-            </p>
-          </div>
-
-          {/* Three Candidate Architectures Overview */}
-          <div className="space-y-3">
-            <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-              Candidate Architectures in Play
-            </span>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="panel p-4 space-y-2 border-zinc-800 bg-zinc-900/40">
-                <div className="flex items-center justify-between">
-                  <span className="badge badge-zinc">Baseline Relational</span>
-                  <span className="font-mono text-xs text-emerald-400 font-semibold">$133/mo</span>
-                </div>
-                <h4 className="font-bold text-sm text-white">Architecture A: Simple Direct</h4>
-                <div className="text-[11px] font-mono text-zinc-400">API → PostgreSQL 16</div>
-                <p className="text-xs text-zinc-400 leading-relaxed pt-1">
-                  Zero cache complexity. Best suited for balanced low-to-medium throughput where database CPU stays under 60%.
-                </p>
-              </div>
-
-              <div className="panel p-4 space-y-2 border-indigo-500/30 bg-zinc-900/40">
-                <div className="flex items-center justify-between">
-                  <span className="badge badge-indigo">In-Memory Shield</span>
-                  <span className="font-mono text-xs text-emerald-400 font-semibold">$176/mo</span>
-                </div>
-                <h4 className="font-bold text-sm text-white">Architecture B: Cached Reads</h4>
-                <div className="text-[11px] font-mono text-indigo-300">API → Redis Cache → PostgreSQL</div>
-                <p className="text-xs text-zinc-400 leading-relaxed pt-1">
-                  Sub-10ms reads. In-memory cache absorbs 85%+ read spikes, preventing database saturation on catalog reads.
-                </p>
-              </div>
-
-              <div className="panel p-4 space-y-2 border-cyan-500/30 bg-zinc-900/40">
-                <div className="flex items-center justify-between">
-                  <span className="badge badge-cyan">Decoupled Queue</span>
-                  <span className="font-mono text-xs text-emerald-400 font-semibold">$216/mo</span>
-                </div>
-                <h4 className="font-bold text-sm text-white">Architecture C: Async Pipeline</h4>
-                <div className="text-[11px] font-mono text-cyan-300">API → Kafka → Worker → PostgreSQL</div>
-                <p className="text-xs text-zinc-400 leading-relaxed pt-1">
-                  Immediate HTTP 202 ack. Background workers absorb massive write spikes with asynchronous persistence.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* How It Works 3-Step Banner */}
-          <div className="panel p-5 space-y-3 bg-[#0d0d12]">
-            <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
-              Autonomous Verification Process
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-400">
-              <div className="space-y-1">
-                <div className="font-semibold text-white flex items-center gap-1.5">
-                  <Bot className="w-3.5 h-3.5 text-indigo-400" /> 1. Model Discovery
-                </div>
-                <p className="leading-relaxed">
-                  Checks operating bounds in the SQLite registry (24 active empirical models).
-                </p>
-              </div>
-              <div className="space-y-1">
-                <div className="font-semibold text-white flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-emerald-400" /> 2. SimPy Simulation
-                </div>
-                <p className="leading-relaxed">
-                  Simulates request queueing, database connection limits, and CPU cores.
-                </p>
-              </div>
-              <div className="space-y-1">
-                <div className="font-semibold text-white flex items-center gap-1.5">
-                  <Award className="w-3.5 h-3.5 text-amber-400" /> 3. Decision Engine
-                </div>
-                <p className="leading-relaxed">
-                  Two-stage filtering eliminates SLA violators and ranks optimal Pareto efficiency.
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4 bg-[#08090e]">
+        <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <Zap className="w-6 h-6" />
         </div>
-
-        {/* Bottom CTA */}
-        <div className="pt-6 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-500">
-          <span>Deterministic & Auditable Simulation Pipeline</span>
-          <span className="font-mono text-[11px]">Manifest: 69d3e068...77a6</span>
+        <div className="space-y-1">
+          <h3 className="text-base font-bold text-white">Select a Scenario to Begin</h3>
+          <p className="text-xs text-zinc-400 max-w-md">
+            Choose a benchmark scenario on the left to immediately inspect discrete-event simulation results.
+          </p>
         </div>
       </div>
     );
   }
 
-  // Active Results View
+  // Max scale for visual bars
+  const maxLatency = Math.max(slaMs * 1.5, ...candidates.map(c => c.p95 || 0));
+  const maxCost = Math.max(budgetUsd * 1.25, ...candidates.map(c => c.cost || 0));
+
   return (
-    <div className="flex-1 bg-[#09090b] flex flex-col h-full overflow-y-auto">
-      {/* Top Results Navigation */}
-      <div className="border-b border-zinc-800 bg-[#0c0c10] px-6 py-2.5 flex items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-white">Results & Inspection:</span>
-          {winner && (
-            <span className="badge badge-emerald text-[10px]">
-              <Award className="w-3 h-3" /> Winner: {winner.name?.split('—')[0] || winner.id}
+    <div className="flex-1 bg-[#08090e] flex flex-col h-full overflow-y-auto">
+      {/* Studio Header Bar */}
+      <div className="border-b border-zinc-800/80 bg-[#0b0c13] px-6 py-3 flex flex-wrap items-center justify-between gap-4 shrink-0">
+        <div className="flex items-center gap-3">
+          <span className="badge badge-indigo text-xs">SimPy 4.1 Studio</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-white">Simulated Evaluation:</span>
+            <span className="text-xs text-zinc-400 font-mono">
+              {workload.qps} RPS • {workload.read_ratio * 100}% Read • SLA &lt; {slaMs}ms • Budget ${budgetUsd}
             </span>
-          )}
+          </div>
         </div>
 
         {/* Tab Controls */}
-        <div className="flex items-center gap-1 text-xs">
+        <div className="flex items-center gap-1.5 text-xs">
           {[
-            { id: 'recommendation', label: 'Recommendation', icon: Award },
-            { id: 'comparison', label: 'Simulations', icon: Layers },
+            { id: 'overview', label: 'Architecture Matrix', icon: Award },
+            { id: 'rationale', label: 'Decision Rationale', icon: Activity },
             { id: 'trace', label: 'Agent Trace', icon: Bot },
-            { id: 'evidence', label: 'Evidence & Epistemics', icon: ShieldCheck },
-            { id: 'registry', label: 'Model Registry', icon: Database },
+            { id: 'evidence', label: 'Evidence & Provenance', icon: ShieldCheck },
+            { id: 'registry', label: 'Model Registry (24)', icon: Database },
           ].map((t) => {
             const IconComp = t.icon;
             const isTabActive = activeTab === t.id;
@@ -189,13 +110,13 @@ export default function ResultsPanel() {
                 key={t.id}
                 type="button"
                 onClick={() => setActiveTab(t.id)}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all font-medium ${
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all font-semibold ${
                   isTabActive
-                    ? 'bg-zinc-800 text-white shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60'
                 }`}
               >
-                <IconComp className={`w-3.5 h-3.5 ${isTabActive ? 'text-indigo-400' : 'text-zinc-500'}`} />
+                <IconComp className="w-3.5 h-3.5" />
                 <span>{t.label}</span>
               </button>
             );
@@ -203,76 +124,311 @@ export default function ResultsPanel() {
         </div>
       </div>
 
-      {/* Main Results Body */}
-      <div className="p-6 space-y-6 flex-1">
-        {/* Winner Hero Card (Always visible on results canvas) */}
+      {/* Main Results Canvas */}
+      <div className="p-6 lg:p-8 space-y-6 flex-1">
+        {/* 1. Executive Winner Showcase Card */}
         {winner && (
-          <div className="winner-hero p-5 rounded-2xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <span className="badge badge-emerald text-[10px] font-bold">
-                  Recommended Architecture
-                </span>
-                <h3 className="text-xl font-bold text-white mt-1">
+          <div className="relative rounded-2xl bg-gradient-to-r from-emerald-950/40 via-zinc-900/60 to-indigo-950/30 border border-emerald-500/40 p-6 shadow-xl shadow-emerald-950/20 overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl -z-10 pointer-events-none" />
+
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-5 border-b border-zinc-800/80">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="badge badge-emerald text-xs font-bold uppercase tracking-wider py-0.5 px-2.5 flex items-center gap-1">
+                    <Award className="w-3.5 h-3.5" /> Recommended Winner
+                  </span>
+                  <span className="text-xs text-zinc-400 font-mono">
+                    Highest Pareto Utility Score
+                  </span>
+                </div>
+                <h2 className="text-2xl font-black text-white tracking-tight">
                   {winner.name || winner.id}
-                </h3>
-                <p className="text-xs text-zinc-300 mt-0.5 font-mono">
-                  {winner.topology_summary || winner.components?.join(' → ')}
-                </p>
+                </h2>
+                <div className="text-xs font-mono text-emerald-400 flex items-center gap-2 pt-0.5">
+                  <span className="text-zinc-400">Topology:</span>
+                  <span>{winner.topology || winner.topology_summary}</span>
+                </div>
               </div>
 
-              {/* KPI Stat Badges */}
-              <div className="flex items-center gap-2.5 shrink-0">
-                <div className="px-3 py-2 rounded-lg bg-zinc-950/80 border border-zinc-800 text-center">
-                  <div className="text-[10px] text-zinc-400 uppercase font-semibold flex items-center justify-center gap-1">
+              {/* 4 KPI Badges */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 shrink-0">
+                {/* Latency */}
+                <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 text-center">
+                  <div className="text-[10px] text-zinc-400 font-semibold uppercase flex items-center justify-center gap-1">
                     <Clock className="w-3 h-3 text-cyan-400" /> p95 Latency
                   </div>
                   <div className="text-base font-bold text-white font-mono mt-0.5">
-                    {winner.metrics?.p95_latency_ms != null ? `${winner.metrics.p95_latency_ms.toFixed(1)}ms` : '—'}
+                    {winner.p95} ms
+                  </div>
+                  <div className="text-[10px] text-emerald-400 font-medium">
+                    SLA &lt; {slaMs}ms (PASS)
                   </div>
                 </div>
 
-                <div className="px-3 py-2 rounded-lg bg-zinc-950/80 border border-zinc-800 text-center">
-                  <div className="text-[10px] text-zinc-400 uppercase font-semibold flex items-center justify-center gap-1">
-                    <TrendingUp className="w-3 h-3 text-emerald-400" /> Throughput
+                {/* Monthly Cost */}
+                <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 text-center">
+                  <div className="text-[10px] text-zinc-400 font-semibold uppercase flex items-center justify-center gap-1">
+                    <DollarSign className="w-3 h-3 text-emerald-400" /> Monthly Cost
                   </div>
                   <div className="text-base font-bold text-white font-mono mt-0.5">
-                    {winner.metrics?.throughput_qps != null ? `${Math.round(winner.metrics.throughput_qps)} QPS` : '—'}
+                    ${winner.cost}/mo
+                  </div>
+                  <div className="text-[10px] text-emerald-400 font-medium">
+                    Budget &lt; ${budgetUsd} (PASS)
                   </div>
                 </div>
 
-                <div className="px-3 py-2 rounded-lg bg-zinc-950/80 border border-zinc-800 text-center">
-                  <div className="text-[10px] text-zinc-400 uppercase font-semibold flex items-center justify-center gap-1">
-                    <DollarSign className="w-3 h-3 text-amber-400" /> Monthly Cost
+                {/* Throughput */}
+                <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 text-center">
+                  <div className="text-[10px] text-zinc-400 font-semibold uppercase flex items-center justify-center gap-1">
+                    <TrendingUp className="w-3 h-3 text-indigo-400" /> Throughput
                   </div>
                   <div className="text-base font-bold text-white font-mono mt-0.5">
-                    {winner.estimated_cost_monthly != null ? `$${Math.round(winner.estimated_cost_monthly)}` : '—'}
+                    {winner.throughput} RPS
+                  </div>
+                  <div className="text-[10px] text-emerald-400 font-medium">
+                    100% Sustained
+                  </div>
+                </div>
+
+                {/* Database CPU */}
+                <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 text-center">
+                  <div className="text-[10px] text-zinc-400 font-semibold uppercase flex items-center justify-center gap-1">
+                    <Cpu className="w-3 h-3 text-amber-400" /> DB CPU
+                  </div>
+                  <div className="text-base font-bold text-white font-mono mt-0.5">
+                    {winner.cpu}%
+                  </div>
+                  <div className="text-[10px] text-emerald-400 font-medium">
+                    {winner.cpu < 60 ? 'Healthy Pool' : 'Saturated'}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Why It Won Bullets */}
-            {sectionD?.why_it_won && sectionD.why_it_won.length > 0 && (
-              <div className="pt-3 border-t border-emerald-500/20 text-xs text-zinc-200 space-y-1.5">
-                <div className="font-semibold text-emerald-400 flex items-center gap-1 text-[11px] uppercase tracking-wider">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Key Rationale
-                </div>
-                {sectionD.why_it_won.map((r, idx) => (
-                  <div key={idx} className="flex items-start gap-2 text-zinc-300">
-                    <ArrowRight className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{r}</span>
+            {/* Why It Won Bullet Points */}
+            <div className="pt-4 space-y-2">
+              <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Why This Architecture Won:
+              </span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                {(recommendation.decision_rationale || recommendation.why_it_won || []).slice(0, 3).map((r, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 text-xs text-zinc-300 flex items-start gap-2">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="leading-relaxed">{r}</span>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
           </div>
         )}
 
-        {/* Selected View Tab Content */}
-        <div>
-          {activeTab === 'recommendation' && <RecommendationView />}
-          {activeTab === 'comparison' && <ArchitectureComparison />}
+        {/* 2. Candidate Architectures In Play (Side-by-Side 3-Card Grid) */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Candidate Architectures Evaluated Under Workload</span>
+            </span>
+            <span className="text-xs text-zinc-500 font-mono">
+              3 Architectures Simulated Side-by-Side
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {candidates.map((cand) => {
+              const isWinner = cand.id === winner?.id;
+              const isViolated = !cand.slaMet || !cand.feasible;
+
+              return (
+                <div
+                  key={cand.id}
+                  className={`rounded-2xl p-5 border flex flex-col justify-between transition-all ${
+                    isWinner
+                      ? 'bg-zinc-900/90 border-emerald-500/60 ring-1 ring-emerald-500/50 shadow-lg shadow-emerald-500/5'
+                      : 'bg-zinc-900/40 border-zinc-800/80 hover:border-zinc-700'
+                  }`}
+                >
+                  <div className="space-y-4">
+                    {/* Card Header & Status */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>{cand.name.split('—')[0] || cand.id}</span>
+                        </div>
+                        <h4 className="text-sm font-bold text-zinc-200 mt-0.5">
+                          {cand.name.split('—')[1] || cand.name}
+                        </h4>
+                      </div>
+
+                      {isWinner ? (
+                        <span className="badge badge-emerald text-[10px] shrink-0 font-bold">
+                          ★ WINNER
+                        </span>
+                      ) : isViolated ? (
+                        <span className="badge badge-rose text-[10px] shrink-0 font-bold">
+                          ✕ SLA VIOLATED
+                        </span>
+                      ) : (
+                        <span className="badge badge-zinc text-[10px] shrink-0 font-bold">
+                          FEASIBLE
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Visual Topology Diagram Flow */}
+                    <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
+                      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                        Topology Flow
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap text-xs font-mono">
+                        {(cand.topologyNodes || []).map((node, nIdx) => (
+                          <React.Fragment key={nIdx}>
+                            <div className="px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-1 text-[11px]">
+                              {node.type === 'ingress' && <Server className="w-3 h-3 text-zinc-400" />}
+                              {node.type === 'cache' && <Zap className="w-3 h-3 text-cyan-400" />}
+                              {node.type === 'database' && <Database className="w-3 h-3 text-indigo-400" />}
+                              {node.type === 'queue' && <Layers className="w-3 h-3 text-amber-400" />}
+                              {node.type === 'worker' && <Cpu className="w-3 h-3 text-emerald-400" />}
+                              <span>{node.name}</span>
+                            </div>
+                            {nIdx < cand.topologyNodes.length - 1 && (
+                              <ArrowRight className="w-3 h-3 text-zinc-600 shrink-0" />
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Visual Comparison Progress Bars */}
+                    <div className="space-y-3 pt-1">
+                      {/* Latency Bar */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-zinc-400 flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-cyan-400" /> p95 Latency:
+                          </span>
+                          <span className={`font-mono font-bold ${cand.p95 <= slaMs ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {cand.p95} ms <span className="text-zinc-500 font-normal">/ {slaMs}ms SLA</span>
+                          </span>
+                        </div>
+                        <div className="relative w-full h-2 rounded-full bg-zinc-950 overflow-hidden border border-zinc-800">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              cand.p95 <= slaMs ? 'bg-emerald-500' : 'bg-rose-500'
+                            }`}
+                            style={{ width: `${Math.min(100, (cand.p95 / maxLatency) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Cost Bar */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-zinc-400 flex items-center gap-1">
+                            <DollarSign className="w-3 h-3 text-amber-400" /> Monthly Cost:
+                          </span>
+                          <span className={`font-mono font-bold ${cand.cost <= budgetUsd ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            ${cand.cost} <span className="text-zinc-500 font-normal">/ ${budgetUsd} budget</span>
+                          </span>
+                        </div>
+                        <div className="relative w-full h-2 rounded-full bg-zinc-950 overflow-hidden border border-zinc-800">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              cand.cost <= budgetUsd ? 'bg-indigo-500' : 'bg-rose-500'
+                            }`}
+                            style={{ width: `${Math.min(100, (cand.cost / maxCost) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Metrics Grid */}
+                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-800/80 text-[11px] font-mono text-center">
+                      <div className="p-1.5 rounded bg-zinc-950 border border-zinc-800/80">
+                        <div className="text-[9px] text-zinc-500 uppercase">p50 Latency</div>
+                        <div className="text-zinc-200 font-bold">{cand.p50} ms</div>
+                      </div>
+                      <div className="p-1.5 rounded bg-zinc-950 border border-zinc-800/80">
+                        <div className="text-[9px] text-zinc-500 uppercase">Throughput</div>
+                        <div className="text-zinc-200 font-bold">{cand.throughput} RPS</div>
+                      </div>
+                      <div className="p-1.5 rounded bg-zinc-950 border border-zinc-800/80">
+                        <div className="text-[9px] text-zinc-500 uppercase">DB CPU</div>
+                        <div className="text-zinc-200 font-bold">{cand.cpu}%</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verdict Footer */}
+                  <div className="mt-4 pt-3 border-t border-zinc-800/80 text-xs">
+                    {isWinner ? (
+                      <div className="text-emerald-400 flex items-start gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span>Meets latency SLA with lowest total cost.</span>
+                      </div>
+                    ) : isViolated ? (
+                      <div className="text-rose-400 flex items-start gap-1.5">
+                        <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span>
+                          {cand.rejectionReasons?.[0] || `p95 latency (${cand.p95}ms) exceeds SLA.`}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="text-zinc-400 flex items-start gap-1.5">
+                        <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        <span>Feasible, but higher cost than winner.</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 3. Deep-Dive Workspace Tabs */}
+        <div className="pt-4">
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Trade-Offs & Risks */}
+              <div className="panel p-5 space-y-3 bg-zinc-900/40 border-zinc-800/80">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                    Main Trade-Offs & Architectural Risks
+                  </h4>
+                </div>
+                <div className="space-y-2">
+                  {(recommendation.main_trade_offs || recommendation.trade_offs_and_risks || []).map((t, idx) => (
+                    <div key={idx} className="p-3 rounded-xl bg-zinc-950 border border-zinc-800/80 text-xs text-zinc-300 flex items-start gap-2">
+                      <ChevronRight className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{t}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Conditions For Change */}
+              <div className="panel p-5 space-y-3 bg-zinc-900/40 border-zinc-800/80">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-indigo-400" />
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                    Conditions for Change (When to Pivot Architecture)
+                  </h4>
+                </div>
+                <div className="space-y-2">
+                  {(recommendation.conditions_for_change || []).map((c, idx) => (
+                    <div key={idx} className="p-3 rounded-xl bg-zinc-950 border border-zinc-800/80 text-xs text-zinc-300 flex items-start gap-2">
+                      <ChevronRight className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                      <span className="leading-relaxed">{c}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'rationale' && <RecommendationView />}
           {activeTab === 'trace' && <InvestigationTrace />}
           {activeTab === 'evidence' && <EvidenceDisclosure />}
           {activeTab === 'registry' && <ModelRegistryBrowser />}

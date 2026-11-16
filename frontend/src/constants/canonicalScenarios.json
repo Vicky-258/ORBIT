@@ -1,0 +1,1351 @@
+{
+  "scenario_1_ecommerce": {
+    "request_summary": {
+      "app_type": "ecommerce",
+      "request_rate_rps": 500.0,
+      "peak_load_factor": 2.0,
+      "read_ratio": 0.9,
+      "write_ratio": 0.1,
+      "p95_latency_target_ms": 100.0,
+      "min_throughput_rps": 450.0,
+      "max_monthly_budget_usd": 250.0,
+      "hard_constraints": [
+        "p95_latency",
+        "min_throughput",
+        "max_budget"
+      ],
+      "soft_preferences": {
+        "cost": 0.3,
+        "latency": 0.5,
+        "simplicity": 0.2
+      },
+      "user_facts": {
+        "request_rate_rps": "500.0",
+        "p95_latency_target_ms": "100.0",
+        "max_monthly_budget_usd": "250.0",
+        "read_ratio": "0.9",
+        "write_ratio": "0.1",
+        "app_type": "ecommerce"
+      },
+      "agent_assumptions": [
+        "0.85",
+        "2.0",
+        "Peak burst headroom assumed: 2.0x",
+        "Cache hit rate expectation: 85%"
+      ],
+      "clarification_questions": []
+    },
+    "investigation_summary": {
+      "investigation_rounds": 2,
+      "actions": [
+        {
+          "round": 1,
+          "tool_name": "check_component_models",
+          "purpose": "Audit registry model coverage and calibration status for all candidate architectures.",
+          "target": "all_candidates",
+          "relevant_arguments": {
+            "target": "all_candidates"
+          },
+          "result_summary": "Audited 3 candidates; 0 missing models identified.",
+          "status": "SUCCESS",
+          "duration_seconds": 0.002,
+          "policy_verdict": "APPROVED",
+          "provenance": "model_derived"
+        },
+        {
+          "round": 2,
+          "tool_name": "inspect_uncertainty",
+          "purpose": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+          "target": "all",
+          "relevant_arguments": {
+            "target": "all"
+          },
+          "result_summary": "Uncertainty analysis completed across 3 candidates.",
+          "status": "SUCCESS",
+          "duration_seconds": 0.0,
+          "policy_verdict": "APPROVED",
+          "provenance": "uncertainty_analysis"
+        }
+      ],
+      "why_agent_stopped": "Sufficient simulation and uncertainty evidence established. Investigation completed.",
+      "total_duration_seconds": 0.002,
+      "budget_spent_seconds": 0.002,
+      "policy_violations_prevented": 0
+    },
+    "architecture_comparison": [
+      {
+        "architecture_id": "arch_a_simple",
+        "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+        "topology": "Sync API \u2192 PostgreSQL",
+        "description": "Direct database queries for all reads and writes. Simple operations, low complexity, but database bound under high load.",
+        "throughput_achieved_rps": 496.0,
+        "p50_latency_ms": 5.56,
+        "p95_latency_ms": 13.58,
+        "p99_latency_ms": 17.6,
+        "estimated_monthly_cost_usd": 133.0,
+        "cpu_utilization_pct": 80.7,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": null,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 100.0,
+            "predicted_value": 13.58,
+            "uncertainty_range": [
+              13.37,
+              13.79
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (13.6ms) satisfies target SLA (100.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 450.0,
+            "predicted_value": 496.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (496.0 rps) satisfies requirement (450.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 250.0,
+            "predicted_value": 133.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($133.00) is within budget cap ($250.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          13.37,
+          13.79
+        ],
+        "limitations": []
+      },
+      {
+        "architecture_id": "arch_b_cached",
+        "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+        "topology": "Sync API \u2192 Redis Cache \u2192 PostgreSQL",
+        "description": "In-memory cache for feed reads. Sub-millisecond cache hits shield the primary database from read-heavy spikes.",
+        "throughput_achieved_rps": 501.6,
+        "p50_latency_ms": 0.99,
+        "p95_latency_ms": 7.25,
+        "p99_latency_ms": 8.17,
+        "estimated_monthly_cost_usd": 176.0,
+        "cpu_utilization_pct": 27.5,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": 0.848,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 100.0,
+            "predicted_value": 7.25,
+            "uncertainty_range": [
+              7.13,
+              7.37
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (7.2ms) satisfies target SLA (100.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 450.0,
+            "predicted_value": 501.6,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (501.6 rps) satisfies requirement (450.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 250.0,
+            "predicted_value": 176.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($176.00) is within budget cap ($250.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          7.13,
+          7.37
+        ],
+        "limitations": []
+      },
+      {
+        "architecture_id": "arch_c_async",
+        "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+        "topology": "Async API \u2192 Message Queue \u2192 Background Worker \u2192 PostgreSQL",
+        "description": "Decoupled write pipeline using an asynchronous queue and background worker, alongside cached reads. Rapid write acknowledgements.",
+        "throughput_achieved_rps": 490.4,
+        "p50_latency_ms": 0.96,
+        "p95_latency_ms": 3.3,
+        "p99_latency_ms": 3.86,
+        "estimated_monthly_cost_usd": 216.0,
+        "cpu_utilization_pct": 26.1,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": 0.852,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 100.0,
+            "predicted_value": 3.3,
+            "uncertainty_range": [
+              3.24,
+              3.35
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (3.3ms) satisfies target SLA (100.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 450.0,
+            "predicted_value": 490.4,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (490.4 rps) satisfies requirement (450.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 250.0,
+            "predicted_value": 216.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($216.00) is within budget cap ($250.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          3.24,
+          3.35
+        ],
+        "limitations": []
+      }
+    ],
+    "recommendation": {
+      "winner_architecture_id": "arch_b_cached",
+      "winner_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+      "selected_architecture_id": "arch_b_cached",
+      "selected_architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+      "is_conclusive": true,
+      "feasibility_status": "FEASIBLE",
+      "executive_summary": "Recommend Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL). Under the specified 500 RPS workload, it satisfies all mandatory constraints with a predicted p95 latency of 7.2ms (heuristic uncertainty bounds [7.1, 7.4] ms) at an estimated monthly cost of $176.00.",
+      "decision_rationale": [
+        "Selected based on optimal balance under stated preferences (Cost: 30%, Latency: 50%, Simplicity: 20%).",
+        "Meets hard constraints: Achieves p95 latency of 7.2ms (target <= 100.0ms) at $176.00/mo (budget <= $250.00/mo).",
+        "Effective read caching (84.8% hit rate) shields the database connection pool, sustaining 501.6 RPS with 27.5% DB utilization."
+      ],
+      "main_trade_offs": [
+        "Added operational complexity of Redis cache management, cache invalidation, and potential stale reads during write bursts.",
+        "Monthly cost is ~$43.00 higher than Architecture A due to the dedicated Redis instance."
+      ],
+      "rejected_alternatives": [
+        {
+          "architecture_id": "arch_a_simple",
+          "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "rejection_reasons": [
+            "Lower multi-objective score compared to Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)."
+          ],
+          "trade_off_vs_winner": "Architecture A \u2014 Simple (API \u2192 PostgreSQL) exhibits higher latency or infrastructure overhead under the evaluated 500.0 RPS load profile."
+        },
+        {
+          "architecture_id": "arch_c_async",
+          "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "rejection_reasons": [
+            "Lower multi-objective score compared to Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)."
+          ],
+          "trade_off_vs_winner": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL) exhibits higher latency or infrastructure overhead under the evaluated 500.0 RPS load profile."
+        }
+      ],
+      "evidence_limitations": [
+        "Container-level isolation was used for benchmarks; bare-metal hypervisor contention was not simulated."
+      ],
+      "conditions_for_change": [
+        "If read ratio drops below 60%, Redis caching benefits decrease and direct transactional database routing becomes more cost-effective.",
+        "If incoming traffic exceeds 650 RPS, direct PostgreSQL saturates 2 vCPU quotas, requiring horizontal read replicas or asynchronous ingestion queues.",
+        "If monthly infrastructure budget is capped below $150/mo, Architecture A (direct PostgreSQL without cache) is the only viable candidate."
+      ],
+      "evaluations": [
+        {
+          "architecture_id": "arch_b_cached",
+          "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 100.0,
+              "predicted_value": 7.25,
+              "uncertainty_range": [
+                7.13,
+                7.37
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (7.2ms) satisfies target SLA (100.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 450.0,
+              "predicted_value": 501.6,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (501.6 rps) satisfies requirement (450.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 250.0,
+              "predicted_value": 176.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($176.00) is within budget cap ($250.00)."
+            }
+          ],
+          "cost_score": 0.482,
+          "latency_score": 0.616,
+          "throughput_score": 1.0,
+          "complexity_score": 0.7,
+          "overall_score": 0.592,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        },
+        {
+          "architecture_id": "arch_c_async",
+          "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 100.0,
+              "predicted_value": 3.3,
+              "uncertainty_range": [
+                3.24,
+                3.35
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (3.3ms) satisfies target SLA (100.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 450.0,
+              "predicted_value": 490.4,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (490.4 rps) satisfies requirement (450.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 250.0,
+              "predicted_value": 216.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($216.00) is within budget cap ($250.00)."
+            }
+          ],
+          "cost_score": 0.0,
+          "latency_score": 1.0,
+          "throughput_score": 0.0,
+          "complexity_score": 0.4,
+          "overall_score": 0.58,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        },
+        {
+          "architecture_id": "arch_a_simple",
+          "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 100.0,
+              "predicted_value": 13.58,
+              "uncertainty_range": [
+                13.37,
+                13.79
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (13.6ms) satisfies target SLA (100.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 450.0,
+              "predicted_value": 496.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (496.0 rps) satisfies requirement (450.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 250.0,
+              "predicted_value": 133.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($133.00) is within budget cap ($250.00)."
+            }
+          ],
+          "cost_score": 1.0,
+          "latency_score": 0.0,
+          "throughput_score": 0.5,
+          "complexity_score": 1.0,
+          "overall_score": 0.5,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        }
+      ]
+    },
+    "evidence_disclosure": {
+      "empirical_calibrated_components": [
+        "PostgreSQL 16 (postgres_db:postgres:16-alpine): Reconciled empirical baseline from Phase 4F.4.5 live benchmark trials (12 trials, 1 & 2 vCPU, SF2, 8 concurrency).",
+        "Redis 7.2 (redis_cache:redis:7.2-alpine): In-memory key-value service model calibrated from microbenchmarks."
+      ],
+      "model_derived_metrics": [
+        "PostgreSQL base read/write service demand times (piecewise and linear models).",
+        "Redis sub-millisecond cache lookup latency (~0.65ms point estimate)."
+      ],
+      "simulation_derived_metrics": [
+        "Discrete-event queueing contention, concurrency bottlenecks, and resource wait times via SimPy.",
+        "Tail latency percentiles (p50, p90, p95, p99) under stochastic Poisson request arrival.",
+        "Bottleneck component identification and CPU/resource utilization percentages."
+      ],
+      "assumed_parameters": [
+        "Monthly infrastructure cost model: API container $30/mo, 2 vCPU PostgreSQL $70/mo, Redis $43/mo, Queue/Worker $53/mo.",
+        "Network inter-process transit latency: ~0.5ms inter-container overhead assumption.",
+        "Cache hit rate heuristic: 85% for read-heavy workloads when cache tier is present."
+      ],
+      "synthetic_fixtures_used": [],
+      "disclosures": [
+        {
+          "metric_or_component": "postgres_db",
+          "epistemological_category": "EMPIRICAL_MEASURED",
+          "source_detail": "Phase 4F.4.5 empirical pilot (execution ID exec_p4f4_20261103_053428_525413_19491), reconciled in Phase 4F.4.6.",
+          "notes": "Bound to frozen manifest 69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6."
+        },
+        {
+          "metric_or_component": "tail_latencies_p95_p99",
+          "epistemological_category": "SIMULATION_DERIVED",
+          "source_detail": "SimPy Discrete-Event Simulation Engine.",
+          "notes": "Simulation metrics reflect queueing theory models and are distinct from live real-world benchmarks."
+        },
+        {
+          "metric_or_component": "monthly_infrastructure_cost",
+          "epistemological_category": "ASSUMPTION_BASED",
+          "source_detail": "Standardized AWS/GCP container VM pricing approximations (730 hrs/mo continuous).",
+          "notes": "Pricing heuristics do not account for dynamic auto-scaling or reserved instance discounting."
+        }
+      ],
+      "overall_evidence_integrity": "HIGH_EMPIRICAL_INTEGRITY: PostgreSQL component calibrated from real physical container trials; SimPy simulation models queueing dynamics; no synthetic data substituted for empirical measurements."
+    },
+    "workflow_status": "RECOMMENDED",
+    "execution_mode": "FALLBACK"
+  },
+  "scenario_2_transactional": {
+    "request_summary": {
+      "app_type": "transactional",
+      "request_rate_rps": 150.0,
+      "peak_load_factor": 2.0,
+      "read_ratio": 0.4,
+      "write_ratio": 0.6,
+      "p95_latency_target_ms": 150.0,
+      "min_throughput_rps": 135.0,
+      "max_monthly_budget_usd": 300.0,
+      "hard_constraints": [
+        "p95_latency",
+        "min_throughput",
+        "max_budget"
+      ],
+      "soft_preferences": {
+        "cost": 0.4,
+        "latency": 0.35,
+        "simplicity": 0.25
+      },
+      "user_facts": {
+        "request_rate_rps": "150.0",
+        "p95_latency_target_ms": "150.0",
+        "max_monthly_budget_usd": "300.0",
+        "read_ratio": "0.4",
+        "write_ratio": "0.6",
+        "app_type": "transactional"
+      },
+      "agent_assumptions": [
+        "0.85",
+        "2.0",
+        "Peak burst headroom assumed: 2.0x",
+        "Cache hit rate expectation: 85%"
+      ],
+      "clarification_questions": []
+    },
+    "investigation_summary": {
+      "investigation_rounds": 2,
+      "actions": [
+        {
+          "round": 1,
+          "tool_name": "check_component_models",
+          "purpose": "Audit registry model coverage and calibration status for all candidate architectures.",
+          "target": "all_candidates",
+          "relevant_arguments": {
+            "target": "all_candidates"
+          },
+          "result_summary": "Audited 3 candidates; 0 missing models identified.",
+          "status": "SUCCESS",
+          "duration_seconds": 0.002,
+          "policy_verdict": "APPROVED",
+          "provenance": "model_derived"
+        },
+        {
+          "round": 2,
+          "tool_name": "inspect_uncertainty",
+          "purpose": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+          "target": "all",
+          "relevant_arguments": {
+            "target": "all"
+          },
+          "result_summary": "Uncertainty analysis completed across 3 candidates.",
+          "status": "SUCCESS",
+          "duration_seconds": 0.0,
+          "policy_verdict": "APPROVED",
+          "provenance": "uncertainty_analysis"
+        }
+      ],
+      "why_agent_stopped": "Sufficient simulation and uncertainty evidence established. Investigation completed.",
+      "total_duration_seconds": 0.002,
+      "budget_spent_seconds": 0.002,
+      "policy_violations_prevented": 0
+    },
+    "architecture_comparison": [
+      {
+        "architecture_id": "arch_a_simple",
+        "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+        "topology": "Sync API \u2192 PostgreSQL",
+        "description": "Direct database queries for all reads and writes. Simple operations, low complexity, but database bound under high load.",
+        "throughput_achieved_rps": 146.8,
+        "p50_latency_ms": 6.42,
+        "p95_latency_ms": 9.72,
+        "p99_latency_ms": 13.56,
+        "estimated_monthly_cost_usd": 133.0,
+        "cpu_utilization_pct": 37.1,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": null,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 150.0,
+            "predicted_value": 9.72,
+            "uncertainty_range": [
+              9.46,
+              9.98
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (9.7ms) satisfies target SLA (150.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 135.0,
+            "predicted_value": 146.8,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (146.8 rps) satisfies requirement (135.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 300.0,
+            "predicted_value": 133.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($133.00) is within budget cap ($300.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          9.46,
+          9.98
+        ],
+        "limitations": []
+      },
+      {
+        "architecture_id": "arch_b_cached",
+        "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+        "topology": "Sync API \u2192 Redis Cache \u2192 PostgreSQL",
+        "description": "In-memory cache for feed reads. Sub-millisecond cache hits shield the primary database from read-heavy spikes.",
+        "throughput_achieved_rps": 144.4,
+        "p50_latency_ms": 6.46,
+        "p95_latency_ms": 8.75,
+        "p99_latency_ms": 11.32,
+        "estimated_monthly_cost_usd": 176.0,
+        "cpu_utilization_pct": 30.1,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": 0.822,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 150.0,
+            "predicted_value": 8.75,
+            "uncertainty_range": [
+              8.4,
+              9.1
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (8.8ms) satisfies target SLA (150.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 135.0,
+            "predicted_value": 144.4,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (144.4 rps) satisfies requirement (135.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 300.0,
+            "predicted_value": 176.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($176.00) is within budget cap ($300.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          8.4,
+          9.1
+        ],
+        "limitations": []
+      },
+      {
+        "architecture_id": "arch_c_async",
+        "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+        "topology": "Async API \u2192 Message Queue \u2192 Background Worker \u2192 PostgreSQL",
+        "description": "Decoupled write pipeline using an asynchronous queue and background worker, alongside cached reads. Rapid write acknowledgements.",
+        "throughput_achieved_rps": 146.6,
+        "p50_latency_ms": 0.94,
+        "p95_latency_ms": 3.01,
+        "p99_latency_ms": 3.51,
+        "estimated_monthly_cost_usd": 216.0,
+        "cpu_utilization_pct": 32.9,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": 0.83,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 150.0,
+            "predicted_value": 3.01,
+            "uncertainty_range": [
+              2.93,
+              3.08
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (3.0ms) satisfies target SLA (150.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 135.0,
+            "predicted_value": 146.6,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (146.6 rps) satisfies requirement (135.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 300.0,
+            "predicted_value": 216.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($216.00) is within budget cap ($300.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          2.93,
+          3.08
+        ],
+        "limitations": []
+      }
+    ],
+    "recommendation": {
+      "winner_architecture_id": "arch_a_simple",
+      "winner_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+      "selected_architecture_id": "arch_a_simple",
+      "selected_architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+      "is_conclusive": true,
+      "feasibility_status": "FEASIBLE",
+      "executive_summary": "Recommend Architecture A \u2014 Simple (API \u2192 PostgreSQL). Under the specified 150 RPS workload, it satisfies all mandatory constraints with a predicted p95 latency of 9.7ms (heuristic uncertainty bounds [9.5, 10.0] ms) at an estimated monthly cost of $133.00.",
+      "decision_rationale": [
+        "Selected based on optimal balance under stated preferences (Cost: 40%, Latency: 35%, Simplicity: 25%).",
+        "Meets hard constraints: Achieves p95 latency of 9.7ms (target <= 150.0ms) at $133.00/mo (budget <= $300.00/mo)."
+      ],
+      "main_trade_offs": [
+        "Database is the primary bottleneck. Susceptible to queue buildup and latency spikes during sudden traffic surges beyond peak factor."
+      ],
+      "rejected_alternatives": [
+        {
+          "architecture_id": "arch_b_cached",
+          "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "rejection_reasons": [
+            "Lower multi-objective score compared to Architecture A \u2014 Simple (API \u2192 PostgreSQL)."
+          ],
+          "trade_off_vs_winner": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL) exhibits higher latency or infrastructure overhead under the evaluated 150.0 RPS load profile."
+        },
+        {
+          "architecture_id": "arch_c_async",
+          "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "rejection_reasons": [
+            "Lower multi-objective score compared to Architecture A \u2014 Simple (API \u2192 PostgreSQL)."
+          ],
+          "trade_off_vs_winner": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL) exhibits higher latency or infrastructure overhead under the evaluated 150.0 RPS load profile."
+        }
+      ],
+      "evidence_limitations": [
+        "Container-level isolation was used for benchmarks; bare-metal hypervisor contention was not simulated."
+      ],
+      "conditions_for_change": [
+        "If read ratio drops below 60%, Redis caching benefits decrease and direct transactional database routing becomes more cost-effective.",
+        "If incoming traffic exceeds 650 RPS, direct PostgreSQL saturates 2 vCPU quotas, requiring horizontal read replicas or asynchronous ingestion queues.",
+        "If monthly infrastructure budget is capped below $150/mo, Architecture A (direct PostgreSQL without cache) is the only viable candidate."
+      ],
+      "evaluations": [
+        {
+          "architecture_id": "arch_a_simple",
+          "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 150.0,
+              "predicted_value": 9.72,
+              "uncertainty_range": [
+                9.46,
+                9.98
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (9.7ms) satisfies target SLA (150.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 135.0,
+              "predicted_value": 146.8,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (146.8 rps) satisfies requirement (135.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 300.0,
+              "predicted_value": 133.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($133.00) is within budget cap ($300.00)."
+            }
+          ],
+          "cost_score": 1.0,
+          "latency_score": 0.0,
+          "throughput_score": 0.24,
+          "complexity_score": 1.0,
+          "overall_score": 0.65,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        },
+        {
+          "architecture_id": "arch_c_async",
+          "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 150.0,
+              "predicted_value": 3.01,
+              "uncertainty_range": [
+                2.93,
+                3.08
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (3.0ms) satisfies target SLA (150.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 135.0,
+              "predicted_value": 146.6,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (146.6 rps) satisfies requirement (135.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 300.0,
+              "predicted_value": 216.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($216.00) is within budget cap ($300.00)."
+            }
+          ],
+          "cost_score": 0.0,
+          "latency_score": 1.0,
+          "throughput_score": 0.22,
+          "complexity_score": 0.4,
+          "overall_score": 0.45,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        },
+        {
+          "architecture_id": "arch_b_cached",
+          "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 150.0,
+              "predicted_value": 8.75,
+              "uncertainty_range": [
+                8.4,
+                9.1
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (8.8ms) satisfies target SLA (150.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 135.0,
+              "predicted_value": 144.4,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (144.4 rps) satisfies requirement (135.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 300.0,
+              "predicted_value": 176.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($176.00) is within budget cap ($300.00)."
+            }
+          ],
+          "cost_score": 0.482,
+          "latency_score": 0.145,
+          "throughput_score": 0.0,
+          "complexity_score": 0.7,
+          "overall_score": 0.418,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        }
+      ]
+    },
+    "evidence_disclosure": {
+      "empirical_calibrated_components": [
+        "PostgreSQL 16 (postgres_db:postgres:16-alpine): Reconciled empirical baseline from Phase 4F.4.5 live benchmark trials (12 trials, 1 & 2 vCPU, SF2, 8 concurrency).",
+        "Redis 7.2 (redis_cache:redis:7.2-alpine): In-memory key-value service model calibrated from microbenchmarks."
+      ],
+      "model_derived_metrics": [
+        "PostgreSQL base read/write service demand times (piecewise and linear models).",
+        "Redis sub-millisecond cache lookup latency (~0.65ms point estimate)."
+      ],
+      "simulation_derived_metrics": [
+        "Discrete-event queueing contention, concurrency bottlenecks, and resource wait times via SimPy.",
+        "Tail latency percentiles (p50, p90, p95, p99) under stochastic Poisson request arrival.",
+        "Bottleneck component identification and CPU/resource utilization percentages."
+      ],
+      "assumed_parameters": [
+        "Monthly infrastructure cost model: API container $30/mo, 2 vCPU PostgreSQL $70/mo, Redis $43/mo, Queue/Worker $53/mo.",
+        "Network inter-process transit latency: ~0.5ms inter-container overhead assumption.",
+        "Cache hit rate heuristic: 85% for read-heavy workloads when cache tier is present."
+      ],
+      "synthetic_fixtures_used": [],
+      "disclosures": [
+        {
+          "metric_or_component": "postgres_db",
+          "epistemological_category": "EMPIRICAL_MEASURED",
+          "source_detail": "Phase 4F.4.5 empirical pilot (execution ID exec_p4f4_20261103_053428_525413_19491), reconciled in Phase 4F.4.6.",
+          "notes": "Bound to frozen manifest 69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6."
+        },
+        {
+          "metric_or_component": "tail_latencies_p95_p99",
+          "epistemological_category": "SIMULATION_DERIVED",
+          "source_detail": "SimPy Discrete-Event Simulation Engine.",
+          "notes": "Simulation metrics reflect queueing theory models and are distinct from live real-world benchmarks."
+        },
+        {
+          "metric_or_component": "monthly_infrastructure_cost",
+          "epistemological_category": "ASSUMPTION_BASED",
+          "source_detail": "Standardized AWS/GCP container VM pricing approximations (730 hrs/mo continuous).",
+          "notes": "Pricing heuristics do not account for dynamic auto-scaling or reserved instance discounting."
+        }
+      ],
+      "overall_evidence_integrity": "HIGH_EMPIRICAL_INTEGRITY: PostgreSQL component calibrated from real physical container trials; SimPy simulation models queueing dynamics; no synthetic data substituted for empirical measurements."
+    },
+    "workflow_status": "RECOMMENDED",
+    "execution_mode": "FALLBACK"
+  },
+  "scenario_3_background_worker": {
+    "request_summary": {
+      "app_type": "background_processing",
+      "request_rate_rps": 300.0,
+      "peak_load_factor": 2.0,
+      "read_ratio": 0.9,
+      "write_ratio": 0.1,
+      "p95_latency_target_ms": 100.0,
+      "min_throughput_rps": 270.0,
+      "max_monthly_budget_usd": 350.0,
+      "hard_constraints": [
+        "p95_latency",
+        "min_throughput",
+        "max_budget"
+      ],
+      "soft_preferences": {
+        "cost": 0.25,
+        "latency": 0.65,
+        "simplicity": 0.1
+      },
+      "user_facts": {
+        "request_rate_rps": "300.0",
+        "p95_latency_target_ms": "100.0",
+        "max_monthly_budget_usd": "350.0",
+        "app_type": "background_processing",
+        "read_ratio": 0.9,
+        "write_ratio": 0.1
+      },
+      "agent_assumptions": [
+        "0.85",
+        "2.0",
+        "Peak burst headroom assumed: 2.0x",
+        "Default read/write split: 90% Reads / 10% Writes",
+        "Cache hit rate expectation: 85%"
+      ],
+      "clarification_questions": []
+    },
+    "investigation_summary": {
+      "investigation_rounds": 2,
+      "actions": [
+        {
+          "round": 1,
+          "tool_name": "check_component_models",
+          "purpose": "Audit registry model coverage and calibration status for all candidate architectures.",
+          "target": "all_candidates",
+          "relevant_arguments": {
+            "target": "all_candidates"
+          },
+          "result_summary": "Audited 3 candidates; 0 missing models identified.",
+          "status": "SUCCESS",
+          "duration_seconds": 0.002,
+          "policy_verdict": "APPROVED",
+          "provenance": "model_derived"
+        },
+        {
+          "round": 2,
+          "tool_name": "inspect_uncertainty",
+          "purpose": "Audit latency heuristic uncertainty bounds against hard SLA targets across all candidates.",
+          "target": "all",
+          "relevant_arguments": {
+            "target": "all"
+          },
+          "result_summary": "Uncertainty analysis completed across 3 candidates.",
+          "status": "SUCCESS",
+          "duration_seconds": 0.0,
+          "policy_verdict": "APPROVED",
+          "provenance": "uncertainty_analysis"
+        }
+      ],
+      "why_agent_stopped": "Sufficient simulation and uncertainty evidence established. Investigation completed.",
+      "total_duration_seconds": 0.002,
+      "budget_spent_seconds": 0.002,
+      "policy_violations_prevented": 0
+    },
+    "architecture_comparison": [
+      {
+        "architecture_id": "arch_a_simple",
+        "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+        "topology": "Sync API \u2192 PostgreSQL",
+        "description": "Direct database queries for all reads and writes. Simple operations, low complexity, but database bound under high load.",
+        "throughput_achieved_rps": 299.4,
+        "p50_latency_ms": 3.34,
+        "p95_latency_ms": 7.73,
+        "p99_latency_ms": 9.87,
+        "estimated_monthly_cost_usd": 133.0,
+        "cpu_utilization_pct": 48.6,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": null,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 100.0,
+            "predicted_value": 7.73,
+            "uncertainty_range": [
+              7.6,
+              7.86
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (7.7ms) satisfies target SLA (100.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 270.0,
+            "predicted_value": 299.4,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (299.4 rps) satisfies requirement (270.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 350.0,
+            "predicted_value": 133.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($133.00) is within budget cap ($350.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          7.6,
+          7.86
+        ],
+        "limitations": []
+      },
+      {
+        "architecture_id": "arch_b_cached",
+        "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+        "topology": "Sync API \u2192 Redis Cache \u2192 PostgreSQL",
+        "description": "In-memory cache for feed reads. Sub-millisecond cache hits shield the primary database from read-heavy spikes.",
+        "throughput_achieved_rps": 301.0,
+        "p50_latency_ms": 0.99,
+        "p95_latency_ms": 7.13,
+        "p99_latency_ms": 7.98,
+        "estimated_monthly_cost_usd": 176.0,
+        "cpu_utilization_pct": 15.9,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": 0.844,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 100.0,
+            "predicted_value": 7.13,
+            "uncertainty_range": [
+              6.98,
+              7.28
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (7.1ms) satisfies target SLA (100.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 270.0,
+            "predicted_value": 301.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (301.0 rps) satisfies requirement (270.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 350.0,
+            "predicted_value": 176.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($176.00) is within budget cap ($350.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          6.98,
+          7.28
+        ],
+        "limitations": []
+      },
+      {
+        "architecture_id": "arch_c_async",
+        "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+        "topology": "Async API \u2192 Message Queue \u2192 Background Worker \u2192 PostgreSQL",
+        "description": "Decoupled write pipeline using an asynchronous queue and background worker, alongside cached reads. Rapid write acknowledgements.",
+        "throughput_achieved_rps": 288.8,
+        "p50_latency_ms": 0.97,
+        "p95_latency_ms": 3.2,
+        "p99_latency_ms": 3.49,
+        "estimated_monthly_cost_usd": 216.0,
+        "cpu_utilization_pct": 15.1,
+        "memory_utilization_mb": 2048.0,
+        "bottleneck_component": "DB",
+        "cache_hit_rate": 0.861,
+        "sla_result": "SATISFIED",
+        "feasibility_status": "FEASIBLE",
+        "feasibility_checks": [
+          {
+            "criterion": "p95_latency",
+            "target_value": 100.0,
+            "predicted_value": 3.2,
+            "uncertainty_range": [
+              3.15,
+              3.26
+            ],
+            "status": "FEASIBLE",
+            "explanation": "p95 latency (3.2ms) satisfies target SLA (100.0ms)."
+          },
+          {
+            "criterion": "min_throughput",
+            "target_value": 270.0,
+            "predicted_value": 288.8,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Achieved throughput (288.8 rps) satisfies requirement (270.0 rps)."
+          },
+          {
+            "criterion": "max_budget",
+            "target_value": 350.0,
+            "predicted_value": 216.0,
+            "uncertainty_range": null,
+            "status": "FEASIBLE",
+            "explanation": "Cost ($216.00) is within budget cap ($350.00)."
+          }
+        ],
+        "evidence_status": "OBSERVED",
+        "model_provenance": "Calibrated empirical PostgreSQL baseline + SimPy discrete-event simulation",
+        "uncertainty_bounds_p95_ms": [
+          3.15,
+          3.26
+        ],
+        "limitations": []
+      }
+    ],
+    "recommendation": {
+      "winner_architecture_id": "arch_c_async",
+      "winner_architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+      "selected_architecture_id": "arch_c_async",
+      "selected_architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+      "is_conclusive": true,
+      "feasibility_status": "FEASIBLE",
+      "executive_summary": "Recommend Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL). Under the specified 300 RPS workload, it satisfies all mandatory constraints with a predicted p95 latency of 3.2ms (heuristic uncertainty bounds [3.1, 3.3] ms) at an estimated monthly cost of $216.00.",
+      "decision_rationale": [
+        "Selected based on optimal balance under stated preferences (Cost: 25%, Latency: 65%, Simplicity: 10%).",
+        "Meets hard constraints: Achieves p95 latency of 3.2ms (target <= 100.0ms) at $216.00/mo (budget <= $350.00/mo).",
+        "Effective read caching (86.1% hit rate) shields the database connection pool, sustaining 288.8 RPS with 15.1% DB utilization."
+      ],
+      "main_trade_offs": [
+        "Highest operational complexity: introduces message queues and asynchronous worker failure modes, requiring dead-letter handling.",
+        "Eventual consistency on post creation: writes are acknowledged upon enqueue, so immediate read-after-write may experience replication lag."
+      ],
+      "rejected_alternatives": [
+        {
+          "architecture_id": "arch_a_simple",
+          "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "rejection_reasons": [
+            "Lower multi-objective score compared to Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)."
+          ],
+          "trade_off_vs_winner": "Architecture A \u2014 Simple (API \u2192 PostgreSQL) exhibits higher latency or infrastructure overhead under the evaluated 300.0 RPS load profile."
+        },
+        {
+          "architecture_id": "arch_b_cached",
+          "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "rejection_reasons": [
+            "Lower multi-objective score compared to Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)."
+          ],
+          "trade_off_vs_winner": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL) exhibits higher latency or infrastructure overhead under the evaluated 300.0 RPS load profile."
+        }
+      ],
+      "evidence_limitations": [
+        "Container-level isolation was used for benchmarks; bare-metal hypervisor contention was not simulated."
+      ],
+      "conditions_for_change": [
+        "If read ratio drops below 60%, Redis caching benefits decrease and direct transactional database routing becomes more cost-effective.",
+        "If incoming traffic exceeds 650 RPS, direct PostgreSQL saturates 2 vCPU quotas, requiring horizontal read replicas or asynchronous ingestion queues.",
+        "If monthly infrastructure budget is capped below $150/mo, Architecture A (direct PostgreSQL without cache) is the only viable candidate."
+      ],
+      "evaluations": [
+        {
+          "architecture_id": "arch_c_async",
+          "architecture_name": "Architecture C \u2014 Async Processing (API \u2192 Queue \u2192 Worker \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 100.0,
+              "predicted_value": 3.2,
+              "uncertainty_range": [
+                3.15,
+                3.26
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (3.2ms) satisfies target SLA (100.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 270.0,
+              "predicted_value": 288.8,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (288.8 rps) satisfies requirement (270.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 350.0,
+              "predicted_value": 216.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($216.00) is within budget cap ($350.00)."
+            }
+          ],
+          "cost_score": 0.0,
+          "latency_score": 1.0,
+          "throughput_score": 0.0,
+          "complexity_score": 0.4,
+          "overall_score": 0.69,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        },
+        {
+          "architecture_id": "arch_a_simple",
+          "architecture_name": "Architecture A \u2014 Simple (API \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 100.0,
+              "predicted_value": 7.73,
+              "uncertainty_range": [
+                7.6,
+                7.86
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (7.7ms) satisfies target SLA (100.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 270.0,
+              "predicted_value": 299.4,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (299.4 rps) satisfies requirement (270.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 350.0,
+              "predicted_value": 133.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($133.00) is within budget cap ($350.00)."
+            }
+          ],
+          "cost_score": 1.0,
+          "latency_score": 0.0,
+          "throughput_score": 0.869,
+          "complexity_score": 1.0,
+          "overall_score": 0.35,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        },
+        {
+          "architecture_id": "arch_b_cached",
+          "architecture_name": "Architecture B \u2014 Cached Reads (API \u2192 Redis \u2192 PostgreSQL)",
+          "feasibility_status": "FEASIBLE",
+          "checks": [
+            {
+              "criterion": "p95_latency",
+              "target_value": 100.0,
+              "predicted_value": 7.13,
+              "uncertainty_range": [
+                6.98,
+                7.28
+              ],
+              "status": "FEASIBLE",
+              "explanation": "p95 latency (7.1ms) satisfies target SLA (100.0ms)."
+            },
+            {
+              "criterion": "min_throughput",
+              "target_value": 270.0,
+              "predicted_value": 301.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Achieved throughput (301.0 rps) satisfies requirement (270.0 rps)."
+            },
+            {
+              "criterion": "max_budget",
+              "target_value": 350.0,
+              "predicted_value": 176.0,
+              "uncertainty_range": null,
+              "status": "FEASIBLE",
+              "explanation": "Cost ($176.00) is within budget cap ($350.00)."
+            }
+          ],
+          "cost_score": 0.482,
+          "latency_score": 0.132,
+          "throughput_score": 1.0,
+          "complexity_score": 0.7,
+          "overall_score": 0.277,
+          "is_pareto_dominated": false,
+          "dominated_by": null
+        }
+      ]
+    },
+    "evidence_disclosure": {
+      "empirical_calibrated_components": [
+        "PostgreSQL 16 (postgres_db:postgres:16-alpine): Reconciled empirical baseline from Phase 4F.4.5 live benchmark trials (12 trials, 1 & 2 vCPU, SF2, 8 concurrency).",
+        "Redis 7.2 (redis_cache:redis:7.2-alpine): In-memory key-value service model calibrated from microbenchmarks."
+      ],
+      "model_derived_metrics": [
+        "PostgreSQL base read/write service demand times (piecewise and linear models).",
+        "Redis sub-millisecond cache lookup latency (~0.65ms point estimate)."
+      ],
+      "simulation_derived_metrics": [
+        "Discrete-event queueing contention, concurrency bottlenecks, and resource wait times via SimPy.",
+        "Tail latency percentiles (p50, p90, p95, p99) under stochastic Poisson request arrival.",
+        "Bottleneck component identification and CPU/resource utilization percentages."
+      ],
+      "assumed_parameters": [
+        "Monthly infrastructure cost model: API container $30/mo, 2 vCPU PostgreSQL $70/mo, Redis $43/mo, Queue/Worker $53/mo.",
+        "Network inter-process transit latency: ~0.5ms inter-container overhead assumption.",
+        "Cache hit rate heuristic: 85% for read-heavy workloads when cache tier is present."
+      ],
+      "synthetic_fixtures_used": [],
+      "disclosures": [
+        {
+          "metric_or_component": "postgres_db",
+          "epistemological_category": "EMPIRICAL_MEASURED",
+          "source_detail": "Phase 4F.4.5 empirical pilot (execution ID exec_p4f4_20261103_053428_525413_19491), reconciled in Phase 4F.4.6.",
+          "notes": "Bound to frozen manifest 69d3e068fd3907792647f21f2bd33d6668560952ea9b53c509f94aaf209b77a6."
+        },
+        {
+          "metric_or_component": "tail_latencies_p95_p99",
+          "epistemological_category": "SIMULATION_DERIVED",
+          "source_detail": "SimPy Discrete-Event Simulation Engine.",
+          "notes": "Simulation metrics reflect queueing theory models and are distinct from live real-world benchmarks."
+        },
+        {
+          "metric_or_component": "monthly_infrastructure_cost",
+          "epistemological_category": "ASSUMPTION_BASED",
+          "source_detail": "Standardized AWS/GCP container VM pricing approximations (730 hrs/mo continuous).",
+          "notes": "Pricing heuristics do not account for dynamic auto-scaling or reserved instance discounting."
+        }
+      ],
+      "overall_evidence_integrity": "HIGH_EMPIRICAL_INTEGRITY: PostgreSQL component calibrated from real physical container trials; SimPy simulation models queueing dynamics; no synthetic data substituted for empirical measurements."
+    },
+    "workflow_status": "RECOMMENDED",
+    "execution_mode": "FALLBACK"
+  }
+}
