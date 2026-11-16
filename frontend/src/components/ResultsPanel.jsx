@@ -48,7 +48,7 @@ export default function ResultsPanel() {
   // Loading state
   if (loading) {
     return (
-      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4 bg-[#090d16]">
+      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4 bg-[#080b12] h-full">
         <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
         <div className="space-y-1">
           <h3 className="text-sm font-semibold text-slate-100">
@@ -65,7 +65,7 @@ export default function ResultsPanel() {
   // Pre-run welcome canvas fallback
   if (!response || candidates.length === 0) {
     return (
-      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4 bg-[#090d16]">
+      <div className="flex-1 p-8 flex flex-col items-center justify-center text-center space-y-4 bg-[#080b12] h-full">
         <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
           <Zap className="w-6 h-6" />
         </div>
@@ -82,7 +82,7 @@ export default function ResultsPanel() {
   const maxLatency = Math.max(slaMs * 1.3, ...candidates.map((c) => c.p95 || 0));
 
   return (
-    <main className="flex-1 bg-[#090d16] flex flex-col h-full overflow-y-auto">
+    <main className="flex-1 bg-[#080b12] flex flex-col h-full overflow-y-auto w-full min-h-0">
       {/* Studio Header Bar */}
       <div className="border-b border-white/[0.08] bg-[#0c101a] px-6 py-3.5 flex flex-wrap items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
@@ -94,246 +94,185 @@ export default function ResultsPanel() {
             </span>
           </div>
         </div>
+
+        <div className="text-xs text-slate-400 font-mono">
+          3 Candidates Evaluated • Empirical Baseline Phase 4F.4.5
+        </div>
       </div>
 
-      {/* Main Spacious Canvas */}
-      <div className="p-6 lg:p-8 space-y-8 flex-1 max-w-6xl mx-auto w-full">
-        {/* 1. Executive Winner Showcase Card */}
-        {winner && (
-          <div className="rounded-xl bg-[#0f1422] border border-emerald-500/30 p-6 lg:p-7 space-y-5 shadow-sm">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-5 border-b border-white/[0.08]">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="badge badge-emerald text-xs font-medium py-0.5 px-2.5 flex items-center gap-1.5">
-                    <Award className="w-3.5 h-3.5" /> Recommended Architecture
-                  </span>
-                  <span className="text-xs text-slate-400 font-mono">
-                    Highest Pareto Score
-                  </span>
-                </div>
-                <h2 className="text-2xl font-bold text-slate-100 tracking-tight">
-                  {winner.name || winner.id}
-                </h2>
-                <div className="text-xs font-mono text-slate-400 flex items-center gap-2 pt-0.5">
-                  <span className="text-slate-500">Topology:</span>
-                  <span className="text-slate-300">{winner.topology || winner.topology_summary}</span>
-                </div>
-              </div>
-
-              {/* 4 Clean Metric Cards in a Row */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 shrink-0">
-                <div className="p-3 rounded-lg bg-black/20 border border-white/[0.06] text-center min-w-[110px]">
-                  <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                    p95 Latency
-                  </div>
-                  <div className="text-base font-semibold text-slate-100 font-mono mt-0.5">
-                    {winner.p95} ms
-                  </div>
-                  <div className="text-[10px] text-emerald-400 font-medium mt-0.5">
-                    Target &lt; {slaMs}ms (PASS)
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-black/20 border border-white/[0.06] text-center min-w-[110px]">
-                  <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                    Monthly Cost
-                  </div>
-                  <div className="text-base font-semibold text-slate-100 font-mono mt-0.5">
-                    ${winner.cost}/mo
-                  </div>
-                  <div className="text-[10px] text-emerald-400 font-medium mt-0.5">
-                    Budget &lt; ${budgetUsd} (PASS)
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-black/20 border border-white/[0.06] text-center min-w-[110px]">
-                  <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                    Throughput
-                  </div>
-                  <div className="text-base font-semibold text-slate-100 font-mono mt-0.5">
-                    {winner.throughput} RPS
-                  </div>
-                  <div className="text-[10px] text-emerald-400 font-medium mt-0.5">
-                    100% Sustained
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-lg bg-black/20 border border-white/[0.06] text-center min-w-[110px]">
-                  <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                    Database CPU
-                  </div>
-                  <div className="text-base font-semibold text-slate-100 font-mono mt-0.5">
-                    {winner.cpu}%
-                  </div>
-                  <div className="text-[10px] text-emerald-400 font-medium mt-0.5">
-                    {winner.cpu < 60 ? 'Optimal Headroom' : 'Contention'}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Clean Executive Summary */}
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-4xl">
-              {recommendation.executive_summary ||
-                `${winner.name} is the optimal architecture. In-memory caching shields database connections, meeting the ${slaMs}ms tail-latency SLA at lowest total cost.`}
-            </p>
-          </div>
-        )}
-
-        {/* 2. Architecture Comparison Table (Clean, Linear, Spacious) */}
-        <div className="space-y-3">
+      {/* Main Full-Width Canvas */}
+      <div className="p-6 lg:p-8 space-y-6 flex-1 w-full">
+        {/* Section 1: Candidate Architecture Portfolio (Full Width Stacked Cards) */}
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-slate-200 tracking-tight">
-                Architecture Comparison Matrix
-              </h3>
-              <p className="text-xs text-slate-500">
-                Simulated side-by-side under {workload.qps} RPS offered load
+              <h2 className="text-base font-semibold text-slate-100 tracking-tight">
+                Evaluated Architecture Candidates
+              </h2>
+              <p className="text-xs text-slate-400">
+                Simulated side-by-side under {workload.qps} RPS offered load using calibrated component models
               </p>
             </div>
             <span className="text-xs text-slate-500 font-mono">
-              3 Candidates Evaluated
+              SLA Cutoff: {slaMs} ms • Budget: ${budgetUsd}/mo
             </span>
           </div>
 
-          <div className="rounded-xl border border-white/[0.08] overflow-hidden bg-[#0f1422]">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-white/[0.08] bg-white/[0.02] text-slate-400 font-medium">
-                    <th className="py-3 px-4">Architecture</th>
-                    <th className="py-3 px-4">Topology Flow</th>
-                    <th className="py-3 px-4">p95 Latency</th>
-                    <th className="py-3 px-4">Monthly Cost</th>
-                    <th className="py-3 px-4">DB CPU</th>
-                    <th className="py-3 px-4">Feasibility Verdict</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/[0.06]">
-                  {candidates.map((cand) => {
-                    const isWinner = cand.id === winner?.id;
-                    const isViolated = !cand.slaMet || !cand.feasible;
+          <div className="space-y-4">
+            {candidates.map((cand) => {
+              const isWinner = cand.id === winner?.id;
+              const isViolated = !cand.slaMet || !cand.feasible;
 
-                    return (
-                      <tr
-                        key={cand.id}
-                        className={`transition-colors ${
-                          isWinner
-                            ? 'bg-emerald-500/[0.04]'
-                            : 'hover:bg-white/[0.02]'
-                        }`}
-                      >
-                        {/* Name + Badge */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-100">
-                              {cand.name.split('—')[0] || cand.id}
-                            </span>
-                            {isWinner ? (
-                              <span className="badge badge-emerald text-[10px] py-0 px-2 font-medium">
-                                ★ Winner
-                              </span>
-                            ) : isViolated ? (
-                              <span className="badge badge-rose text-[10px] py-0 px-2 font-medium">
-                                Violated SLA
-                              </span>
-                            ) : (
-                              <span className="badge badge-zinc text-[10px] py-0 px-2 font-medium">
-                                Feasible
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5">
-                            {cand.name.split('—')[1] || cand.name}
-                          </div>
-                        </td>
-
-                        {/* Topology */}
-                        <td className="py-3.5 px-4 font-mono text-[11px] text-slate-300">
-                          {cand.topology || cand.topology_summary}
-                        </td>
-
-                        {/* p95 Latency Bar */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`font-mono font-medium ${
-                                cand.p95 <= slaMs ? 'text-emerald-400' : 'text-rose-400'
-                              }`}
-                            >
-                              {cand.p95} ms
-                            </span>
-                            <span className="text-[10px] text-slate-500 font-mono">
-                              / {slaMs}ms
-                            </span>
-                          </div>
-                          <div className="w-24 h-1.5 rounded-full bg-white/[0.06] overflow-hidden mt-1">
-                            <div
-                              className={`h-full rounded-full ${
-                                cand.p95 <= slaMs ? 'bg-emerald-500' : 'bg-rose-500'
-                              }`}
-                              style={{ width: `${Math.min(100, (cand.p95 / maxLatency) * 100)}%` }}
-                            />
-                          </div>
-                        </td>
-
-                        {/* Monthly Cost */}
-                        <td className="py-3.5 px-4 font-mono">
-                          <span
-                            className={
-                              cand.cost <= budgetUsd ? 'text-slate-200' : 'text-rose-400'
-                            }
-                          >
-                            ${cand.cost}
+              return (
+                <div
+                  key={cand.id}
+                  className={`rounded-xl border p-5 transition-all ${
+                    isWinner
+                      ? 'bg-[#0f172a]/60 border-emerald-500/50 shadow-sm shadow-emerald-950/20'
+                      : 'bg-[#0e1320] border-white/[0.08] hover:border-white/[0.14]'
+                  }`}
+                >
+                  {/* Top Row: Title, Status, and Key KPIs */}
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2.5">
+                        {isWinner ? (
+                          <span className="badge badge-emerald text-xs font-semibold py-0.5 px-2.5 flex items-center gap-1.5">
+                            <Award className="w-3.5 h-3.5" /> Recommended Winner
                           </span>
-                          <span className="text-[10px] text-slate-500 ml-1">
-                            / ${budgetUsd}
+                        ) : isViolated ? (
+                          <span className="badge badge-rose text-xs font-medium py-0.5 px-2.5">
+                            SLA Violated
                           </span>
-                        </td>
+                        ) : (
+                          <span className="badge badge-zinc text-xs font-medium py-0.5 px-2.5">
+                            Feasible Alternative
+                          </span>
+                        )}
+                        <h3 className="text-base font-bold text-slate-100">
+                          {cand.name}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-400 font-mono">
+                        {cand.topology || cand.topology_summary}
+                      </p>
+                    </div>
 
-                        {/* DB CPU */}
-                        <td className="py-3.5 px-4 font-mono text-slate-300">
+                    {/* 4 Metric Pills in a Row */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 shrink-0 text-center font-mono">
+                      <div className="p-2.5 rounded-lg bg-black/25 border border-white/[0.06] min-w-[110px]">
+                        <div className="text-[10px] text-slate-400 uppercase font-sans">p95 Latency</div>
+                        <div
+                          className={`text-sm font-bold mt-0.5 ${
+                            cand.p95 <= slaMs ? 'text-emerald-400' : 'text-rose-400'
+                          }`}
+                        >
+                          {cand.p95} ms
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded-lg bg-black/25 border border-white/[0.06] min-w-[110px]">
+                        <div className="text-[10px] text-slate-400 uppercase font-sans">Monthly Cost</div>
+                        <div
+                          className={`text-sm font-bold mt-0.5 ${
+                            cand.cost <= budgetUsd ? 'text-slate-100' : 'text-rose-400'
+                          }`}
+                        >
+                          ${cand.cost}/mo
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded-lg bg-black/25 border border-white/[0.06] min-w-[110px]">
+                        <div className="text-[10px] text-slate-400 uppercase font-sans">Throughput</div>
+                        <div className="text-sm font-bold text-slate-100 mt-0.5">
+                          {cand.throughput} RPS
+                        </div>
+                      </div>
+
+                      <div className="p-2.5 rounded-lg bg-black/25 border border-white/[0.06] min-w-[110px]">
+                        <div className="text-[10px] text-slate-400 uppercase font-sans">DB CPU</div>
+                        <div
+                          className={`text-sm font-bold mt-0.5 ${
+                            cand.cpu < 60 ? 'text-emerald-400' : cand.cpu < 85 ? 'text-amber-400' : 'text-rose-400'
+                          }`}
+                        >
                           {cand.cpu}%
-                        </td>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                        {/* Verdict */}
-                        <td className="py-3.5 px-4">
-                          {isWinner ? (
-                            <div className="text-emerald-400 flex items-center gap-1.5 font-medium">
-                              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                              <span>Optimal fit; meets all constraints.</span>
-                            </div>
-                          ) : isViolated ? (
-                            <div className="text-rose-400 flex items-center gap-1.5">
-                              <XCircle className="w-3.5 h-3.5 shrink-0" />
-                              <span>
-                                {cand.rejectionReasons?.[0] || 'Latency exceeds SLA target.'}
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="text-slate-400 flex items-center gap-1.5">
-                              <Info className="w-3.5 h-3.5 shrink-0" />
-                              <span>Higher cost or complexity than winner.</span>
-                            </div>
+                  {/* Middle Row: Visual Topology Nodes + Progress Bar */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-4 items-center">
+                    {/* Topology Chain (6 cols) */}
+                    <div className="lg:col-span-6 flex items-center gap-1.5 flex-wrap font-mono text-xs">
+                      <span className="text-[11px] text-slate-500 uppercase font-sans mr-2 font-medium">Flow:</span>
+                      {(cand.topologyNodes || []).map((node, nIdx) => (
+                        <React.Fragment key={nIdx}>
+                          <div className="px-2.5 py-1.5 rounded-lg bg-black/30 border border-white/[0.08] text-slate-200 flex items-center gap-1.5 text-xs">
+                            {node.type === 'ingress' && <Server className="w-3.5 h-3.5 text-slate-400" />}
+                            {node.type === 'cache' && <Zap className="w-3.5 h-3.5 text-cyan-400" />}
+                            {node.type === 'database' && <Database className="w-3.5 h-3.5 text-indigo-400" />}
+                            {node.type === 'queue' && <Layers className="w-3.5 h-3.5 text-amber-400" />}
+                            {node.type === 'worker' && <Cpu className="w-3.5 h-3.5 text-emerald-400" />}
+                            <span>{node.name}</span>
+                          </div>
+                          {nIdx < cand.topologyNodes.length - 1 && (
+                            <ArrowRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
                           )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </React.Fragment>
+                      ))}
+                    </div>
+
+                    {/* Progress Bar (3 cols) */}
+                    <div className="lg:col-span-3 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400">p95 Latency vs SLA:</span>
+                        <span className="font-mono text-slate-300">{cand.p95}ms / {slaMs}ms</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-black/40 overflow-hidden border border-white/[0.06]">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            cand.p95 <= slaMs ? 'bg-emerald-500' : 'bg-rose-500'
+                          }`}
+                          style={{ width: `${Math.min(100, (cand.p95 / maxLatency) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Verdict (3 cols) */}
+                    <div className="lg:col-span-3 text-xs flex items-center justify-start lg:justify-end">
+                      {isWinner ? (
+                        <div className="text-emerald-400 flex items-center gap-1.5 font-medium">
+                          <CheckCircle2 className="w-4 h-4 shrink-0" />
+                          <span>Meets all constraints at lowest cost</span>
+                        </div>
+                      ) : isViolated ? (
+                        <div className="text-rose-400 flex items-center gap-1.5 font-medium">
+                          <XCircle className="w-4 h-4 shrink-0" />
+                          <span>{cand.rejectionReasons?.[0] || 'Latency exceeds SLA'}</span>
+                        </div>
+                      ) : (
+                        <div className="text-slate-400 flex items-center gap-1.5">
+                          <Info className="w-4 h-4 shrink-0" />
+                          <span>Feasible, but higher cost than winner</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* 3. Deep-Dive Tabs (One Clean View at a Time) */}
-        <div className="space-y-4 pt-2">
-          {/* Tab Navigation Buttons */}
+        {/* Section 2: Deep-Dive Workspace Tabs */}
+        <div className="space-y-4 pt-4">
           <div className="border-b border-white/[0.08] flex items-center gap-2 pb-2">
             {[
               { id: 'rationale', label: 'Decision Rationale & Trade-Offs', icon: Activity },
               { id: 'trace', label: 'Autonomous Agent Trace', icon: Bot },
-              { id: 'evidence', label: 'Epistemic Evidence & Provenance', icon: ShieldCheck },
+              { id: 'evidence', label: 'Scientific Evidence & Provenance', icon: ShieldCheck },
               { id: 'registry', label: 'Empirical Model Registry (24)', icon: Database },
             ].map((t) => {
               const IconComp = t.icon;
@@ -344,36 +283,36 @@ export default function ResultsPanel() {
                   key={t.id}
                   type="button"
                   onClick={() => setActiveTab(t.id)}
-                  className={`px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs font-medium transition-all ${
+                  className={`px-3.5 py-2 rounded-lg flex items-center gap-2 text-xs font-medium transition-all ${
                     isTabActive
-                      ? 'bg-white/[0.08] text-white shadow-sm'
+                      ? 'bg-white/[0.08] text-white shadow-sm border border-white/[0.06]'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
                   }`}
                 >
-                  <IconComp className="w-3.5 h-3.5" />
+                  <IconComp className="w-4 h-4" />
                   <span>{t.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Tab 1: Rationale, Trade-offs & Breaking Points */}
+          {/* Tab 1: Rationale & Trade-Offs */}
           {activeTab === 'rationale' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Key Rationale */}
-              <div className="p-5 rounded-xl bg-[#0f1422] border border-white/[0.08] space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Why It Won */}
+              <div className="p-6 rounded-xl bg-[#0e1320] border border-white/[0.08] space-y-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">
-                    Why Architecture B Won
+                    Why Architecture B Won (Pareto Optimal)
                   </h4>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {(recommendation.decision_rationale || recommendation.why_it_won || []).map(
                     (r, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-lg bg-black/20 border border-white/[0.04] text-xs text-slate-300 flex items-start gap-2.5"
+                        className="p-3.5 rounded-lg bg-black/25 border border-white/[0.04] text-xs text-slate-300 flex items-start gap-2.5"
                       >
                         <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                         <span className="leading-relaxed">{r}</span>
@@ -384,18 +323,18 @@ export default function ResultsPanel() {
               </div>
 
               {/* Conditions for Change */}
-              <div className="p-5 rounded-xl bg-[#0f1422] border border-white/[0.08] space-y-3">
+              <div className="p-6 rounded-xl bg-[#0e1320] border border-white/[0.08] space-y-4">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-indigo-400" />
                   <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider">
                     Conditions for Change (Breaking Points)
                   </h4>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {(recommendation.conditions_for_change || []).map((c, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-lg bg-black/20 border border-white/[0.04] text-xs text-slate-300 flex items-start gap-2.5"
+                      className="p-3.5 rounded-lg bg-black/25 border border-white/[0.04] text-xs text-slate-300 flex items-start gap-2.5"
                     >
                       <ChevronRight className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                       <span className="leading-relaxed">{c}</span>
