@@ -31,6 +31,9 @@ from aads.core.schemas import (
     FeasibilityStatus,
 )
 from aads.registry.component_registry import ComponentRegistry
+from aads.sdk.interface import SimulationSDK
+from aads.sdk.models import TopologyGraph, ExperimentStatus
+from aads.sdk.tools import get_simulation_sdk
 from aads.agent.tools import (
     validate_workload,
     generate_architecture_candidates,
@@ -137,7 +140,9 @@ class AADSOrchestrator:
 
     def _parse_workload_node(self, state: AgentWorkflowState) -> Dict[str, Any]:
         req_text = state.get("request_text", "")
-        spec, questions, assumptions, mode = self.agent.parse_request(req_text)
+        turn = state.get("clarification_turn", 0)
+        already_clarified = bool(turn > 0)
+        spec, questions, assumptions, mode = self.agent.parse_request(req_text, already_clarified=already_clarified)
         
         errors = list(state.get("errors", []))
         provenance = dict(state.get("provenance", {}))
@@ -149,21 +154,24 @@ class AADSOrchestrator:
             if not val_res.get("valid", True):
                 errors.extend(val_res.get("errors", []))
                 status = "FAILED"
-            elif questions:
+            elif questions and not already_clarified:
                 status = "NEEDS_CLARIFICATION"
             else:
                 status = "WORKLOAD_PARSED"
         else:
-            status = "NEEDS_CLARIFICATION" if questions else "FAILED"
+            status = "NEEDS_CLARIFICATION" if (questions and not already_clarified) else "FAILED"
+
+        new_turn = (turn + 1) if status == "NEEDS_CLARIFICATION" else turn
 
         return {
             "workload_spec": spec,
-            "clarification_questions": questions,
+            "clarification_questions": questions if status == "NEEDS_CLARIFICATION" else [],
             "assumptions": assumptions,
             "execution_mode": mode.value,
             "errors": errors,
             "provenance": provenance,
             "workflow_status": status,
+            "clarification_turn": new_turn,
         }
 
     def _generate_candidates_node(self, state: AgentWorkflowState) -> Dict[str, Any]:
@@ -182,11 +190,37 @@ class AADSOrchestrator:
         else:
             status = "CANDIDATES_GENERATED"
 
+        # Initialize Simulation SDK Workspace and link experiments
+        sdk = get_simulation_sdk()
+        workload = state.get("workload_spec")
+        app_domain = workload.app_type if workload else "general"
+        ws_res = sdk.create_workspace(
+            name=f"Workspace: {app_domain}",
+            intent_summary=state.get("request_text", ""),
+        )
+        workspace_id = ws_res.get("workspace_id")
+        sdk_exp_ids: List[str] = []
+
+        if val_meta.get("valid", True) and workspace_id:
+            for cand in candidates_raw:
+                try:
+                    exp_res = sdk.create_experiment(workspace_id=workspace_id, label=cand.id)
+                    exp_id = exp_res["experiment_id"]
+                    topo = TopologyGraph.from_architecture_graph(cand)
+                    sdk.define_topology(experiment_id=exp_id, topology_data=topo.model_dump())
+                    if workload:
+                        sdk.define_workload(experiment_id=exp_id, workload_data=workload.model_dump())
+                    sdk_exp_ids.append(exp_id)
+                except Exception as e:
+                    logger.warning(f"Failed to register SDK experiment for candidate {cand.id}: {e}")
+
         return {
             "candidate_architectures": candidates_raw,
             "validation_results": val_meta,
             "errors": errors,
             "workflow_status": status,
+            "sdk_workspace_id": workspace_id,
+            "sdk_experiments": sdk_exp_ids,
         }
 
     def _check_models_node(self, state: AgentWorkflowState) -> Dict[str, Any]:
@@ -267,13 +301,15 @@ class AADSOrchestrator:
         workload = state.get("workload_spec")
         duration = state.get("simulation_duration_seconds", 5.0)
         seed = state.get("random_seed", 42)
+        sdk_exp_ids = state.get("sdk_experiments", [])
+        sdk = get_simulation_sdk()
 
         sim_results: List[SimulationResult] = []
         provenance = dict(state.get("provenance", {}))
         provenance["simulation"] = "simulated"
 
         # Simulate candidates whose required models are all registered
-        for c in candidates:
+        for idx, c in enumerate(candidates):
             all_models_present = all(
                 self.registry.get_model(*(m.split(":", 1) if ":" in m else (m, "latest"))) is not None
                 for m in c.required_models
@@ -287,7 +323,21 @@ class AADSOrchestrator:
                     "registry": self.registry,
                 })
                 if sim_res.get("success", False):
-                    sim_results.append(SimulationResult.model_validate(sim_res["result"]))
+                    res_obj = SimulationResult.model_validate(sim_res["result"])
+                    sim_results.append(res_obj)
+                    # Sync into corresponding SDK experiment
+                    if idx < len(sdk_exp_ids):
+                        exp_id = sdk_exp_ids[idx]
+                        try:
+                            exp = sdk.store.get_experiment(exp_id)
+                            if exp:
+                                exp.results = res_obj
+                                exp.status = ExperimentStatus.COMPLETED
+                                exp.simulation_duration_seconds = duration
+                                exp.random_seed = seed
+                                sdk.store.save_experiment(exp)
+                        except Exception as e:
+                            logger.warning(f"Could not sync SDK experiment {exp_id}: {e}")
 
         return {
             "simulation_results": sim_results,
@@ -319,6 +369,21 @@ class AADSOrchestrator:
 
         provenance = dict(state.get("provenance", {}))
         provenance["recommendation"] = "model-predicted"
+
+        # If multiple experiments were simulated, perform SDK comparative trade-off analysis
+        sdk_exp_ids = state.get("sdk_experiments", [])
+        if len(sim_results) > 1 and sdk_exp_ids:
+            try:
+                sdk = get_simulation_sdk()
+                completed_ids = [
+                    eid for eid in sdk_exp_ids
+                    if sdk.store.get_experiment(eid) and sdk.store.get_experiment(eid).status == ExperimentStatus.COMPLETED
+                ]
+                if len(completed_ids) >= 2:
+                    comparison = sdk.compare_experiments(completed_ids, primary_metric="p95_latency_ms")
+                    provenance["sdk_comparison"] = comparison
+            except Exception as e:
+                logger.warning(f"SDK comparison failed: {e}")
 
         return {
             "recommendation": rec,
@@ -474,12 +539,16 @@ class AADSOrchestrator:
         include_unsupported: bool = False,
         max_investigation_rounds: int = 3,
         investigation_budget_seconds: float = 60.0,
+        clarification_turn: int = 0,
     ) -> AgentWorkflowState:
         """
         Executes the compiled LangGraph workflow from start to finish.
         """
         initial_state: AgentWorkflowState = {
             "request_text": request_text,
+            "clarification_turn": clarification_turn,
+            "sdk_workspace_id": None,
+            "sdk_experiments": [],
             "auto_benchmark_missing": auto_benchmark_missing,
             "force_synthetic": force_synthetic,
             "simulation_duration_seconds": simulation_duration_seconds,

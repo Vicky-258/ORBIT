@@ -24,6 +24,8 @@ from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
 from aads.modeling.model_trainer import ModelTrainer
 from aads.simulation.simpy_engine import SimPyEngine
 from aads.evaluation.recommender import ArchitectureRecommender
+from aads.sdk.tools import get_simulation_sdk
+from aads.sdk.models import ExperimentPlan
 
 router = APIRouter(prefix="/api")
 
@@ -268,6 +270,7 @@ class AgentPromptRequest(BaseModel):
     include_unsupported: bool = False
     max_investigation_rounds: int = 3
     investigation_budget_seconds: float = 60.0
+    clarification_turn: int = 0
 
 
 @router.post("/agent/run")
@@ -289,6 +292,7 @@ def run_agent_workflow(req: AgentPromptRequest) -> Dict[str, Any]:
         include_unsupported=req.include_unsupported,
         max_investigation_rounds=req.max_investigation_rounds,
         investigation_budget_seconds=req.investigation_budget_seconds,
+        clarification_turn=req.clarification_turn,
     )
     demo_resp = build_demo_workflow_response(state)
     resp_dict = demo_resp.model_dump()
@@ -350,5 +354,38 @@ def run_demo_workflow(req: AgentPromptRequest) -> DemoWorkflowResponse:
         include_unsupported=req.include_unsupported,
         max_investigation_rounds=req.max_investigation_rounds,
         investigation_budget_seconds=req.investigation_budget_seconds,
+        clarification_turn=req.clarification_turn,
     )
     return build_demo_workflow_response(state)
+
+
+# -----------------------------------------------------------------------------
+# Simulation SDK Direct REST Endpoints (Phase 5.3)
+# -----------------------------------------------------------------------------
+
+@router.get("/sdk/capabilities")
+def get_sdk_capabilities(category: Optional[str] = None) -> Dict[str, Any]:
+    """Inspects supported simulation components, models, operating envelopes, and limitations."""
+    sdk = get_simulation_sdk()
+    return sdk.inspect_capabilities(category_filter=category)
+
+
+@router.get("/sdk/workspaces/{workspace_id}")
+def get_sdk_workspace(workspace_id: str) -> Dict[str, Any]:
+    """Retrieves an isolated investigation workspace including all experiments and branching lineage."""
+    sdk = get_simulation_sdk()
+    ws = sdk.store.get_workspace(workspace_id)
+    if not ws:
+        raise HTTPException(status_code=404, detail=f"Workspace '{workspace_id}' not found.")
+    experiments = sdk.store.list_experiments(workspace_id)
+    return {
+        "workspace": ws.model_dump(),
+        "experiments": [e.model_dump() for e in experiments],
+    }
+
+
+@router.post("/sdk/plans/execute")
+def execute_sdk_plan(plan: ExperimentPlan) -> Dict[str, Any]:
+    """Executes a declarative multi-step ExperimentPlan through the simulation sandbox."""
+    sdk = get_simulation_sdk()
+    return sdk.execute_plan(plan.model_dump())

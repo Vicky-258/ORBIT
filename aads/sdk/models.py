@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Any, Tuple
 import uuid
 from pydantic import BaseModel, Field, model_validator
 
-from aads.core.schemas import WorkloadSpec, SimulationResult, ArchitectureGraph, ComponentType
+from aads.core.schemas import WorkloadSpec, SimulationResult, ArchitectureGraph, ComponentType, ComponentConfig
 
 
 class ComponentCategory(str, Enum):
@@ -141,6 +141,51 @@ class TopologyGraph(BaseModel):
             ingress_node_id=ingress_id,
             read_path=arch.read_path,
             write_path=arch.write_path,
+        )
+
+    def to_architecture_graph(self) -> ArchitectureGraph:
+        """Converts validated TopologyGraph into legacy ArchitectureGraph for evaluation and display."""
+        cat_to_type = {
+            ComponentCategory.INGRESS: ComponentType.API,
+            ComponentCategory.CACHE: ComponentType.CACHE,
+            ComponentCategory.DATABASE: ComponentType.DATABASE,
+            ComponentCategory.QUEUE: ComponentType.QUEUE,
+            ComponentCategory.COMPUTE: ComponentType.WORKER,
+            ComponentCategory.STORAGE: ComponentType.DATABASE,
+            ComponentCategory.EDGE: ComponentType.API,
+        }
+        comps: Dict[str, ComponentConfig] = {}
+        total_cost = 0.0
+        for c in self.components:
+            cost = c.monthly_cost_override_usd if c.monthly_cost_override_usd is not None else 25.0
+            total_cost += cost
+            comps[c.id] = ComponentConfig(
+                name=c.model_name,
+                component_type=cat_to_type.get(c.category, ComponentType.WORKER),
+                version=c.version,
+                cpu_cores=c.cpu_cores,
+                memory_mb=c.memory_mb,
+                concurrency_limit=c.concurrency_limit,
+                monthly_cost_usd=cost,
+                parameters=c.parameters,
+            )
+
+        connections = [(edge.source_id, edge.target_id) for edge in self.connections]
+        queue_present = any(c.category == ComponentCategory.QUEUE for c in self.components)
+        required_models = [f"{c.model_name}:{c.version}" for c in self.components]
+
+        return ArchitectureGraph(
+            id=self.topology_id,
+            name=self.name,
+            description=self.description or "",
+            components=comps,
+            connections=connections,
+            read_path=self.read_path,
+            write_path=self.write_path,
+            queue_present=queue_present,
+            required_models=required_models,
+            total_monthly_cost_usd=round(total_cost, 2),
+            metadata={"topology_id": self.topology_id},
         )
 
 
