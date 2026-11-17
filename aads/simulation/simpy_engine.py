@@ -346,3 +346,20 @@ class SimPyEngine:
                     yield env.timeout(service_s)
                     collector.record_busy_time("worker", service_s)
                     collector.record_busy_time("db", service_s)
+
+    def simulate_topology(
+        self,
+        topology: Any,
+        workload: WorkloadSpec,
+        duration_seconds: float = 10.0,
+        random_seed: int = 42,
+    ) -> SimulationResult:
+        """Simulates dynamic TopologyGraph using DynamicSimPyEngine (Phase 5.3B)."""
+        from aads.simulation.dynamic_simpy_engine import DynamicSimPyEngine
+        engine = DynamicSimPyEngine(registry=self.registry)
+        return engine.simulate_topology(
+            topology=topology,
+            workload=workload,
+            duration_seconds=duration_seconds,
+            random_seed=random_seed,
+        )
