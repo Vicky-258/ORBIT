@@ -46,3 +46,6 @@ class AgentWorkflowState(TypedDict, total=False):
     benchmark_proposals: List[Dict[str, Any]]
     active_decision: Optional[Dict[str, Any]]
     investigation_status: str
+    clarification_turn: int
+    sdk_workspace_id: Optional[str]
+    sdk_experiments: List[str]
