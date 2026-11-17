@@ -1,5 +1,5 @@
 /**
- * Universal Data Normalizer for AADS Phase 5.1
+ * Universal Data Normalizer for ORBIT Phase 5.1
  * Maps raw backend responses (/api/demo/run, /api/agent/run, or canonical fixtures)
  * into a rich, structured, canonical ArchitectureDecisionResult contract.
  *

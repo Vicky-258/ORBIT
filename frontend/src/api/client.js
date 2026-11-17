@@ -1,5 +1,5 @@
 /**
- * AADS REST API Client
+ * ORBIT REST API Client
  */
 
 const API_BASE = '/api';

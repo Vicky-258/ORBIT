@@ -1,13 +1,13 @@
 """
-FastAPI Application Entrypoint for AADS.
+FastAPI Application Entrypoint for ORBIT.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from aads.api.routes import router
 
 app = FastAPI(
-    title="Agentic Architecture Design & Simulation (AADS) API",
-    description="AI Agent backend for backend system architecture comparison, benchmarking, and discrete-event simulation.",
+    title="ORBIT — Orchestrated Reasoning and Benchmarking for Infrastructure Testing API",
+    description="AI Agent platform for architecture reasoning, empirical benchmarking, and discrete-event simulation.",
     version="0.1.0",
 )
 
@@ -24,13 +24,13 @@ app.include_router(router)
 
 @app.get("/api/health")
 def api_health():
-    return {"status": "ok", "service": "AADS API"}
+    return {"status": "ok", "service": "ORBIT API"}
 
 
 @app.get("/")
 def root():
     return {
-        "service": "AADS API",
+        "service": "ORBIT API",
         "status": "healthy",
         "docs_url": "/docs",
         "endpoints": [

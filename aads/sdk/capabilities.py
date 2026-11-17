@@ -28,7 +28,7 @@ class ComponentCapability(BaseModel):
 
 class SimulationCapabilitiesCatalog(BaseModel):
     """Machine-readable capability registry exposed to AI agents via SDK."""
-    engine_name: str = "AADS SimPy Discrete-Event Simulation Engine"
+    engine_name: str = "ORBIT SimPy Discrete-Event Simulation Engine"
     engine_version: str = "5.3B"
     supported_categories: List[str]
     components: List[ComponentCapability]

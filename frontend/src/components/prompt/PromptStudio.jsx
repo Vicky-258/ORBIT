@@ -113,7 +113,7 @@ export default function PromptStudio() {
             <Layers className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div className="flex items-center gap-2.5">
-            <span className="font-bold text-base tracking-tight text-white">AADS</span>
+            <span className="font-bold text-base tracking-tight text-white">ORBIT</span>
             <span className="text-xs font-medium text-zinc-400 border-l border-white/10 pl-2.5">
               Architecture Copilot
             </span>
@@ -164,7 +164,7 @@ export default function PromptStudio() {
               What backend are you building?
             </h1>
             <p className="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-              Describe what you want to build in plain English. AADS automatically infers your traffic load, latency SLAs, and access patterns to design the optimal backend architecture.
+              Describe what you want to build in plain English. ORBIT automatically infers your traffic load, latency SLAs, and access patterns to design the optimal backend architecture.
             </p>
           </div>
 
@@ -253,7 +253,7 @@ export default function PromptStudio() {
                       </span>
                     </h3>
                     <p className="text-xs text-zinc-400 mt-0.5">
-                      AADS interpreted your requirements into concrete distributed systems specifications:
+                      ORBIT interpreted your requirements into concrete distributed systems specifications:
                     </p>
                   </div>
                 </div>
@@ -353,7 +353,7 @@ export default function PromptStudio() {
                 <div className="space-y-0.5">
                   <span className="font-medium text-white">No technical setup required:</span>
                   <p className="text-zinc-400 text-xs">
-                    You can click <strong className="text-white">Simulate &amp; Generate Blueprint</strong> immediately. AADS will test candidate topologies against this inferred load and prove which architecture works best for your app.
+                    You can click <strong className="text-white">Simulate &amp; Generate Blueprint</strong> immediately. ORBIT will test candidate topologies against this inferred load and prove which architecture works best for your app.
                   </p>
                 </div>
               </div>

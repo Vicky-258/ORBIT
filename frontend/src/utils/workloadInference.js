@@ -1,5 +1,5 @@
 /**
- * Workload Inference Engine for AADS Architecture Copilot
+ * Workload Inference Engine for ORBIT Architecture Copilot
  *
  * Automatically translates natural-language project descriptions, user scale,
  * and app domain into concrete, calibrated system engineering parameters

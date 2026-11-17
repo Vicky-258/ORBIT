@@ -151,7 +151,7 @@ export default function EvidenceDisclosure() {
                       {String(item.value)}
                     </td>
                     <td className="text-xs text-slate-400 font-mono">
-                      {item.provenance || item.source || 'AADS Component Registry'}
+                      {item.provenance || item.source || 'ORBIT Component Registry'}
                     </td>
                     <td>
                       <span className="badge badge-emerald text-[10px] flex items-center gap-1">

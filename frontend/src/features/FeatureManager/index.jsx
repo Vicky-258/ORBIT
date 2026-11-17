@@ -36,7 +36,7 @@ export default function FeatureManager() {
             <div>
               <h2 className="text-lg font-bold text-white tracking-tight">Feature & Modular Slot Manager</h2>
               <p className="text-xs text-slate-400">
-                Easily toggle, enable, or disable features in your AADS workspace in real-time.
+                Easily toggle, enable, or disable features in your ORBIT workspace in real-time.
               </p>
             </div>
           </div>

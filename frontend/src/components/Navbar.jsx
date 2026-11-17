@@ -31,14 +31,14 @@ export default function Navbar() {
           <Zap className="w-4 h-4 text-white fill-white" />
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-sm text-slate-100 tracking-tight">AADS</span>
+          <span className="font-semibold text-sm text-slate-100 tracking-tight">ORBIT</span>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 font-mono">
-            v5.0
+            v5.3
           </span>
         </div>
         <div className="h-4 w-px bg-white/[0.08] mx-1 hidden sm:block" />
         <span className="text-xs text-slate-400 hidden lg:inline font-normal">
-          Agentic Architecture Design & Discrete-Event Simulation
+          Orchestrated Reasoning and Benchmarking for Infrastructure Testing
         </span>
       </div>
 

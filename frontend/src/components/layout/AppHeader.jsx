@@ -19,7 +19,7 @@ export default function AppHeader() {
           <Layers className="w-3.5 h-3.5 stroke-[2.5]" />
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-bold text-sm text-slate-900 tracking-tight">AADS</span>
+          <span className="font-bold text-sm text-slate-900 tracking-tight">ORBIT</span>
           <span className="text-xs font-normal text-slate-400 border-l border-slate-200 pl-2">
             Architecture Copilot
           </span>

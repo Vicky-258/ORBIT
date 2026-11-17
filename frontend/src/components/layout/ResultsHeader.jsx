@@ -57,7 +57,7 @@ export default function ResultsHeader() {
         </button>
 
         <div className="hidden md:flex items-center gap-2 pl-2 border-l border-white/[0.08]">
-          <span className="font-bold text-sm tracking-tight text-white">AADS</span>
+          <span className="font-bold text-sm tracking-tight text-white">ORBIT</span>
           <span className="text-[11px] text-zinc-400 font-mono">/ Copilot</span>
         </div>
       </div>

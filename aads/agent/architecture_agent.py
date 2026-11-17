@@ -20,7 +20,7 @@ from aads.agent.provider import LLMProviderManager, ExecutionMode
 
 logger = logging.getLogger("aads.agent.architecture_agent")
 
-SYSTEM_PROMPT = """You are the AADS (Agentic Architecture Design & Simulation) Architecture Agent.
+SYSTEM_PROMPT = """You are the ORBIT (Orchestrated Reasoning and Benchmarking for Infrastructure Testing) Architecture Agent.
 Your responsibility is to analyze user requests for backend system architecture designs and extract structured engineering workload requirements.
 
 Guidelines:
@@ -192,6 +192,89 @@ def rank_and_evaluate_ambiguity(
     return score, questions
 
 
+SYSTEM_ARCHETYPES: Dict[str, Dict[str, Any]] = {
+    "DECOUPLED_ASYNC_COMPUTE": {
+        "description": "Heavy compute, AI generation, video rendering, batch processing, background jobs",
+        "default_read_ratio": 0.20,
+        "default_write_ratio": 0.80,
+        "default_p95_sla_ms": 50.0,
+        "keywords": ["video", "videos", "render", "rendering", "generation", "generate", "generating", "ai", "background", "async", "asynchronous", "worker", "workers", "queue", "queues", "batch", "encode", "encoding", "export", "transcode"],
+    },
+    "TRANSACTIONAL_OLTP": {
+        "description": "Strict ACID transactional consistency, financial ledgers, bookings, checkout, order mutations",
+        "default_read_ratio": 0.50,
+        "default_write_ratio": 0.50,
+        "default_p95_sla_ms": 150.0,
+        "keywords": ["booking", "bookings", "reservation", "reservations", "payment", "payments", "bank", "banking", "financial", "finance", "transaction", "transactions", "transactional", "checkout", "order", "orders", "ledger", "wallet", "crypto", "oltp"],
+    },
+    "WRITE_HEAVY_INGESTION": {
+        "description": "Continuous telemetry, sensor ingestion, clickstream analytics, logs",
+        "default_read_ratio": 0.10,
+        "default_write_ratio": 0.90,
+        "default_p95_sla_ms": 100.0,
+        "keywords": ["telemetry", "iot", "sensor", "sensors", "analytics", "tracking", "log", "logs", "logging", "metrics", "metric", "ingest", "ingestion", "stream", "streams"],
+    },
+    "REALTIME_STREAM_TRACKING": {
+        "description": "Real-time state synchronization, live vehicle GPS tracking, chat messaging, multiplayer state",
+        "default_read_ratio": 0.50,
+        "default_write_ratio": 0.50,
+        "default_p95_sla_ms": 40.0,
+        "keywords": ["live", "real-time", "realtime", "chat", "chats", "messaging", "message", "messages", "gps", "drone", "drones", "vehicle", "vehicles", "websocket", "websockets"],
+    },
+    "READ_HEAVY_INTERACTIVE": {
+        "description": "Read-dominated browsing with hot cacheable data (ratings, reviews, catalog, feeds, maps, listings)",
+        "default_read_ratio": 0.90,
+        "default_write_ratio": 0.10,
+        "default_p95_sla_ms": 100.0,
+        "keywords": ["hotel", "hotels", "rating", "ratings", "review", "reviews", "map", "maps", "listing", "listings", "catalog", "catalogs", "browse", "browsing", "photo", "photos", "image", "images", "feed", "feeds", "social", "search", "searching", "shop", "shopping", "ecommerce", "store"],
+    },
+}
+
+
+def extract_dynamic_domain(text: str) -> str:
+    """Extracts open-ended application domain from prompt text."""
+    text_clean = text.lower().strip()
+    if "ecommerce" in text_clean or "e-commerce" in text_clean or "shop" in text_clean or "store" in text_clean:
+        return "ecommerce"
+    if "transactional" in text_clean or "banking" in text_clean or "payment" in text_clean or "financial" in text_clean:
+        return "transactional"
+    if "background" in text_clean or "worker" in text_clean or "queue" in text_clean:
+        return "background_processing"
+    if "analytics" in text_clean or "logging" in text_clean or "telemetry" in text_clean:
+        return "analytics_pipeline"
+
+    # Dynamic extraction for open-ended product requests
+    match = re.search(
+        r"(?:backend\s+for\s+(?:an?|the)?|build\s+(?:an?|the)?|building\s+(?:an?|the)?|create\s+(?:an?|the)?)\s*([a-zA-Z0-9\s\-]+?)(?:\s+(?:that|where|targeting|which|to|\.|\,)|$)",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if match:
+        slug = re.sub(r"[\s\-]+", "_", match.group(1).strip()).lower()
+        if len(slug) >= 3 and slug not in ("system", "application", "backend", "app", "service"):
+            return slug
+
+    if "photo" in text_clean or "image" in text_clean or "feed" in text_clean or "social" in text_clean:
+        return "social_media_feed"
+
+    return "general_web_service"
+
+
+def classify_system_archetype(text: str) -> Tuple[str, Dict[str, Any]]:
+    """Maps free-form application text to a calibrated engineering archetype."""
+    text_lower = text.lower()
+    for arch_name, info in SYSTEM_ARCHETYPES.items():
+        for kw in info["keywords"]:
+            if re.search(r"\b" + re.escape(kw) + r"\b", text_lower):
+                return arch_name, info
+    return "GENERAL_WEB_SERVICE", {
+        "description": "Standard interactive CRUD web service with balanced reads and writes",
+        "default_read_ratio": 0.70,
+        "default_write_ratio": 0.30,
+        "default_p95_sla_ms": 100.0,
+    }
+
+
 class ArchitectureAgent:
     """Agent that translates natural-language prompts into validated AADS specifications."""
 
@@ -317,40 +400,20 @@ class ArchitectureAgent:
             user_facts["write_ratio"] = write_ratio
             has_read_write = True
 
-        # 5. Domain / App type
-        app_type = "social_media_feed"
-        if "ecommerce" in text or "e-commerce" in text or "shop" in text or "store" in text:
-            app_type = "ecommerce"
+        # 5. Dynamic Domain & System Archetype Inference
+        app_type = extract_dynamic_domain(text)
+        if app_type != "general_web_service":
             user_facts["app_type"] = app_type
-            if not has_read_write:
-                read_ratio, write_ratio = 0.85, 0.15
-                has_read_write = True
-        elif "transactional" in text or "payment" in text or "banking" in text or "financial" in text or "oltp" in text:
-            app_type = "transactional"
-            user_facts["app_type"] = app_type
-            if not has_read_write:
-                read_ratio, write_ratio = 0.50, 0.50
-                has_read_write = True
-        elif "background" in text or "async" in text or "worker" in text or "queue" in text or "batch" in text:
-            app_type = "background_processing"
-            user_facts["app_type"] = app_type
-            if not has_read_write:
-                read_ratio, write_ratio = 0.20, 0.80
-                has_read_write = True
-        elif "analytics" in text or "logging" in text or "telemetry" in text:
-            app_type = "analytics_pipeline"
-            user_facts["app_type"] = app_type
-            if not has_read_write:
-                read_ratio, write_ratio = 0.05, 0.95
-                has_read_write = True
-        elif "photo" in text or "image" in text or "feed" in text or "social" in text:
-            app_type = "social_media_feed"
-            user_facts["app_type"] = app_type
-            if not has_read_write:
-                read_ratio, write_ratio = 0.90, 0.10
-                has_read_write = True
         else:
-            agent_assumptions.append("Application domain defaulted to Social Media Feed")
+            agent_assumptions.append("Application domain defaulted to General Web Service")
+
+        archetype_name, archetype_info = classify_system_archetype(text)
+        agent_assumptions.append(f"System Archetype identified: {archetype_name} ({archetype_info['description']})")
+
+        if not has_read_write:
+            read_ratio = archetype_info["default_read_ratio"]
+            write_ratio = archetype_info["default_write_ratio"]
+            has_read_write = True
 
         # 6. Ambiguity Ranking & Threshold Evaluation
         clarification_questions: List[str] = []
@@ -389,10 +452,10 @@ class ArchitectureAgent:
             if peak_factor is None:
                 peak_factor = 2.0
 
-        # Tailor soft preferences by domain requirements
-        if app_type == "background_processing":
+        # Tailor soft preferences by domain requirements & system archetype
+        if app_type == "background_processing" or archetype_name in ("DECOUPLED_ASYNC_COMPUTE", "WRITE_HEAVY_INGESTION"):
             soft_prefs = {"cost": 0.25, "latency": 0.65, "simplicity": 0.10}
-        elif app_type == "transactional":
+        elif app_type == "transactional" or archetype_name == "TRANSACTIONAL_OLTP":
             soft_prefs = {"cost": 0.40, "latency": 0.35, "simplicity": 0.25}
         elif app_type == "ecommerce":
             soft_prefs = {"cost": 0.30, "latency": 0.50, "simplicity": 0.20}

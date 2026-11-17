@@ -244,7 +244,7 @@ export default function WorkloadInput() {
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 fill-white" />
-                <span>Run AADS Agent Investigation</span>
+                <span>Run ORBIT Agent Investigation</span>
               </>
             )}
           </button>

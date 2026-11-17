@@ -22,7 +22,7 @@ from aads.core.schemas import WorkloadSpec, SimulationResult, RecommendationResu
 
 logger = logging.getLogger(__name__)
 
-PLANNER_SYSTEM_PROMPT = """You are the AADS Architecture Investigation Agent.
+PLANNER_SYSTEM_PROMPT = """You are the ORBIT (Orchestrated Reasoning and Benchmarking for Infrastructure Testing) Architecture Investigation Agent.
 Your objective is to inspect the current evidence for a backend workload, evaluate candidate architectures,
 and decide the next most valuable investigation step from a finite set of approved actions.
 

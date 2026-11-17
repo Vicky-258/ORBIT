@@ -1,7 +1,7 @@
 [project]
-name = "aads"
+name = "orbit"
 version = "0.1.0"
-description = "Agentic Architecture Design & Simulation POC"
+description = "ORBIT — Orchestrated Reasoning and Benchmarking for Infrastructure Testing"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

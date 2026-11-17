@@ -7,7 +7,7 @@ export default function UncertaintyPanel() {
       title: 'Heuristic Prediction Uncertainty vs. Statistical Confidence Intervals',
       badge: 'Uncertainty Modeling',
       description:
-        'AADS outputs heuristic prediction intervals based on piecewise regression residual errors. These are heuristic uncertainty bounds, not formal frequentist 95% confidence intervals, and should be interpreted as operational risk boundaries.',
+        'ORBIT outputs heuristic prediction intervals based on piecewise regression residual errors. These are heuristic uncertainty bounds, not formal frequentist 95% confidence intervals, and should be interpreted as operational risk boundaries.',
     },
     {
       title: 'Container Isolation vs. Production Hypervisor Contention',
@@ -34,7 +34,7 @@ export default function UncertaintyPanel() {
       <div className="p-4 rounded-xl bg-[#121215] border border-white/[0.08] text-zinc-300 space-y-1">
         <span className="font-semibold text-white">Scientific Uncertainty &amp; Limitation Disclosures</span>
         <p className="text-zinc-400 leading-relaxed">
-          In alignment with AADS empirical integrity guidelines, all heuristic bounds and model limitations are disclosed openly to prevent overconfident architectural conclusions.
+          In alignment with ORBIT empirical integrity guidelines, all heuristic bounds and model limitations are disclosed openly to prevent overconfident architectural conclusions.
         </p>
       </div>
 

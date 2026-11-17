@@ -144,3 +144,39 @@ class TestArchitectureAgentFallbackParse:
         assert turn2.p95_latency_target_ms == 50.0
         assert turn2.max_monthly_budget_usd == 250.0
         assert "Default p95 latency target assumed" in " ".join(turn2.agent_assumptions)
+
+
+class TestDynamicDomainAndArchetypeClassification:
+    @pytest.fixture
+    def agent(self):
+        return ArchitectureAgent()
+
+    def test_hotel_rating_app_with_maps(self, agent):
+        prompt = "I want a backend for a hotel rating app with maps that targets around 50K users"
+        res = agent.fallback_parse(prompt, already_clarified=True)
+
+        assert res.app_type == "hotel_rating_app_with_maps"
+        assert res.read_ratio == 0.90
+        assert res.write_ratio == 0.10
+        assumptions = " ".join(res.agent_assumptions)
+        assert "READ_HEAVY_INTERACTIVE" in assumptions
+
+    def test_education_platform_with_ai_video(self, agent):
+        prompt = "building an education platform with user generated AI videos that targets 10K students"
+        res = agent.fallback_parse(prompt, already_clarified=True)
+
+        assert res.app_type == "education_platform_with_user_generated_ai_videos"
+        assert res.read_ratio == 0.20
+        assert res.write_ratio == 0.80
+        assumptions = " ".join(res.agent_assumptions)
+        assert "DECOUPLED_ASYNC_COMPUTE" in assumptions
+
+    def test_banking_ledger_transactional(self, agent):
+        prompt = "Write-heavy transactional workload with 150 RPS for banking payments"
+        res = agent.fallback_parse(prompt, already_clarified=True)
+
+        assert res.app_type == "transactional"
+        assert res.read_ratio == 0.40
+        assert res.write_ratio == 0.60
+        assumptions = " ".join(res.agent_assumptions)
+        assert "TRANSACTIONAL_OLTP" in assumptions

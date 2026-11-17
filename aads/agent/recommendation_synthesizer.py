@@ -19,7 +19,7 @@ from aads.agent.provider import LLMProviderManager, ExecutionMode
 
 logger = logging.getLogger("aads.agent.recommendation_synthesizer")
 
-SYNTHESIS_SYSTEM_PROMPT = """You are an expert backend systems architecture analyst for AADS (Agentic Architecture Design & Simulation).
+SYNTHESIS_SYSTEM_PROMPT = """You are an expert backend systems architecture analyst for ORBIT (Orchestrated Reasoning and Benchmarking for Infrastructure Testing).
 Your role is strictly to synthesize and explain the provided quantitative evaluation evidence and architectural trade-offs.
 
 CRITICAL CORRECTNESS RULES:

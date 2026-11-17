@@ -168,7 +168,7 @@ export default function WorkloadDrawer() {
               className="text-xs bg-white border border-slate-300 focus:border-slate-500 rounded-lg p-3 text-slate-900 placeholder:text-slate-400 transition-all resize-none w-full"
             />
             <span className="text-[11px] text-slate-500 block">
-              Parsed by AADS into structured traffic and constraint parameters.
+              Parsed by ORBIT into structured traffic and constraint parameters.
             </span>
           </div>
 
