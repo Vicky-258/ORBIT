@@ -35,8 +35,8 @@ from typing import Dict, List
 import numpy as np
 import pytest
 
-from aads.modeling.model_interface import ComponentPerformanceModel
-from aads.models.empirical_postgres import (
+from orbit.modeling.model_interface import ComponentPerformanceModel
+from orbit.models.empirical_postgres import (
     EmpiricalLinearRegressionModel,
     EmpiricalLookupModel,
     EmpiricalMechanisticModel,

@@ -19,7 +19,7 @@ import math
 import numpy as np
 from typing import List, Dict, Any
 
-from aads.core.schemas import (
+from orbit.core.schemas import (
     WorkloadSpec,
     SimulationResult,
     FeasibilityStatus,
@@ -27,7 +27,7 @@ from aads.core.schemas import (
     CandidateEvaluation,
     RecommendationResult,
 )
-from aads.evaluation.scenarios import (
+from orbit.evaluation.scenarios import (
     EvaluationScenario,
     ScenarioClass,
     DatasetSplit,
@@ -35,23 +35,23 @@ from aads.evaluation.scenarios import (
     DEV_SCENARIOS,
     HELDOUT_SCENARIOS,
 )
-from aads.evaluation.strategies import (
+from orbit.evaluation.strategies import (
     StrategyExecutionResult,
     run_strategy_a_fixed_pipeline,
     run_strategy_b_deterministic_adaptive,
     run_strategy_c_llm_adaptive,
 )
-from aads.evaluation.metrics import (
+from orbit.evaluation.metrics import (
     compute_metrics,
     DecisionQualityMetrics,
 )
-from aads.evaluation.recommender import ArchitectureRecommender
-from aads.evaluation.tradeoff_analyzer import TradeoffAnalyzer
-from aads.evaluation.feasibility_filter import FeasibilityFilter
-from aads.simulation.metrics_collector import SimulationMetricsCollector, RequestTrace
-from aads.registry.component_registry import ComponentRegistry
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.simulation.simpy_engine import SimPyEngine
+from orbit.evaluation.recommender import ArchitectureRecommender
+from orbit.evaluation.tradeoff_analyzer import TradeoffAnalyzer
+from orbit.evaluation.feasibility_filter import FeasibilityFilter
+from orbit.simulation.metrics_collector import SimulationMetricsCollector, RequestTrace
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.simulation.simpy_engine import SimPyEngine
 
 
 def _make_dummy_sim(arch_id: str, arch_name: str, p95: float, cost: float, tp: float = 500.0) -> SimulationResult:

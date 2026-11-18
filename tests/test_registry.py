@@ -1,7 +1,7 @@
 """
 Unit tests for Component and Model Registry.
 """
-from aads.core.schemas import WorkloadSpec, ModelRecord
+from orbit.core.schemas import WorkloadSpec, ModelRecord
 
 
 def test_registry_seed_and_query(registry):

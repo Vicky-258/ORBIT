@@ -2,8 +2,8 @@
 Unit tests for Architecture Candidate Generator.
 """
 import pytest
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.core.schemas import ArchitectureGraph, ComponentType, ComponentConfig
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.core.schemas import ArchitectureGraph, ComponentType, ComponentConfig
 
 
 def test_generate_candidates_count(generator):

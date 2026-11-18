@@ -16,24 +16,24 @@ from typing import List, Optional
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from aads.agent.schemas import (
+from orbit.agent.schemas import (
     AuthorizationLevel,
     AuthorizationRecord,
     AuthorizationStatus,
     ExperimentProposal,
 )
-from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from orbit.benchmark.bounded_executor import BoundedBenchmarkExecutor
 import numpy as np
-from aads.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
-from aads.benchmark.workload_profiles import (
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
+from orbit.benchmark.workload_profiles import (
     BALANCED_OLTP_TPCB,
     READ_ONLY_SELECT,
     SIMPLE_WRITE_INGEST,
     WORKLOAD_PROFILES,
     resolve_workload_profile,
 )
-from aads.core.schemas import ExperimentRecord
-from aads.registry.component_registry import ComponentRegistry
+from orbit.core.schemas import ExperimentRecord
+from orbit.registry.component_registry import ComponentRegistry
 
 
 def parse_args():

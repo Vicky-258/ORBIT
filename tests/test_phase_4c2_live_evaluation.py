@@ -15,13 +15,13 @@ import pytest
 from unittest.mock import MagicMock, patch
 from typing import Dict, Any
 
-from aads.core.schemas import (
+from orbit.core.schemas import (
     WorkloadSpec,
     SimulationResult,
     FeasibilityStatus,
     ArchitectureGraph,
 )
-from aads.evaluation.scenarios import (
+from orbit.evaluation.scenarios import (
     EvaluationScenario,
     ScenarioClass,
     DatasetSplit,
@@ -30,21 +30,21 @@ from aads.evaluation.scenarios import (
     HELDOUT_SCENARIOS,
     PILOT_SCENARIOS,
 )
-from aads.evaluation.strategies import (
+from orbit.evaluation.strategies import (
     run_strategy_a_fixed_pipeline,
     run_strategy_b_deterministic_adaptive,
     run_strategy_c_llm_adaptive,
     StrategyExecutionResult,
 )
-from aads.evaluation.metrics import compute_metrics
-from aads.registry.component_registry import ComponentRegistry
-from aads.agent.investigation_planner import InvestigationPlanner
-from aads.agent.schemas import (
+from orbit.evaluation.metrics import compute_metrics
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.agent.investigation_planner import InvestigationPlanner
+from orbit.agent.schemas import (
     InvestigationDecision,
     InvestigationActionType,
     LiveLLMCallRecord,
 )
-from aads.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
+from orbit.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
 
 
 def test_identical_initial_evidence_across_strategies():
@@ -103,7 +103,7 @@ def test_fail_closed_when_credentials_unavailable():
     mock_pm = MagicMock()
     mock_pm.is_llm_available.return_value = False
 
-    with patch("aads.evaluation.strategies.InvestigationPlanner") as mock_planner_cls:
+    with patch("orbit.evaluation.strategies.InvestigationPlanner") as mock_planner_cls:
         mock_planner = MagicMock()
         mock_planner.provider_mgr = mock_pm
         mock_planner_cls.return_value = mock_planner

@@ -6,13 +6,13 @@ Guarantees NO external network requests are made during testing.
 import pytest
 from unittest.mock import MagicMock, patch
 
-from aads.agent.provider import (
+from orbit.agent.provider import (
     LLMProviderManager,
     verify_live_llm,
     redact_secrets,
 )
-from aads.agent.architecture_agent import WorkloadExtractionResult
-from aads.core.config import LLMConfig
+from orbit.agent.architecture_agent import WorkloadExtractionResult
+from orbit.core.config import LLMConfig
 
 
 def test_missing_credentials(monkeypatch):

@@ -11,14 +11,14 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from aads.agent.schemas import AuthorizationRecord, AuthorizationStatus, ExperimentProposal
-from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
-from aads.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.core.schemas import ExperimentRecord, ModelRecord
-from aads.modeling.calibration_pipeline import CalibrationPipeline
-from aads.modeling.model_trainer import InsufficientIndependentGroupsError, ModelTrainer
-from aads.registry.component_registry import ComponentRegistry
+from orbit.agent.schemas import AuthorizationRecord, AuthorizationStatus, ExperimentProposal
+from orbit.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.core.schemas import ExperimentRecord, ModelRecord
+from orbit.modeling.calibration_pipeline import CalibrationPipeline
+from orbit.modeling.model_trainer import InsufficientIndependentGroupsError, ModelTrainer
+from orbit.registry.component_registry import ComponentRegistry
 
 
 def _make_sample_exp(

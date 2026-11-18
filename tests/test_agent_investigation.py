@@ -7,22 +7,22 @@ import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 
-from aads.agent.schemas import (
+from orbit.agent.schemas import (
     InvestigationActionType,
     InvestigationDecision,
     InvestigationRecord,
     BenchmarkProposalDetails,
 )
-from aads.agent.investigation_policy import (
+from orbit.agent.investigation_policy import (
     InvestigationPolicy,
     PolicyVerdict,
     PolicyEvaluationResult,
 )
-from aads.agent.investigation_dispatcher import InvestigationDispatcher
-from aads.agent.investigation_planner import InvestigationPlanner
-from aads.agent.orchestrator import AADSOrchestrator
-from aads.agent.provider import LLMProviderManager, ExecutionMode
-from aads.core.schemas import (
+from orbit.agent.investigation_dispatcher import InvestigationDispatcher
+from orbit.agent.investigation_planner import InvestigationPlanner
+from orbit.agent.orchestrator import ORBITOrchestrator
+from orbit.agent.provider import LLMProviderManager, ExecutionMode
+from orbit.core.schemas import (
     WorkloadSpec,
     ArchitectureGraph,
     SimulationResult,
@@ -30,8 +30,8 @@ from aads.core.schemas import (
     CandidateEvaluation,
     FeasibilityStatus,
 )
-from aads.registry.component_registry import ComponentRegistry
-from aads.api.app import app
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.api.app import app
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def mock_workload():
 
 @pytest.fixture
 def mock_candidate():
-    from aads.generator.candidate_generator import ArchitectureGenerator
+    from orbit.generator.candidate_generator import ArchitectureGenerator
     gen = ArchitectureGenerator()
     candidates = gen.generate_candidates(include_async=True)
     return next(c for c in candidates if c.id == "arch_b_cached")
@@ -346,7 +346,7 @@ def test_simulated_and_synthetic_provenance_preserved(mock_workload, mock_candid
 # --- 13. LLM Cannot Change Authoritative Numerical Metrics ---
 def test_llm_cannot_alter_numerical_metrics(monkeypatch):
     monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = "Social media feed 500 RPS, peak 1000 RPS, 90% reads, p95 under 50ms, budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0, random_seed=42)
 
@@ -363,7 +363,7 @@ def test_llm_cannot_alter_numerical_metrics(monkeypatch):
 # --- 14. LLM Cannot Override Deterministic Feasibility or Ranking ---
 def test_llm_cannot_override_feasibility_or_ranking(monkeypatch):
     monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     # Strict low budget: $20/month where NO candidate is feasible
     prompt = "Social feed 500 RPS, 90% reads, p95 under 50ms, budget $20/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0, random_seed=42)
@@ -399,7 +399,7 @@ def test_llm_provider_exception_triggers_safe_fallback(monkeypatch, mock_workloa
 # --- 16. Full Integration Workflow Runs Bounded Investigation Rounds ---
 def test_full_workflow_executes_investigation_trace(monkeypatch):
     monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = "Social feed 500 RPS, peak 1000 RPS, 90% reads, p95 under 50ms, budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0, random_seed=42, max_investigation_rounds=3)
 
@@ -430,7 +430,7 @@ def test_api_endpoint_returns_investigation_trace(monkeypatch):
 
 # --- 18. Workflow Trace Accurately Distinguishes Proposed, Rejected, and Executed Actions ---
 def test_workflow_trace_records_verdicts_accurately(mock_candidate):
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     policy = InvestigationPolicy()
 
     # 1. Test record for approved action

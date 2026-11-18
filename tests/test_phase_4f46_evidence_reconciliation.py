@@ -35,7 +35,7 @@ from typing import Dict, List
 import numpy as np
 import pytest
 
-from aads.benchmark.evidence_reconciliation import (
+from orbit.benchmark.evidence_reconciliation import (
     EXPECTED_MANIFEST_SHA256,
     EXPECTED_REGISTRY_MODELS,
     MetricAvailability,
@@ -53,7 +53,7 @@ from aads.benchmark.evidence_reconciliation import (
     verify_manifest_hash,
     verify_model_registry_integrity,
 )
-from aads.core.evidence_classification import (
+from orbit.core.evidence_classification import (
     EvidenceClassification,
     PerformanceFinding,
 )

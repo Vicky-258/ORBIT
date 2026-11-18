@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from aads.benchmark.phase_4f4_runner import (
+from orbit.benchmark.phase_4f4_runner import (
     EXPECTED_MANIFEST_SHA256,
     CampaignAuthorizationRecord,
     Phase4F4Runner,

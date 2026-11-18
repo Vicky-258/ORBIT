@@ -2,11 +2,11 @@
 Pytest fixtures for AADS test suite.
 """
 import pytest
-from aads.core.schemas import WorkloadSpec
-from aads.registry.component_registry import ComponentRegistry
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.simulation.simpy_engine import SimPyEngine
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.core.schemas import WorkloadSpec
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.simulation.simpy_engine import SimPyEngine
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
 
 
 @pytest.fixture

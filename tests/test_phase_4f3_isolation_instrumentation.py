@@ -24,34 +24,34 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pydantic
 
-from aads.benchmark.cfs_correlation import (
+from orbit.benchmark.cfs_correlation import (
     CFSAssociationLevel,
     CFSCorrelationAnalyzer,
     TransactionRecord,
     verify_controlled_intervention,
 )
-from aads.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
-from aads.benchmark.postgres_instrumentation import (
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
+from orbit.benchmark.postgres_instrumentation import (
     PostgresMetricsCollector,
     PostgresMetricsDelta,
     PostgresPeriodicSampler,
     PostgresSnapshot,
 )
-from aads.benchmark.resource_monitor import ContainerResourceMonitor, ResourceSample
-from aads.benchmark.storage_monitor import (
+from orbit.benchmark.resource_monitor import ContainerResourceMonitor, ResourceSample
+from orbit.benchmark.storage_monitor import (
     StorageMetricsDelta,
     StorageMonitor,
     StoragePressureClassification,
     StorageSnapshot,
 )
-from aads.benchmark.trial_isolation import (
+from orbit.benchmark.trial_isolation import (
     DatabaseStateSnapshot,
     TrialIsolationError,
     TrialIsolationManager,
     compute_content_fingerprint,
 )
-from aads.benchmark.workload_profiles import resolve_workload_profile
-from aads.core.evidence_classification import (
+from orbit.benchmark.workload_profiles import resolve_workload_profile
+from orbit.core.evidence_classification import (
     EvidenceClassification,
     HistoricalSF2FindingsCatalog,
     PerformanceFinding,

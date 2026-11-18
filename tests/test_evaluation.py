@@ -1,8 +1,8 @@
 """
 Unit tests for Architecture Evaluation and Recommender.
 """
-from aads.core.schemas import WorkloadSpec, FeasibilityStatus
-from aads.evaluation.recommender import ArchitectureRecommender
+from orbit.core.schemas import WorkloadSpec, FeasibilityStatus
+from orbit.evaluation.recommender import ArchitectureRecommender
 
 
 def test_feasibility_filtering(sim_engine, generator, default_workload):

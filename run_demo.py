@@ -1,5 +1,5 @@
 """
-CLI Demonstration Script for AADS.
+CLI Demonstration Script for ORBIT.
 Executes the end-to-end reproducible architecture evaluation workflow:
 1. Workload Specification & Assumptions
 2. Candidate Architecture Generation
@@ -24,15 +24,15 @@ import numpy as np
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 
-from aads.core.schemas import WorkloadSpec, FeasibilityStatus
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.registry.component_registry import ComponentRegistry
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.benchmark.docker_runner import DockerBenchmarkRunner
-from aads.benchmark.experiment_manager import AdaptiveExperimentManager
-from aads.modeling.model_trainer import ModelTrainer
-from aads.simulation.simpy_engine import SimPyEngine
-from aads.evaluation.recommender import ArchitectureRecommender
+from orbit.core.schemas import WorkloadSpec, FeasibilityStatus
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner
+from orbit.benchmark.experiment_manager import AdaptiveExperimentManager
+from orbit.modeling.model_trainer import ModelTrainer
+from orbit.simulation.simpy_engine import SimPyEngine
+from orbit.evaluation.recommender import ArchitectureRecommender
 
 
 def print_banner(text: str, char: str = "="):
@@ -44,7 +44,7 @@ def print_banner(text: str, char: str = "="):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="AADS: Agentic Architecture Design & Simulation Technical Demo",
+        description="ORBIT: Orchestrated Reasoning and Benchmarking for Infrastructure Testing Technical Demo",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--seed", type=int, default=42, help="Fixed random seed for deterministic reproduction")
@@ -70,8 +70,8 @@ def main():
     args = parse_args()
 
     if getattr(args, "verify_llm", False):
-        from aads.agent.provider import verify_live_llm
-        print_banner("🔍 AADS: Opt-In Live LLM Connectivity Verification", "=")
+        from orbit.agent.provider import verify_live_llm
+        print_banner("🔍 ORBIT: Opt-In Live LLM Connectivity Verification", "=")
         print("  Notice: Initiating external provider API request. May incur minor token charges.\n")
         res = verify_live_llm()
         print(f"  • Status   : {res.get('status')}")
@@ -94,9 +94,9 @@ def main():
     np.random.seed(args.seed)
 
     if args.prompt:
-        print_banner("🤖 AADS: LangChain & LangGraph Architecture Agent", "=")
-        from aads.agent.orchestrator import AADSOrchestrator
-        from aads.agent.provider import LLMProviderManager
+        print_banner("🤖 ORBIT: LangChain & LangGraph Architecture Agent", "=")
+        from orbit.agent.orchestrator import ORBITOrchestrator
+        from orbit.agent.provider import LLMProviderManager
 
         prov_mgr = LLMProviderManager()
         summary = prov_mgr.get_status_summary()
@@ -107,7 +107,7 @@ def main():
         print(f"  • Random Seed      : {args.seed} (Deterministic Reproducibility Enabled)")
         print(f"  • SimPy Duration   : {args.duration}s per candidate\n")
 
-        orch = AADSOrchestrator(provider_mgr=prov_mgr)
+        orch = ORBITOrchestrator(provider_mgr=prov_mgr)
         state = orch.run(
             request_text=args.prompt,
             auto_benchmark_missing=True,
@@ -218,7 +218,7 @@ def main():
             print(f"\n  💾 Results exported to: {args.json_output}")
         return
 
-    print_banner("⚡ AADS: Agentic Architecture Design & Simulation POC", "=")
+    print_banner("⚡ ORBIT: Orchestrated Reasoning and Benchmarking for Infrastructure Testing", "=")
     print(f"  • Execution Mode   : {args.mode.upper()}")
     print(f"  • Random Seed      : {args.seed} (Deterministic Reproducibility Enabled)")
     print(f"  • SimPy Duration   : {args.duration}s per candidate")

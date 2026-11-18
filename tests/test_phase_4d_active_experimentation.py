@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from aads.agent.schemas import (
+from orbit.agent.schemas import (
     InvestigationActionType,
     InvestigationDecision,
     ExperimentProposal,
@@ -24,15 +24,15 @@ from aads.agent.schemas import (
     AuthorizationLevel,
     ExperimentExecutionResult,
 )
-from aads.core.schemas import WorkloadSpec, ModelRecord, FeasibilityStatus
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.simulation.simpy_engine import SimPyEngine
-from aads.registry.component_registry import ComponentRegistry
-from aads.benchmark.experiment_ranker import ExperimentRanker, RankedExperimentProposal
-from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
-from aads.modeling.calibration_pipeline import CalibrationPipeline
-from aads.agent.investigation_dispatcher import InvestigationDispatcher
-from aads.evaluation.phase_4d_experimentation import (
+from orbit.core.schemas import WorkloadSpec, ModelRecord, FeasibilityStatus
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.simulation.simpy_engine import SimPyEngine
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.benchmark.experiment_ranker import ExperimentRanker, RankedExperimentProposal
+from orbit.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from orbit.modeling.calibration_pipeline import CalibrationPipeline
+from orbit.agent.investigation_dispatcher import InvestigationDispatcher
+from orbit.evaluation.phase_4d_experimentation import (
     build_controlled_scenarios,
     create_scenario_registry,
     run_strategy_1_baseline_no_experiments,
@@ -339,7 +339,7 @@ def test_closed_loop_resimulation_and_recommendation_change(tmp_path, sample_wor
     # Initial pre-experiment baseline simulation
     engine = SimPyEngine(reg)
     sims = [engine.simulate_architecture(c, scenario.workload, duration_seconds=3.0) for c in candidates]
-    from aads.evaluation.recommender import ArchitectureRecommender
+    from orbit.evaluation.recommender import ArchitectureRecommender
     initial_rec = ArchitectureRecommender.evaluate_and_recommend(scenario.workload, sims)
     assert initial_rec.selected_architecture_id == "arch_a_simple"  # Optimistic prior picks cheap arch_a
 

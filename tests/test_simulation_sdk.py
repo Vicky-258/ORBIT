@@ -7,12 +7,12 @@ and multi-operation declarative plan execution.
 import pytest
 from typing import Dict, Any
 
-from aads.core.schemas import WorkloadSpec
-from aads.registry.component_registry import ComponentRegistry
-from aads.sdk.capabilities import SimulationCapabilitiesCatalog
-from aads.sdk.governance import SimulationGovernanceEngine
-from aads.sdk.interface import SimulationSDK
-from aads.sdk.models import (
+from orbit.core.schemas import WorkloadSpec
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.sdk.capabilities import SimulationCapabilitiesCatalog
+from orbit.sdk.governance import SimulationGovernanceEngine
+from orbit.sdk.interface import SimulationSDK
+from orbit.sdk.models import (
     ComponentCategory,
     ComponentNode,
     ConnectionEdge,
@@ -22,8 +22,8 @@ from aads.sdk.models import (
     OperationStep,
     ExperimentPlan,
 )
-from aads.sdk.store import ExperimentStore
-from aads.sdk.tools import get_sdk_tools
+from orbit.sdk.store import ExperimentStore
+from orbit.sdk.tools import get_sdk_tools
 
 
 @pytest.fixture

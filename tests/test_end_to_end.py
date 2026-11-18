@@ -3,14 +3,14 @@ End-to-End Integration Tests.
 Validates the complete workflow from workload specification to explainable recommendation.
 """
 from fastapi.testclient import TestClient
-from aads.api.app import app
-from aads.core.schemas import WorkloadSpec, FeasibilityStatus
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.registry.component_registry import ComponentRegistry
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.modeling.model_trainer import ModelTrainer
-from aads.simulation.simpy_engine import SimPyEngine
-from aads.evaluation.recommender import ArchitectureRecommender
+from orbit.api.app import app
+from orbit.core.schemas import WorkloadSpec, FeasibilityStatus
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.modeling.model_trainer import ModelTrainer
+from orbit.simulation.simpy_engine import SimPyEngine
+from orbit.evaluation.recommender import ArchitectureRecommender
 
 
 def test_end_to_end_python_workflow(tmp_path):

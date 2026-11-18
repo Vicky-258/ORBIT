@@ -4,7 +4,7 @@ Verifies DAU/MAU to RPS conversions, threshold-based ambiguity evaluation,
 bounded clarification dialogue, and strict isolation of user facts from agent assumptions.
 """
 import pytest
-from aads.agent.architecture_agent import (
+from orbit.agent.architecture_agent import (
     ArchitectureAgent,
     parse_natural_traffic,
     rank_and_evaluate_ambiguity,

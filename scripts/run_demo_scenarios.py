@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Reproducible Demo Scenarios Runner for AADS Phase 5.0.
+Reproducible Demo Scenarios Runner for ORBIT.
 Executes the three canonical demonstration scenarios:
 1. Scenario 1: Read-Heavy E-Commerce (Caching Architecture)
 2. Scenario 2: Write-Heavy Transactional (Database Trade-offs)
@@ -17,11 +17,11 @@ workspace_root = Path(__file__).resolve().parent.parent
 if str(workspace_root) not in sys.path:
     sys.path.insert(0, str(workspace_root))
 
-from aads.agent.orchestrator import AADSOrchestrator
-from aads.core.demo_response_builder import build_demo_workflow_response
+from orbit.agent.orchestrator import ORBITOrchestrator
+from orbit.core.demo_response_builder import build_demo_workflow_response
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("aads.demo_scenarios")
+logger = logging.getLogger("orbit.demo_scenarios")
 
 SCENARIOS = [
     {
@@ -64,7 +64,7 @@ SCENARIOS = [
 ]
 
 
-def run_scenario(scenario: Dict[str, Any], orchestrator: AADSOrchestrator) -> Dict[str, Any]:
+def run_scenario(scenario: Dict[str, Any], orchestrator: ORBITOrchestrator) -> Dict[str, Any]:
     logger.info("=" * 70)
     logger.info("RUNNING %s", scenario["title"])
     logger.info("Prompt: %s", scenario["prompt"])
@@ -116,7 +116,7 @@ def run_scenario(scenario: Dict[str, Any], orchestrator: AADSOrchestrator) -> Di
 
 
 def main():
-    orchestrator = AADSOrchestrator()
+    orchestrator = ORBITOrchestrator()
     all_results = {}
     passed = 0
 

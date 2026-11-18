@@ -28,7 +28,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from aads.benchmark.phase_4f4_runner import (
+from orbit.benchmark.phase_4f4_runner import (
     DEFAULT_MANIFEST_PATH,
     EXPECTED_MANIFEST_SHA256,
     Phase4F4Runner,

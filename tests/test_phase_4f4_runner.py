@@ -31,21 +31,21 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from aads.benchmark.cfs_correlation import CFSCorrelationAnalyzer
-from aads.benchmark.docker_runner import PgbenchOutputParser
-from aads.benchmark.phase_4f4_runner import (
+from orbit.benchmark.cfs_correlation import CFSCorrelationAnalyzer
+from orbit.benchmark.docker_runner import PgbenchOutputParser
+from orbit.benchmark.phase_4f4_runner import (
     EXPECTED_MANIFEST_SHA256,
     FROZEN_12_TRIAL_SCHEDULE,
     CampaignAuthorizationRecord,
     Phase4F4Runner,
 )
-from aads.benchmark.postgres_instrumentation import (
+from orbit.benchmark.postgres_instrumentation import (
     PostgresMetricsCollector,
     PostgresPeriodicSampler,
 )
-from aads.benchmark.resource_monitor import ContainerResourceMonitor
-from aads.benchmark.storage_monitor import StorageMonitor
-from aads.benchmark.trial_isolation import (
+from orbit.benchmark.resource_monitor import ContainerResourceMonitor
+from orbit.benchmark.storage_monitor import StorageMonitor
+from orbit.benchmark.trial_isolation import (
     DatabaseStateSnapshot,
     TrialIsolationManager,
 )

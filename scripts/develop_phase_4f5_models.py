@@ -16,7 +16,7 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from aads.models.empirical_postgres import (
+from orbit.models.empirical_postgres import (
     EmpiricalLinearRegressionModel,
     EmpiricalLookupModel,
     EmpiricalMechanisticModel,

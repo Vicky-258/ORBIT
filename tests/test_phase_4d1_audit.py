@@ -17,8 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 import numpy as np
 
-from aads.core.schemas import WorkloadSpec, ExperimentRecord, ModelRecord, FeasibilityStatus
-from aads.agent.schemas import (
+from orbit.core.schemas import WorkloadSpec, ExperimentRecord, ModelRecord, FeasibilityStatus
+from orbit.agent.schemas import (
     ExperimentProposal,
     AuthorizationRecord,
     AuthorizationStatus,
@@ -26,16 +26,16 @@ from aads.agent.schemas import (
     InvestigationDecision,
     InvestigationActionType,
 )
-from aads.registry.component_registry import ComponentRegistry
-from aads.modeling.model_trainer import ModelTrainer
-from aads.modeling.calibration_pipeline import CalibrationPipeline
-from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.agent.investigation_dispatcher import InvestigationDispatcher
-from aads.agent.investigation_planner import InvestigationPlanner
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.simulation.simpy_engine import SimPyEngine
-from aads.evaluation.recommender import ArchitectureRecommender
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.modeling.model_trainer import ModelTrainer
+from orbit.modeling.calibration_pipeline import CalibrationPipeline
+from orbit.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.agent.investigation_dispatcher import InvestigationDispatcher
+from orbit.agent.investigation_planner import InvestigationPlanner
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.simulation.simpy_engine import SimPyEngine
+from orbit.evaluation.recommender import ArchitectureRecommender
 
 
 @pytest.fixture
@@ -154,7 +154,7 @@ def test_small_config_fallback_split_replication_leakage_audit():
     assert len(configs) == 2  # Less than 3
 
     # Hardened behavior: ModelTrainer rejects < 3 configurations to prevent leakage
-    from aads.modeling.model_trainer import InsufficientIndependentGroupsError
+    from orbit.modeling.model_trainer import InsufficientIndependentGroupsError
     with pytest.raises(InsufficientIndependentGroupsError):
         ModelTrainer._group_train_test_split(records)
 
@@ -446,7 +446,7 @@ def test_recommendation_change_requires_actual_model_promotion(temp_registry):
     )
 
     from unittest.mock import patch
-    from aads.modeling.calibration_pipeline import CalibrationOutcome
+    from orbit.modeling.calibration_pipeline import CalibrationOutcome
     dispatcher = InvestigationDispatcher(registry=temp_registry)
     with patch.object(
         dispatcher.calibration_pipeline,

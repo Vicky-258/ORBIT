@@ -7,21 +7,21 @@ import pytest
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-from aads.core.schemas import (
+from orbit.core.schemas import (
     WorkloadSpec,
     ExperimentRecord,
     ModelRecord,
     SimulationResult,
     FeasibilityStatus,
 )
-from aads.evaluation.empirical_validation import (
+from orbit.evaluation.empirical_validation import (
     calculate_error_metrics,
     EmpiricalValidator,
     ErrorMetrics,
 )
-from aads.registry.component_registry import ComponentRegistry
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.modeling.model_trainer import ModelTrainer
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.modeling.model_trainer import ModelTrainer
 
 
 def test_calculate_error_metrics_standard():
@@ -304,7 +304,7 @@ def test_model_versioning_and_registry_compatibility(tmp_path):
 
 def test_docker_runner_resource_limits_and_cleanup(monkeypatch):
     """Test 11: Docker runner enforces CPU/mem limits and guarantees cleanup on failure."""
-    from aads.benchmark.docker_runner import DockerBenchmarkRunner
+    from orbit.benchmark.docker_runner import DockerBenchmarkRunner
     runner = DockerBenchmarkRunner(cpu_limit="0.5", memory_limit="256m")
 
     assert runner.cpu_limit == "0.5"

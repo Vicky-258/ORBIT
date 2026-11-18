@@ -7,10 +7,10 @@ import pytest
 from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 
-from aads.agent.provider import LLMProviderManager, ExecutionMode
-from aads.agent.architecture_agent import ArchitectureAgent, WorkloadExtractionResult
-from aads.agent.orchestrator import AADSOrchestrator
-from aads.agent.tools import (
+from orbit.agent.provider import LLMProviderManager, ExecutionMode
+from orbit.agent.architecture_agent import ArchitectureAgent, WorkloadExtractionResult
+from orbit.agent.orchestrator import ORBITOrchestrator
+from orbit.agent.tools import (
     validate_workload,
     generate_architecture_candidates,
     check_component_models,
@@ -19,10 +19,10 @@ from aads.agent.tools import (
     simulate_architecture,
     evaluate_candidates,
 )
-from aads.core.schemas import WorkloadSpec, ArchitectureGraph, FeasibilityStatus
-from aads.registry.component_registry import ComponentRegistry
-from aads.evaluation.recommender import ArchitectureRecommender
-from aads.api.app import app
+from orbit.core.schemas import WorkloadSpec, ArchitectureGraph, FeasibilityStatus
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.evaluation.recommender import ArchitectureRecommender
+from orbit.api.app import app
 
 
 def test_fallback_mode_without_credentials(monkeypatch):
@@ -44,7 +44,7 @@ def test_fallback_mode_without_credentials(monkeypatch):
 def test_valid_natural_language_request_fallback(monkeypatch):
     """Test 1: Valid natural language request extracted deterministically in fallback mode."""
     monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = "I need a social feed architecture for 500 RPS with peak 1000 RPS, 90% reads / 10% writes, p95 under 50ms, and budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0, random_seed=42)
 
@@ -69,7 +69,7 @@ def test_valid_natural_language_request_fallback(monkeypatch):
 
 def test_missing_or_ambiguous_requirements():
     """Test 2: Sparse/ambiguous requirements trigger clarification questions rather than false recommendations."""
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     vague_prompt = "Build me a backend system for my application"
     state = orch.run(vague_prompt)
 
@@ -121,7 +121,7 @@ def test_valid_and_invalid_architecture_candidates():
         "required_models": [],
         "total_monthly_cost_usd": 20.0,
     }
-    from aads.generator.candidate_generator import ArchitectureGenerator
+    from orbit.generator.candidate_generator import ArchitectureGenerator
     gen = ArchitectureGenerator()
     with pytest.raises(ValueError, match="missing Database"):
         gen.validate_graph(ArchitectureGraph.model_validate(bad_arch_data))
@@ -136,7 +136,7 @@ def test_missing_component_models_routing(tmp_path):
         conn.cursor().execute("DELETE FROM models WHERE component_name = 'mongodb_cluster'")
         conn.commit()
 
-    orch = AADSOrchestrator(registry=reg)
+    orch = ORBITOrchestrator(registry=reg)
     prompt = "Feed system handling 500 RPS with 90% reads, p95 under 50ms, budget $250/mo"
 
     # 1. Without permission: must report UNRESOLVED
@@ -210,7 +210,7 @@ def test_mocked_llm_structured_output_and_malformed_handling():
 
 def test_provenance_preservation_and_evidence_labeling():
     """Test 11: Traceability of all evidence types (user_fact, agent_assumption, synthetic, simulated)."""
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = "Social media feed handling 500 RPS with 90% reads, p95 latency under 50ms, budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0)
 
@@ -230,7 +230,7 @@ def test_provenance_preservation_and_evidence_labeling():
 def test_recommendation_consistency_with_deterministic_eval(monkeypatch):
     """Test 12: Orchestrator recommendation strictly mirrors underlying deterministic evaluator."""
     monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = "Social media feed handling 500 RPS with 90% reads, p95 latency under 50ms, budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=3.0, random_seed=42)
 

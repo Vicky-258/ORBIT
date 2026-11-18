@@ -10,23 +10,23 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from aads.agent.schemas import (
+from orbit.agent.schemas import (
     AuthorizationLevel,
     AuthorizationRecord,
     AuthorizationStatus,
     ExperimentProposal,
 )
-from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
-from aads.benchmark.docker_runner import DockerBenchmarkRunner
-from aads.benchmark.workload_profiles import (
+from orbit.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner
+from orbit.benchmark.workload_profiles import (
     BALANCED_OLTP_TPCB,
     READ_ONLY_SELECT,
     SIMPLE_WRITE_INGEST,
     WorkloadProfileType,
     resolve_workload_profile,
 )
-from aads.core.schemas import ExperimentRecord
-from aads.registry.component_registry import ComponentRegistry
+from orbit.core.schemas import ExperimentRecord
+from orbit.registry.component_registry import ComponentRegistry
 
 
 # ---------------------------------------------------------------------------

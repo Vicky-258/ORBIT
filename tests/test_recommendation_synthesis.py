@@ -7,12 +7,12 @@ Guarantees NO external network requests are made during testing.
 import pytest
 from unittest.mock import MagicMock, patch
 
-from aads.agent.provider import LLMProviderManager, ExecutionMode
-from aads.agent.schemas import RecommendationExplanation
-from aads.agent.architecture_agent import WorkloadExtractionResult
-from aads.agent.recommendation_synthesizer import RecommendationSynthesizer
-from aads.agent.orchestrator import AADSOrchestrator
-from aads.core.schemas import (
+from orbit.agent.provider import LLMProviderManager, ExecutionMode
+from orbit.agent.schemas import RecommendationExplanation
+from orbit.agent.architecture_agent import WorkloadExtractionResult
+from orbit.agent.recommendation_synthesizer import RecommendationSynthesizer
+from orbit.agent.orchestrator import ORBITOrchestrator
+from orbit.core.schemas import (
     WorkloadSpec,
     SimulationResult,
     RecommendationResult,
@@ -20,7 +20,7 @@ from aads.core.schemas import (
     FeasibilityCheck,
     FeasibilityStatus,
 )
-from aads.evaluation.recommender import ArchitectureRecommender
+from orbit.evaluation.recommender import ArchitectureRecommender
 
 
 @pytest.fixture
@@ -334,7 +334,7 @@ def test_orchestrator_integration_with_mocked_llm():
     prov_mgr.get_chat_model.return_value = mock_chat
     prov_mgr.get_execution_mode.return_value = ExecutionMode.LLM
 
-    orch = AADSOrchestrator(provider_mgr=prov_mgr)
+    orch = ORBITOrchestrator(provider_mgr=prov_mgr)
     prompt = "I need a social feed architecture for 500 RPS, 90% reads, p95 under 50ms, budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0, random_seed=42)
 
@@ -352,7 +352,7 @@ def test_orchestrator_integration_in_fallback_mode(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setenv("AADS_FORCE_FALLBACK", "true")
 
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = "I need a social feed architecture for 500 RPS, 90% reads, p95 under 50ms, budget $250/mo"
     state = orch.run(prompt, simulation_duration_seconds=2.0, random_seed=42)
 

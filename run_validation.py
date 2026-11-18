@@ -1,5 +1,5 @@
 """
-AADS Empirical Validation Campaign Runner (Phase 3C).
+ORBIT Empirical Validation Campaign Runner (Phase 3C).
 Executes reproducible Docker benchmarks for PostgreSQL & Redis microbenchmarks,
 runs multi-tier end-to-end calibration for Architecture A & B, performs group-based
 held-out model validation, and compares simulated vs measured feasibility and ranking.
@@ -16,15 +16,15 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 
-from aads.benchmark.docker_runner import DockerBenchmarkRunner
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.benchmark.e2e_calibration import RealDeploymentCalibrationHarness
-from aads.core.schemas import WorkloadSpec, ExperimentRecord
-from aads.evaluation.empirical_validation import EmpiricalValidator, calculate_error_metrics
-from aads.registry.component_registry import ComponentRegistry
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.benchmark.e2e_calibration import RealDeploymentCalibrationHarness
+from orbit.core.schemas import WorkloadSpec, ExperimentRecord
+from orbit.evaluation.empirical_validation import EmpiricalValidator, calculate_error_metrics
+from orbit.registry.component_registry import ComponentRegistry
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("aads.validation")
+logger = logging.getLogger("orbit.validation")
 
 
 def run_campaign(
@@ -201,7 +201,7 @@ def run_campaign(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run AADS Phase 3C Empirical Validation Campaign")
+    parser = argparse.ArgumentParser(description="Run ORBIT Phase 3C Empirical Validation Campaign")
     parser.add_argument("--mode", choices=["docker", "synthetic"], default="docker", help="Execution mode")
     parser.add_argument("--duration", type=float, default=2.5, help="Measurement duration per calibration point")
     parser.add_argument("--report-out", type=str, default="validation_results.json", help="Path to save output JSON")

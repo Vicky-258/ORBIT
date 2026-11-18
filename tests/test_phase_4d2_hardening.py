@@ -21,25 +21,25 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from aads.agent.schemas import (
+from orbit.agent.schemas import (
     AuthorizationRecord,
     AuthorizationStatus,
     ExperimentProposal,
     ExperimentExecutionResult,
 )
-from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
-from aads.benchmark.docker_runner import (
+from orbit.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from orbit.benchmark.docker_runner import (
     DockerBenchmarkRunner,
     PgbenchOutputParser,
     RedisBenchmarkParser,
 )
-from aads.benchmark.runner_interface import BenchmarkRunner
-from aads.core.schemas import ExperimentRecord, ModelRecord
-from aads.modeling.calibration_pipeline import CalibrationPipeline, CalibrationOutcome
-from aads.modeling.lookup_model import LookupInterpolationModel
-from aads.modeling.model_trainer import ModelTrainer, InsufficientIndependentGroupsError
-from aads.modeling.regression_model import RegressionPerformanceModel
-from aads.registry.component_registry import ComponentRegistry
+from orbit.benchmark.runner_interface import BenchmarkRunner
+from orbit.core.schemas import ExperimentRecord, ModelRecord
+from orbit.modeling.calibration_pipeline import CalibrationPipeline, CalibrationOutcome
+from orbit.modeling.lookup_model import LookupInterpolationModel
+from orbit.modeling.model_trainer import ModelTrainer, InsufficientIndependentGroupsError
+from orbit.modeling.regression_model import RegressionPerformanceModel
+from orbit.registry.component_registry import ComponentRegistry
 
 
 @pytest.fixture

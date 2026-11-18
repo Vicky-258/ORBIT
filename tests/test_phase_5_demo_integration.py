@@ -7,21 +7,21 @@ enforcing policy guardrails, evidence integrity, and response standardization.
 import pytest
 from fastapi.testclient import TestClient
 
-from aads.api.app import app
-from aads.agent.orchestrator import AADSOrchestrator
-from aads.agent.architecture_agent import ArchitectureAgent
-from aads.agent.schemas import InvestigationActionType, InvestigationDecision
-from aads.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
-from aads.core.schemas import (
+from orbit.api.app import app
+from orbit.agent.orchestrator import ORBITOrchestrator
+from orbit.agent.architecture_agent import ArchitectureAgent
+from orbit.agent.schemas import InvestigationActionType, InvestigationDecision
+from orbit.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
+from orbit.core.schemas import (
     WorkloadSpec,
     FeasibilityStatus,
     DemoWorkflowResponse,
 )
-from aads.core.demo_response_builder import build_demo_workflow_response
-from aads.registry.component_registry import ComponentRegistry
-from aads.simulation.simpy_engine import SimPyEngine
-from aads.evaluation.feasibility_filter import FeasibilityFilter
-from aads.evaluation.recommender import ArchitectureRecommender
+from orbit.core.demo_response_builder import build_demo_workflow_response
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.simulation.simpy_engine import SimPyEngine
+from orbit.evaluation.feasibility_filter import FeasibilityFilter
+from orbit.evaluation.recommender import ArchitectureRecommender
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +33,7 @@ def api_client():
 def orchestrator():
     reg = ComponentRegistry()
     reg.seed_baseline_data()
-    return AADSOrchestrator(registry=reg)
+    return ORBITOrchestrator(registry=reg)
 
 
 # =============================================================================

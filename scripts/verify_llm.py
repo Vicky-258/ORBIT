@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AADS: Explicit Opt-In Live LLM Connectivity Verification.
+ORBIT: Explicit Opt-In Live LLM Connectivity Verification.
 Sends a single minimal bounded request to the configured LLM provider
 to verify API credentials, network reachability, and structured output extraction.
 
@@ -17,12 +17,12 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from aads.agent.provider import verify_live_llm
+from orbit.agent.provider import verify_live_llm
 
 
 def main():
     print("=" * 65)
-    print("🤖 AADS: Opt-In Live LLM Connectivity Verification")
+    print("🤖 ORBIT: Opt-In Live LLM Connectivity Verification")
     print("=" * 65)
     print("  Notice: This command initiates an actual outbound network request")
     print("  to the configured LLM provider and may incur minor token charges.\n")

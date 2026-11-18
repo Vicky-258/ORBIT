@@ -19,16 +19,16 @@ import numpy as np
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from aads.agent.schemas import (
+from orbit.agent.schemas import (
     AuthorizationLevel,
     AuthorizationRecord,
     AuthorizationStatus,
     ExperimentProposal,
 )
-from aads.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
-from aads.benchmark.workload_profiles import resolve_workload_profile
-from aads.core.schemas import ExperimentRecord
-from aads.registry.component_registry import ComponentRegistry
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner, PgbenchOutputParser
+from orbit.benchmark.workload_profiles import resolve_workload_profile
+from orbit.core.schemas import ExperimentRecord
+from orbit.registry.component_registry import ComponentRegistry
 
 
 def verify_cgroup_placement(container_name: str, art_dir: Path) -> Dict[str, Any]:

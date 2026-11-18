@@ -15,17 +15,17 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
-from aads.agent.schemas import (
+from orbit.agent.schemas import (
     AuthorizationLevel,
     AuthorizationRecord,
     AuthorizationStatus,
     ExperimentProposal,
 )
-from aads.benchmark.bounded_executor import BoundedBenchmarkExecutor
-from aads.benchmark.docker_runner import DockerBenchmarkRunner
-from aads.modeling.calibration_pipeline import CalibrationPipeline
-from aads.modeling.model_trainer import ModelTrainer
-from aads.registry.component_registry import ComponentRegistry
+from orbit.benchmark.bounded_executor import BoundedBenchmarkExecutor
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner
+from orbit.modeling.calibration_pipeline import CalibrationPipeline
+from orbit.modeling.model_trainer import ModelTrainer
+from orbit.registry.component_registry import ComponentRegistry
 
 
 def main():

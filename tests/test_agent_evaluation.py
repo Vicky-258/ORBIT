@@ -9,18 +9,18 @@ import numpy as np
 from pathlib import Path
 from pydantic import ValidationError
 
-from aads.core.schemas import (
+from orbit.core.schemas import (
     WorkloadSpec,
     SimulationResult,
     FeasibilityStatus,
     ArchitectureGraph,
 )
-from aads.generator.candidate_generator import ArchitectureGenerator
-from aads.registry.component_registry import ComponentRegistry
-from aads.evaluation.recommender import ArchitectureRecommender
-from aads.evaluation.tradeoff_analyzer import TradeoffAnalyzer
-from aads.evaluation.feasibility_filter import FeasibilityFilter
-from aads.evaluation.scenarios import (
+from orbit.generator.candidate_generator import ArchitectureGenerator
+from orbit.registry.component_registry import ComponentRegistry
+from orbit.evaluation.recommender import ArchitectureRecommender
+from orbit.evaluation.tradeoff_analyzer import TradeoffAnalyzer
+from orbit.evaluation.feasibility_filter import FeasibilityFilter
+from orbit.evaluation.scenarios import (
     EvaluationScenario,
     ScenarioClass,
     DatasetSplit,
@@ -29,18 +29,18 @@ from aads.evaluation.scenarios import (
     HELDOUT_SCENARIOS,
     get_scenarios,
 )
-from aads.evaluation.strategies import (
+from orbit.evaluation.strategies import (
     run_strategy_a_fixed_pipeline,
     run_strategy_b_deterministic_adaptive,
     run_strategy_c_llm_adaptive,
     StrategyExecutionResult,
 )
-from aads.evaluation.metrics import (
+from orbit.evaluation.metrics import (
     compute_metrics,
     DecisionQualityMetrics,
 )
-from aads.evaluation.runner import run_evaluation_suite
-from aads.simulation.metrics_collector import SimulationMetricsCollector, RequestTrace
+from orbit.evaluation.runner import run_evaluation_suite
+from orbit.simulation.metrics_collector import SimulationMetricsCollector, RequestTrace
 
 
 def make_dummy_sim_result(
@@ -208,8 +208,8 @@ def test_llm_planner_cannot_modify_simulation_metrics():
 # Test 8: Disallowed or invalid actions are rejected by schema or policy
 # ---------------------------------------------------------------------------
 def test_disallowed_actions_rejected_by_policy():
-    from aads.agent.schemas import InvestigationDecision, InvestigationActionType
-    from aads.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
+    from orbit.agent.schemas import InvestigationDecision, InvestigationActionType
+    from orbit.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
 
     # 1. Pydantic validation rejects unapproved action strings
     with pytest.raises(ValidationError):
@@ -235,8 +235,8 @@ def test_disallowed_actions_rejected_by_policy():
 # Test 9: Repeated actions and exhausted budgets are recorded correctly
 # ---------------------------------------------------------------------------
 def test_repeated_actions_and_exhausted_budgets():
-    from aads.agent.schemas import InvestigationDecision, InvestigationActionType
-    from aads.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
+    from orbit.agent.schemas import InvestigationDecision, InvestigationActionType
+    from orbit.agent.investigation_policy import InvestigationPolicy, PolicyVerdict
 
     policy = InvestigationPolicy()
     state = {

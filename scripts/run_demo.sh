@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# AADS (Agentic Architecture Design & Simulation) Demo Startup Script
-# Phase 5.0 End-to-End Product Demonstration
+# ORBIT (Orchestrated Reasoning and Benchmarking for Infrastructure Testing) Demo Startup Script
 # =============================================================================
 
 set -e
@@ -24,13 +23,13 @@ fi
 export PYTHONPATH="${WORKSPACE_ROOT}:${PYTHONPATH}"
 
 # Default hosts and ports
-API_HOST="${AADS_API_HOST:-127.0.0.1}"
-API_PORT="${AADS_API_PORT:-8000}"
-REACT_PORT="${AADS_REACT_PORT:-3000}"
-STREAMLIT_PORT="${AADS_STREAMLIT_PORT:-8501}"
+API_HOST="${ORBIT_API_HOST:-127.0.0.1}"
+API_PORT="${ORBIT_API_PORT:-8000}"
+REACT_PORT="${ORBIT_REACT_PORT:-3000}"
+STREAMLIT_PORT="${ORBIT_STREAMLIT_PORT:-8501}"
 
 echo "======================================================================"
-echo "⚡ AADS: Agentic Architecture Design & Simulation — Demo Launcher"
+echo "⚡ ORBIT: Orchestrated Reasoning and Benchmarking for Infrastructure Testing — Demo Launcher"
 echo "======================================================================"
 echo "Workspace Root:  ${WORKSPACE_ROOT}"
 echo "Python Binary:   ${PYTHON}"
@@ -49,7 +48,7 @@ fi
 
 if [ "${MODE}" = "--api-only" ] || [ "${MODE}" = "api" ]; then
     echo "Starting FastAPI backend on http://${API_HOST}:${API_PORT}..."
-    exec "${PYTHON}" -m uvicorn aads.api.app:app --host "${API_HOST}" --port "${API_PORT}" --reload
+    exec "${PYTHON}" -m uvicorn orbit.api.app:app --host "${API_HOST}" --port "${API_PORT}" --reload
 fi
 
 if [ "${MODE}" = "--react-only" ] || [ "${MODE}" = "react" ]; then
@@ -60,7 +59,7 @@ fi
 
 if [ "${MODE}" = "--streamlit" ] || [ "${MODE}" = "streamlit" ]; then
     echo "Starting legacy Streamlit UI on http://${API_HOST}:${STREAMLIT_PORT}..."
-    exec "${STREAMLIT}" run aads/ui/streamlit_app.py --server.port "${STREAMLIT_PORT}" --server.address "${API_HOST}"
+    exec "${STREAMLIT}" run orbit/ui/streamlit_app.py --server.port "${STREAMLIT_PORT}" --server.address "${API_HOST}"
 fi
 
 # Default: Start both FastAPI backend and React frontend
@@ -69,7 +68,7 @@ FRONTEND_PID=""
 
 cleanup() {
     echo ""
-    echo "Shutting down AADS demo services..."
+    echo "Shutting down ORBIT demo services..."
     if [ -n "${FRONTEND_PID}" ] && kill -0 "${FRONTEND_PID}" 2>/dev/null; then
         kill "${FRONTEND_PID}" 2>/dev/null || true
     fi
@@ -83,9 +82,9 @@ cleanup() {
 trap cleanup INT TERM
 
 echo "1. Starting FastAPI backend in background..."
-"${PYTHON}" -m uvicorn aads.api.app:app --host "${API_HOST}" --port "${API_PORT}" > /tmp/aads_api.log 2>&1 &
+"${PYTHON}" -m uvicorn orbit.api.app:app --host "${API_HOST}" --port "${API_PORT}" > /tmp/orbit_api.log 2>&1 &
 API_PID=$!
-echo "   Backend PID: ${API_PID} (Logs: /tmp/aads_api.log)"
+echo "   Backend PID: ${API_PID} (Logs: /tmp/orbit_api.log)"
 
 # Wait for API health check
 echo -n "2. Polling API health check on http://${API_HOST}:${API_PORT}/ ... "

@@ -1,7 +1,7 @@
 """
 Unit tests for SimPy discrete-event simulation engine.
 """
-from aads.core.schemas import WorkloadSpec
+from orbit.core.schemas import WorkloadSpec
 
 
 def test_simulation_architecture_a(sim_engine, generator, default_workload):

@@ -19,14 +19,14 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from aads.benchmark.resource_monitor import (
+from orbit.benchmark.resource_monitor import (
     ContainerResourceMonitor,
     ResourceSample,
     CgroupSnapshot,
     TrialMonitoringSummary,
 )
-from aads.benchmark.docker_runner import DockerBenchmarkRunner
-from aads.agent.schemas import ExperimentProposal, AuthorizationRecord, AuthorizationStatus
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner
+from orbit.agent.schemas import ExperimentProposal, AuthorizationRecord, AuthorizationStatus
 
 
 @pytest.fixture

@@ -8,9 +8,9 @@ Validates the photo sharing 200K DAU user journey:
 import pytest
 from fastapi.testclient import TestClient
 
-from aads.agent.orchestrator import AADSOrchestrator
-from aads.sdk.tools import get_simulation_sdk
-from aads.api.app import app
+from orbit.agent.orchestrator import ORBITOrchestrator
+from orbit.sdk.tools import get_simulation_sdk
+from orbit.api.app import app
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def test_photo_sharing_turn_0_clarification_prompt():
     Since latency SLA and budget ceiling are unspecified (ambiguity >= 0.50),
     the system must NOT silently invent them; it must ask 2 ranked clarification questions.
     """
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = (
         "I want a backend for a photo sharing app that targets around 200K active daily users, "
         "where people share photos with a wide range of followers with features to like comment share those images, "
@@ -52,7 +52,7 @@ def test_photo_sharing_turn_1_clarified_execution():
     5. SDK experiments are populated and discrete-event simulations run.
     6. Recommendation is produced with empirical evidence.
     """
-    orch = AADSOrchestrator()
+    orch = ORBITOrchestrator()
     prompt = (
         "I want a backend for a photo sharing app that targets around 200K active daily users, "
         "where people share photos with a wide range of followers with features to like comment share those images, "

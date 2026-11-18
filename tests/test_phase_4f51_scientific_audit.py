@@ -24,10 +24,10 @@ from typing import Dict, List
 import numpy as np
 import pytest
 
-from aads.core.schemas import FeasibilityStatus, SimulationResult, WorkloadSpec
-from aads.evaluation.feasibility_filter import FeasibilityFilter
-from aads.evaluation.recommender import ArchitectureRecommender
-from aads.models.empirical_postgres import (
+from orbit.core.schemas import FeasibilityStatus, SimulationResult, WorkloadSpec
+from orbit.evaluation.feasibility_filter import FeasibilityFilter
+from orbit.evaluation.recommender import ArchitectureRecommender
+from orbit.models.empirical_postgres import (
     EmpiricalLinearRegressionModel,
     EmpiricalLookupModel,
     EmpiricalMechanisticModel,

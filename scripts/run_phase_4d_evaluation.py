@@ -10,7 +10,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from aads.evaluation.phase_4d_experimentation import (
+from orbit.evaluation.phase_4d_experimentation import (
     build_controlled_scenarios,
     run_strategy_1_baseline_no_experiments,
     run_strategy_2_fixed_experiments,

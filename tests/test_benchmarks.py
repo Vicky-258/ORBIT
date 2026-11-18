@@ -1,9 +1,9 @@
 """
 Unit tests for Benchmarks and Experiment Management.
 """
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.benchmark.docker_runner import DockerBenchmarkRunner
-from aads.benchmark.experiment_manager import AdaptiveExperimentManager
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.benchmark.docker_runner import DockerBenchmarkRunner
+from orbit.benchmark.experiment_manager import AdaptiveExperimentManager
 
 
 def test_synthetic_runner_variance_and_labels(synthetic_runner):

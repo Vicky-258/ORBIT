@@ -2,7 +2,7 @@
 Unit tests for data contracts and schemas.
 """
 import pytest
-from aads.core.schemas import (
+from orbit.core.schemas import (
     WorkloadSpec,
     ComponentConfig,
     ComponentType,

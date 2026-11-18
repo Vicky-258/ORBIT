@@ -1,10 +1,10 @@
 """
 Unit tests for Performance Modeling and Held-out Validation.
 """
-from aads.benchmark.synthetic_runner import SyntheticBenchmarkRunner
-from aads.modeling.lookup_model import LookupInterpolationModel
-from aads.modeling.regression_model import RegressionPerformanceModel
-from aads.modeling.model_trainer import ModelTrainer
+from orbit.benchmark.synthetic_runner import SyntheticBenchmarkRunner
+from orbit.modeling.lookup_model import LookupInterpolationModel
+from orbit.modeling.regression_model import RegressionPerformanceModel
+from orbit.modeling.model_trainer import ModelTrainer
 
 
 def test_lookup_model(synthetic_runner):
