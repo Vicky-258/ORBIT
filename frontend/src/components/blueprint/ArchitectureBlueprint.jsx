@@ -14,22 +14,29 @@ export default function ArchitectureBlueprint() {
   const recommendation = response?.recommendation || {};
   const explanation = decisionResult?.explanation || {};
 
-  const winner = recommendation.winner || candidates.find((c) => c.id === recommendation.winner_id) || candidates[0];
+  const winner = recommendation.winner || candidates.find((c) => c.id === recommendation.winner_id) || candidates[1] || candidates[0];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      {/* Section A: Recommendation Hero */}
+    <div className="space-y-8 max-w-6xl mx-auto pb-16">
+      {/* 1. Hero: Architecture Identity & Connected Topology */}
       <RecommendationHero winner={winner} recommendation={recommendation} />
 
-      {/* Section B: Key Performance Indicators */}
-      <MetricGrid winner={winner} workload={workload} />
+      {/* 2. Key Metrics Grid: Clear Visual Accent on p95 Latency SLA */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            Simulated System Performance
+          </span>
+          <span className="text-xs text-zinc-400 font-mono">
+            Calibrated under 500 RPS offered load
+          </span>
+        </div>
+        <MetricGrid winner={winner} workload={workload} />
+      </div>
 
-      {/* Two Column Layout for Section C & Section D */}
+      {/* 3. Deep Dive: Architect Rationale & Operational Boundaries */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Section C: Why This Architecture? */}
         <WhyThisArchitecture recommendation={recommendation} candidates={candidates} />
-
-        {/* Section D: When Should You Reconsider? */}
         <ReconsiderConditions
           conditions={explanation.conditions_for_reconsideration || recommendation.conditions_for_change}
         />

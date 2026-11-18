@@ -5,26 +5,15 @@ import {
   Database,
   Layers,
   Cpu,
-  ArrowRight,
-  HardDrive,
-  Globe,
-  Radio,
-  Share2
+  ArrowRight
 } from 'lucide-react';
-
-/**
- * ArchitectureTopology: Cohesive, connected system topology visualization
- * Displays the infrastructure primitives, category badges, operational roles,
- * and data flow connections derived from actual backend architecture candidates.
- */
 
 export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
   const displayNodes = nodes.length > 0 ? nodes : deriveNodes(topologyStr);
 
   return (
-    <div className="w-full rounded-2xl bg-[#09090b] border border-white/[0.08] p-5 sm:p-6 overflow-hidden">
-      {/* Topology Track */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 relative">
+    <div className="w-full rounded-xl bg-[#09090b] border border-white/[0.06] p-4 sm:p-5">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4 relative">
         {displayNodes.map((node, idx) => {
           const isLast = idx === displayNodes.length - 1;
           const config = getNodeConfig(node.type, node.name);
@@ -32,10 +21,10 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
           return (
             <React.Fragment key={idx}>
               {/* Component Node Card */}
-              <div className="flex-1 min-w-[210px] p-4 rounded-xl bg-[#141417] border border-white/[0.08] hover:border-zinc-500/60 transition-all duration-200 shadow-md group relative">
+              <div className="flex-1 min-w-[200px] p-4 rounded-xl bg-[#141417] border border-white/[0.06] hover:border-zinc-600 transition-all duration-150 shadow-sm">
                 {/* Header: Icon + Category Badge */}
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className={`w-8 h-8 rounded-lg ${config.iconBg} border ${config.iconBorder} flex items-center justify-center ${config.iconColor} shadow-inner`}>
+                <div className="flex items-center justify-between gap-2 mb-2.5">
+                  <div className={`w-8 h-8 rounded-lg ${config.iconBg} border ${config.iconBorder} flex items-center justify-center ${config.iconColor}`}>
                     {config.icon}
                   </div>
                   <span className={`text-[10px] font-mono tracking-tight px-2 py-0.5 rounded-full ${config.badgeBg} ${config.badgeColor} border ${config.badgeBorder}`}>
@@ -44,18 +33,18 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
                 </div>
 
                 {/* Node Title & Description */}
-                <div className="space-y-1">
-                  <div className="font-semibold text-sm text-zinc-100 flex items-center gap-1.5">
+                <div>
+                  <div className="font-bold text-sm text-zinc-100 flex items-center gap-1.5">
                     <span>{node.name}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="Simulated & Validated" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
                   </div>
-                  <div className="text-xs text-zinc-400 leading-snug">
+                  <div className="text-xs text-zinc-400 mt-0.5 leading-snug">
                     {node.note || config.defaultNote}
                   </div>
                 </div>
 
                 {/* Bottom spec pill */}
-                <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+                <div className="mt-3 pt-2 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-zinc-500 font-mono">
                   <span>{config.techFamily}</span>
                   <span className="text-zinc-400">{config.latencyClass}</span>
                 </div>
@@ -63,15 +52,15 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
 
               {/* Data Flow Connector between Nodes */}
               {!isLast && (
-                <div className="flex md:flex-col items-center justify-center px-1 py-2 md:py-0 shrink-0">
+                <div className="flex md:flex-col items-center justify-center px-1 py-1 md:py-0 shrink-0">
                   <div className="flex items-center gap-1">
-                    <div className="w-4 sm:w-6 h-px bg-zinc-700 hidden md:block" />
-                    <div className="w-6 h-6 rounded-full bg-[#18181c] border border-zinc-700 flex items-center justify-center text-zinc-400 shadow-xs group-hover:border-zinc-500">
+                    <div className="w-3 sm:w-5 h-px bg-zinc-700 hidden md:block" />
+                    <div className="w-6 h-6 rounded-full bg-[#18181c] border border-zinc-700 flex items-center justify-center text-zinc-400 shadow-xs">
                       <ArrowRight className="w-3.5 h-3.5 text-zinc-300" />
                     </div>
-                    <div className="w-4 sm:w-6 h-px bg-zinc-700 hidden md:block" />
+                    <div className="w-3 sm:w-5 h-px bg-zinc-700 hidden md:block" />
                   </div>
-                  <span className="text-[10px] text-zinc-400 mt-1 font-mono tracking-tight text-center">
+                  <span className="text-[10px] text-zinc-500 mt-1 font-mono tracking-tight text-center">
                     {idx === 0 ? 'sync call' : idx === 1 && displayNodes.length > 2 ? 'persist write' : 'data flow'}
                   </span>
                 </div>
@@ -159,7 +148,7 @@ function getNodeConfig(type, name = '') {
     badgeBg: 'bg-zinc-800',
     badgeBorder: 'border-zinc-700',
     badgeColor: 'text-zinc-300',
-    roleLabel: 'API & Ingress Gateway',
+    roleLabel: 'API Gateway',
     defaultNote: 'Edge Routing & Rate Limiting',
     techFamily: 'FastAPI / Envoy',
     latencyClass: '< 3ms p95'

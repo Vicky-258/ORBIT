@@ -6,8 +6,7 @@ import {
   Check,
   AlertCircle,
   HelpCircle,
-  ShieldCheck,
-  Scale
+  ShieldCheck
 } from 'lucide-react';
 
 export default function WhyThisArchitecture({ recommendation = {}, candidates = [] }) {
@@ -33,33 +32,28 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
     : candidates.filter(c => !c.id?.includes('cached') && c.id !== recommendation.winner_id);
 
   return (
-    <div className="bg-[#121215] rounded-2xl border border-white/[0.08] p-5 sm:p-6 space-y-4 shadow-xl">
-      <div className="flex items-center gap-3 pb-3 border-b border-white/[0.06]">
-        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-          <ShieldCheck className="w-4 h-4" />
-        </div>
-        <div>
-          <h2 className="text-sm font-bold text-white tracking-tight">
-            Senior Architect Rationale
-          </h2>
-          <p className="text-xs text-zinc-400">
-            Why this topology wins under your latency and cost constraints
-          </p>
-        </div>
+    <div className="bg-[#121215] rounded-2xl border border-white/[0.08] p-6 space-y-5 shadow-xl">
+      <div>
+        <h2 className="text-base font-bold text-white tracking-tight">
+          Senior Architect Rationale
+        </h2>
+        <p className="text-xs text-zinc-400 mt-0.5">
+          Engineering justification grounded in simulation metrics
+        </p>
       </div>
 
       <div className="space-y-3">
         {/* Accordion 1: Why This Architecture Fits */}
-        <div className="rounded-xl border border-white/[0.08] bg-[#09090b] overflow-hidden hover:border-zinc-700 transition-all">
+        <div className="rounded-xl border border-white/[0.06] bg-[#09090b] overflow-hidden">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'why' ? null : 'why')}
-            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-zinc-200 hover:text-white transition-colors cursor-pointer"
+            className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-white/[0.02] transition-colors"
           >
-            <div className="flex items-center gap-2.5">
+            <span className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="text-sm font-semibold text-white">1. Workload Fit &amp; Advantages</span>
-            </div>
+              1. Workload Fit &amp; Advantages
+            </span>
             {openSection === 'why' ? (
               <ChevronUp className="w-4 h-4 text-zinc-400" />
             ) : (
@@ -68,7 +62,7 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
           </button>
 
           {openSection === 'why' && (
-            <div className="px-4 pb-4 pt-1 border-t border-white/[0.06] space-y-2.5 text-xs text-zinc-300 leading-relaxed">
+            <div className="px-4 pb-4 pt-1 border-t border-white/[0.04] space-y-2.5 text-xs text-zinc-300 leading-relaxed">
               {rationale.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2.5">
                   <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-500/20">
@@ -82,16 +76,16 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
         </div>
 
         {/* Accordion 2: Trade-offs & Operational Costs */}
-        <div className="rounded-xl border border-white/[0.08] bg-[#09090b] overflow-hidden hover:border-zinc-700 transition-all">
+        <div className="rounded-xl border border-white/[0.06] bg-[#09090b] overflow-hidden">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'tradeoffs' ? null : 'tradeoffs')}
-            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-zinc-200 hover:text-white transition-colors cursor-pointer"
+            className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-white/[0.02] transition-colors"
           >
-            <div className="flex items-center gap-2.5">
+            <span className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-amber-400" />
-              <span className="text-sm font-semibold text-white">2. Trade-offs &amp; Operational Costs</span>
-            </div>
+              2. Trade-offs &amp; Operational Costs
+            </span>
             {openSection === 'tradeoffs' ? (
               <ChevronUp className="w-4 h-4 text-zinc-400" />
             ) : (
@@ -100,7 +94,7 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
           </button>
 
           {openSection === 'tradeoffs' && (
-            <div className="px-4 pb-4 pt-1 border-t border-white/[0.06] space-y-2.5 text-xs text-zinc-300 leading-relaxed">
+            <div className="px-4 pb-4 pt-1 border-t border-white/[0.04] space-y-2.5 text-xs text-zinc-300 leading-relaxed">
               {tradeOffs.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2.5">
                   <div className="w-4 h-4 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-amber-500/20">
@@ -114,16 +108,16 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
         </div>
 
         {/* Accordion 3: Rejected Alternatives Analysis */}
-        <div className="rounded-xl border border-white/[0.08] bg-[#09090b] overflow-hidden hover:border-zinc-700 transition-all">
+        <div className="rounded-xl border border-white/[0.06] bg-[#09090b] overflow-hidden">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'alternatives' ? null : 'alternatives')}
-            className="w-full p-4 flex items-center justify-between text-left text-xs font-semibold text-zinc-200 hover:text-white transition-colors cursor-pointer"
+            className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-white/[0.02] transition-colors"
           >
-            <div className="flex items-center gap-2.5">
+            <span className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-zinc-400" />
-              <span className="text-sm font-semibold text-white">3. Alternative Candidates Assessment</span>
-            </div>
+              3. Alternative Candidates Assessment
+            </span>
             {openSection === 'alternatives' ? (
               <ChevronUp className="w-4 h-4 text-zinc-400" />
             ) : (
@@ -132,7 +126,7 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
           </button>
 
           {openSection === 'alternatives' && (
-            <div className="px-4 pb-4 pt-1 border-t border-white/[0.06] space-y-2 text-xs text-zinc-300 leading-relaxed">
+            <div className="px-4 pb-4 pt-1 border-t border-white/[0.04] space-y-2 text-xs text-zinc-300 leading-relaxed">
               {alternatives.length > 0 ? (
                 alternatives.map((alt, idx) => {
                   const altName = alt.architecture_name || alt.name || alt.id || `Alternative #${idx + 1}`;
