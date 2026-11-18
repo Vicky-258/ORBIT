@@ -14,6 +14,7 @@ import {
 
 export default function ResultsHeader() {
   const {
+    goToChat,
     goToPrompt,
     activeTab,
     setActiveTab,
@@ -44,16 +45,26 @@ export default function ResultsHeader() {
 
   return (
     <header className="border-b border-white/[0.08] bg-[#121215] px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0 z-20">
-      {/* Left: Back to Prompt Studio + Brand */}
-      <div className="flex items-center gap-3">
+      {/* Left: Back to Chat / Prompt + Brand */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={goToChat}
+          className="btn btn-secondary text-xs py-1.5 px-3 h-8 flex items-center gap-1.5 text-zinc-300 hover:text-white border-zinc-700 hover:border-zinc-500 transition-all cursor-pointer"
+          title="Return to conversational chat (Esc)"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span className="font-medium">Back to Chat</span>
+        </button>
+
         <button
           type="button"
           onClick={goToPrompt}
-          className="btn btn-secondary text-xs py-1.5 px-3 h-8 flex items-center gap-1.5 text-zinc-300 hover:text-white border-zinc-700 hover:border-zinc-500 transition-all cursor-pointer"
-          title="Return to workload prompt & parameters (Esc)"
+          className="text-xs py-1.5 px-2.5 h-8 flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+          title="Open manual tuning studio"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span className="font-medium">Edit Prompt</span>
+          <Sliders className="w-3 h-3" />
+          <span className="hidden sm:inline">Manual Tuning</span>
         </button>
 
         <div className="hidden md:flex items-center gap-2 pl-2 border-l border-white/[0.08]">

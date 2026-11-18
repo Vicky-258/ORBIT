@@ -22,6 +22,10 @@ from orbit.agent.composition_explainer import CompositionExplainer
 @pytest.mark.live
 def test_live_groq_llm_hotel_discovery_pipeline():
     """Live test: Groq LLM -> Domain -> Decomposer -> Composer -> Validator -> SimPy."""
+    # Check if explicit live testing flag is set (prevents offline sandbox failure during automated CI)
+    if os.getenv("ORBIT_RUN_LIVE_TESTS", "").lower() not in ("true", "1"):
+        pytest.skip("Skipping live LLM test: set ORBIT_RUN_LIVE_TESTS=true to run live outbound tests.")
+
     mgr = LLMProviderManager()
     if not mgr.is_llm_available():
         pytest.skip("Live LLM credentials not available or network offline.")

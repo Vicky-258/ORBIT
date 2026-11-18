@@ -48,10 +48,11 @@ export function AppProvider({ children }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('prompt'); // 'prompt' | 'results'
+  const [viewMode, setViewMode] = useState('chat'); // 'chat' | 'prompt' | 'results'
   const [activeTab, setActiveTab] = useState('blueprint'); // 'blueprint' | 'compare' | 'technical'
   const [backendConnected, setBackendConnected] = useState(true);
 
+  const goToChat = useCallback(() => setViewMode('chat'), []);
   const goToPrompt = useCallback(() => setViewMode('prompt'), []);
   const goToResults = useCallback(() => setViewMode('results'), []);
 
@@ -213,6 +214,7 @@ export function AppProvider({ children }) {
         resetToDefault,
         viewMode,
         setViewMode,
+        goToChat,
         goToPrompt,
         goToResults,
         activeTab,

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useApp } from './context/AppContext';
 
+import ChatInterface from './components/chat/ChatInterface';
 import PromptStudio from './components/prompt/PromptStudio';
 import ResultsHeader from './components/layout/ResultsHeader';
 
@@ -19,6 +20,7 @@ import FeatureManager from './features/FeatureManager';
 export default function App() {
   const {
     viewMode,
+    goToChat,
     goToPrompt,
     activeTab,
     loading,
@@ -27,18 +29,29 @@ export default function App() {
     handleRunWorkflow,
   } = useApp();
 
-  // Keyboard shortcut: Esc returns to Prompt Studio if on results page
+  // Keyboard shortcut: Esc returns to Chat interface if on results or prompt studio
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && viewMode === 'results') {
-        goToPrompt();
+      if (e.key === 'Escape' && (viewMode === 'results' || viewMode === 'prompt')) {
+        goToChat();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [viewMode, goToPrompt]);
+  }, [viewMode, goToChat]);
 
-  // Stage 1: Prompt-Focused Studio
+  // Stage 1: AI-First Chat Interface (Primary ORBIT interaction)
+  if (viewMode === 'chat') {
+    return (
+      <div className="h-screen w-screen flex flex-col bg-[#09090b] text-zinc-100 overflow-hidden font-sans">
+        <ChatInterface />
+        <ImplementationPromptModal />
+        <FeatureManager />
+      </div>
+    );
+  }
+
+  // Legacy Stage 1B: Advanced Manual Prompt-Focused Studio
   if (viewMode === 'prompt') {
     return (
       <div className="h-screen w-screen flex flex-col bg-[#09090b] text-zinc-100 overflow-hidden font-sans">
