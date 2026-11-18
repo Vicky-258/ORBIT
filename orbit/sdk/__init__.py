@@ -28,6 +28,13 @@ from orbit.sdk.governance import (
 from orbit.sdk.store import ExperimentStore
 from orbit.sdk.interface import SimulationSDK
 from orbit.simulation.dynamic_simpy_engine import DynamicSimPyEngine
+from orbit.sdk.architecture_validator import (
+    ArchitectureValidator,
+    ArchitectureValidationResult,
+    ValidationVerdict,
+    ValidationIssue,
+    ValidationIssueSeverity,
+)
 
 __all__ = [
     "ComponentCategory",
@@ -49,4 +56,9 @@ __all__ = [
     "ExperimentStore",
     "SimulationSDK",
     "DynamicSimPyEngine",
+    "ArchitectureValidator",
+    "ArchitectureValidationResult",
+    "ValidationVerdict",
+    "ValidationIssue",
+    "ValidationIssueSeverity",
 ]

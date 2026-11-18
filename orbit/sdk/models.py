@@ -64,6 +64,7 @@ class TopologyGraph(BaseModel):
     ingress_node_id: str = Field(description="Entry point for client traffic (e.g. 'api_gw')")
     read_path: List[str] = Field(description="Ordered node sequence traversed for read operations")
     write_path: List[str] = Field(description="Ordered node sequence traversed for write operations")
+    workload_routes: Dict[str, List[str]] = Field(default_factory=dict, description="Per-workload ordered execution paths")
 
     @model_validator(mode="after")
     def validate_topology_integrity(self):
@@ -87,6 +88,11 @@ class TopologyGraph(BaseModel):
         for w_id in self.write_path:
             if w_id not in node_ids:
                 raise ValueError(f"Write path node '{w_id}' does not exist in topology nodes.")
+        
+        for w_name, route in self.workload_routes.items():
+            for node_id in route:
+                if node_id not in node_ids:
+                    raise ValueError(f"Workload route '{w_name}' contains node '{node_id}' which does not exist in topology nodes.")
         
         return self
 

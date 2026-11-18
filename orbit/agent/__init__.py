@@ -23,6 +23,25 @@ from orbit.agent.investigation_policy import (
 )
 from orbit.agent.investigation_dispatcher import InvestigationDispatcher
 from orbit.agent.investigation_planner import InvestigationPlanner
+from orbit.agent.domain_understanding import (
+    DomainIdentity,
+    DomainUnderstandingAgent,
+    DomainOfflineError,
+)
+from orbit.agent.workload_decomposer import (
+    DecomposedWorkload,
+    WorkloadDecompositionResult,
+    WorkloadDecomposer,
+    WorkloadDecompositionOfflineError,
+)
+from orbit.agent.workload_intelligence import (
+    WorkloadIntelligencePipeline,
+    ApplicationWorkloadAnalysis,
+)
+from orbit.agent.composition_explainer import (
+    CompositionExplainer,
+    CompositionExplanation,
+)
 from orbit.agent.recommendation_synthesizer import RecommendationSynthesizer
 from orbit.agent.orchestrator import ORBITOrchestrator, AADSOrchestrator
 from orbit.agent.state import AgentWorkflowState
@@ -69,4 +88,15 @@ __all__ = [
     "PolicyEvaluationResult",
     "InvestigationDispatcher",
     "InvestigationPlanner",
+    "DomainIdentity",
+    "DomainUnderstandingAgent",
+    "DomainOfflineError",
+    "DecomposedWorkload",
+    "WorkloadDecompositionResult",
+    "WorkloadDecomposer",
+    "WorkloadDecompositionOfflineError",
+    "WorkloadIntelligencePipeline",
+    "ApplicationWorkloadAnalysis",
+    "CompositionExplainer",
+    "CompositionExplanation",
 ]

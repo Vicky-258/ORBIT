@@ -189,6 +189,7 @@ class SimulationResult(BaseModel):
     random_seed: int
     latency_uncertainty_p95_ms: Tuple[float, float] = Field(default=(0.0, 0.0), description="Heuristic uncertainty bounds around p95 latency. Engineering proxy, not a validated statistical confidence interval.")
     warnings: List[str] = Field(default_factory=list)
+    workload_metrics: Dict[str, Any] = Field(default_factory=dict, description="Per-workload simulation statistics and SLA compliance")
 
 
 class FeasibilityStatus(str, Enum):

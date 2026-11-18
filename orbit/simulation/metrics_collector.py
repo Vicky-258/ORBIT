@@ -19,6 +19,7 @@ class RequestTrace(BaseModel):
     error_type: Optional[str] = None
     cache_hit: Optional[bool] = None
     queue_wait_ms: float = 0.0
+    workload_id: Optional[str] = None
 
 
 class SimulationMetricsCollector:
@@ -112,6 +113,41 @@ class SimulationMetricsCollector:
         se_margin = 1.96 * (std_lat / math.sqrt(max(1, len(latencies)))) * 1.5 if latencies else 0.5
         p95_bounds = (round(max(0.1, p95 - se_margin), 2), round(p95 + se_margin, 2))
 
+        # Per-workload breakdown
+        workload_metrics: Dict[str, Dict[str, Any]] = {}
+        workload_ids = {t.workload_id for t in self.traces if t.workload_id}
+        for wid in sorted(workload_ids):
+            w_traces = [t for t in self.traces if t.workload_id == wid]
+            w_completed = [t for t in w_traces if t.success]
+            w_errors = [t for t in w_traces if not t.success]
+            w_lats = [t.latency_ms for t in w_completed]
+            if w_lats:
+                w_arr = np.array(w_lats)
+                wp50 = float(np.percentile(w_arr, 50))
+                wp90 = float(np.percentile(w_arr, 90))
+                wp95 = float(np.percentile(w_arr, 95))
+                wp99 = float(np.percentile(w_arr, 99))
+                wmax = float(np.max(w_arr))
+            else:
+                wp50 = wp90 = wp95 = wp99 = wmax = 0.0
+
+            w_rps = len(w_completed) / max(0.1, self.simulation_duration_s)
+            w_err_pct = (len(w_errors) / len(w_traces) * 100.0) if w_traces else 0.0
+
+            workload_metrics[wid] = {
+                "workload_id": wid,
+                "total_requests": len(w_traces),
+                "completed_requests": len(w_completed),
+                "error_count": len(w_errors),
+                "error_rate_pct": round(w_err_pct, 2),
+                "throughput_achieved_rps": round(w_rps, 1),
+                "p50_latency_ms": round(wp50, 2),
+                "p90_latency_ms": round(wp90, 2),
+                "p95_latency_ms": round(wp95, 2),
+                "p99_latency_ms": round(wp99, 2),
+                "max_latency_ms": round(wmax, 2),
+            }
+
         return {
             "total_requests": total_requests,
             "completed_requests": len(completed),
@@ -130,4 +166,5 @@ class SimulationMetricsCollector:
             "cache_hit_rate": round(cache_hit_rate, 3) if cache_hit_rate is not None else None,
             "bottleneck_component": bottleneck,
             "latency_uncertainty_p95_ms": p95_bounds,
+            "workload_metrics": workload_metrics,
         }

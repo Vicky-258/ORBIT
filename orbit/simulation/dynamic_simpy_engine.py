@@ -11,6 +11,7 @@ import simpy
 
 from orbit.core.schemas import WorkloadSpec, SimulationResult
 from orbit.registry.component_registry import ComponentRegistry
+from orbit.catalog.workload_profile import WorkloadProfile
 from orbit.sdk.models import (
     TopologyGraph,
     ComponentNode,
@@ -166,6 +167,184 @@ class DynamicSimPyEngine:
             random_seed=random_seed,
             latency_uncertainty_p95_ms=summary["latency_uncertainty_p95_ms"],
             warnings=summary["warnings"],
+            workload_metrics=summary.get("workload_metrics", {}),
+        )
+
+    def simulate_multi_workload(
+        self,
+        topology: TopologyGraph,
+        workloads: List[WorkloadProfile],
+        duration_seconds: float = 10.0,
+        random_seed: int = 42,
+    ) -> SimulationResult:
+        """
+        Executes concurrent discrete-event queueing simulation of multiple independent workloads
+        competing for shared resources across an arbitrary validated TopologyGraph.
+        """
+        rng = random.Random(random_seed)
+        env = simpy.Environment()
+        collector = SimulationMetricsCollector(simulation_duration_s=duration_seconds)
+        warnings: List[str] = []
+
+        # 1. Component Map & Service Demand Lookup
+        node_map: Dict[str, ComponentNode] = {c.id: c for c in topology.components}
+        total_rps = sum(w.traffic.arrival_rate_rps for w in workloads)
+        synthetic_spec = WorkloadSpec(
+            request_rate_rps=max(1.0, total_rps),
+            peak_load_factor=1.5,
+            read_ratio=0.8,
+            write_ratio=0.2,
+            p95_latency_target_ms=50.0,
+            min_throughput_rps=max(1.0, total_rps * 0.9),
+            max_monthly_budget_usd=1000.0,
+        )
+        service_demands = self._resolve_service_demands(topology, synthetic_spec, warnings)
+
+        # 2. Instantiate SimPy Resources for all nodes
+        resources: Dict[str, simpy.Resource] = {}
+        cpu_resources: Dict[str, simpy.Resource] = {}
+
+        for node in topology.components:
+            cap = max(1, node.concurrency_limit)
+            resources[node.id] = simpy.Resource(env, capacity=cap)
+            collector.register_resource(node.id, cap)
+
+            if node.category in (ComponentCategory.DATABASE, ComponentCategory.COMPUTE):
+                cpu_cores = max(1, int(round(node.cpu_cores)))
+                cpu_resources[node.id] = simpy.Resource(env, capacity=cpu_cores)
+                collector.register_resource(f"{node.id}_cpu", cpu_cores)
+
+        # 3. Instantiate Asynchronous Queues and Background Worker Processes
+        async_queues: Dict[str, simpy.Store] = {}
+        edge_map: Dict[Tuple[str, str], ConnectionEdge] = {
+            (e.source_id, e.target_id): e for e in topology.connections
+        }
+
+        for edge in topology.connections:
+            if edge.protocol == "async_event":
+                q_key = f"{edge.source_id}->{edge.target_id}"
+                q_store = simpy.Store(env, capacity=50000)
+                async_queues[q_key] = q_store
+
+                target_node = node_map.get(edge.target_id)
+                if target_node and target_node.category == ComponentCategory.COMPUTE:
+                    worker_cap = max(1, target_node.concurrency_limit)
+                    for worker_idx in range(min(worker_cap, 16)):
+                        env.process(
+                            self._async_drain_process(
+                                env=env,
+                                worker_id=worker_idx,
+                                queue_key=q_key,
+                                queue_store=q_store,
+                                target_node=target_node,
+                                topology=topology,
+                                resources=resources,
+                                cpu_resources=cpu_resources,
+                                service_demands=service_demands,
+                                collector=collector,
+                                rng=rng,
+                            )
+                        )
+
+        # 4. Request Arrival Process for EACH Workload
+        req_counter = [0]
+
+        for w_prof in workloads:
+            def create_generator(w: WorkloadProfile):
+                arrival_rate = max(0.5, w.traffic.arrival_rate_rps)
+                read_ratio = w.operations.read_ratio
+                cache_hit_rate = w.data.cacheability
+
+                if w.workload_id in topology.workload_routes:
+                    w_path = topology.workload_routes[w.workload_id]
+                else:
+                    w_path = topology.read_path if read_ratio >= 0.5 else topology.write_path
+
+                def proc():
+                    while True:
+                        iat = rng.expovariate(arrival_rate)
+                        yield env.timeout(iat)
+                        req_counter[0] += 1
+                        r_id = req_counter[0]
+                        is_read = rng.random() < read_ratio
+
+                        w_spec = WorkloadSpec(
+                            request_rate_rps=arrival_rate,
+                            peak_load_factor=w.traffic.burst_multiplier,
+                            read_ratio=read_ratio,
+                            write_ratio=round(max(0.0, 1.0 - read_ratio), 2),
+                            p95_latency_target_ms=w.performance.p95_latency_target_ms,
+                            min_throughput_rps=round(arrival_rate * 0.85, 1),
+                            max_monthly_budget_usd=500.0,
+                            cache_assumed_hit_rate=cache_hit_rate,
+                        )
+
+                        env.process(
+                            self._handle_request(
+                                env=env,
+                                req_id=r_id,
+                                is_read=is_read,
+                                path=list(w_path),
+                                topology=topology,
+                                node_map=node_map,
+                                edge_map=edge_map,
+                                resources=resources,
+                                cpu_resources=cpu_resources,
+                                async_queues=async_queues,
+                                service_demands=service_demands,
+                                workload=w_spec,
+                                collector=collector,
+                                rng=rng,
+                                workload_id=w.workload_id,
+                            )
+                        )
+                return proc
+
+            env.process(create_generator(w_prof)())
+
+        # 5. Run simulation
+        env.run(until=duration_seconds)
+
+        # 6. Metrics Synthesis
+        summary = collector.compute_summary()
+        summary["warnings"] = list(set(warnings))
+
+        workload_metrics = summary.get("workload_metrics", {})
+        for w in workloads:
+            wid = w.workload_id
+            if wid in workload_metrics:
+                sla_target = w.performance.p95_latency_target_ms
+                actual_p95 = workload_metrics[wid]["p95_latency_ms"]
+                workload_metrics[wid]["p95_sla_target_ms"] = sla_target
+                workload_metrics[wid]["sla_compliant"] = actual_p95 <= sla_target
+
+        total_cost_usd = self._calculate_topology_cost(topology)
+        bottleneck = self._identify_bottleneck(summary.get("component_utilizations", {}), topology)
+
+        return SimulationResult(
+            architecture_id=topology.topology_id,
+            architecture_name=topology.name,
+            throughput_achieved_rps=summary["throughput_achieved_rps"],
+            p50_latency_ms=summary["p50_latency_ms"],
+            p90_latency_ms=summary["p90_latency_ms"],
+            p95_latency_ms=summary["p95_latency_ms"],
+            p99_latency_ms=summary["p99_latency_ms"],
+            max_latency_ms=summary["max_latency_ms"],
+            error_rate_pct=summary["error_rate_pct"],
+            total_requests=summary["total_requests"],
+            completed_requests=summary["completed_requests"],
+            error_count=summary["error_count"],
+            avg_queue_length=summary["avg_queue_length"],
+            max_queue_length=summary["max_queue_length"],
+            component_utilizations=summary["component_utilizations"],
+            cache_hit_rate=summary["cache_hit_rate"],
+            bottleneck_component=bottleneck,
+            estimated_monthly_cost_usd=total_cost_usd,
+            simulation_duration_seconds=duration_seconds,
+            random_seed=random_seed,
+            latency_uncertainty_p95_ms=summary["latency_uncertainty_p95_ms"],
+            warnings=summary["warnings"],
+            workload_metrics=workload_metrics,
         )
 
     def _resolve_service_demands(
@@ -242,6 +421,7 @@ class DynamicSimPyEngine:
         workload: WorkloadSpec,
         collector: SimulationMetricsCollector,
         rng: random.Random,
+        workload_id: Optional[str] = None,
     ):
         arrival_s = env.now
         is_cache_hit = None
@@ -353,6 +533,7 @@ class DynamicSimPyEngine:
                 success=success,
                 error_type=error_type,
                 cache_hit=is_cache_hit,
+                workload_id=workload_id,
             )
         )
 
