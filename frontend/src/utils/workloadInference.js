@@ -148,3 +148,43 @@ export function inferWorkloadFromPrompt(promptText) {
 
   return result;
 }
+
+export function enrichPromptWithTechnicalEstimates(conversationContext) {
+  if (!conversationContext || typeof conversationContext !== 'string') {
+    return conversationContext;
+  }
+
+  const text = conversationContext.toLowerCase();
+  const additions = [];
+
+  const hasExplicitRps = /(\d+)\s*(?:rps|req\/s|qps)/i.test(text);
+  const hasExplicitP95 = /(\d+)\s*ms/i.test(text);
+  const hasExplicitBudget = /\$\s*(\d+)/i.test(text);
+
+  const userMatch = text.match(/(\d+(?:\.\d+)?)\s*(k|thousand|m|million)?\s*(?:active\s*)?(?:daily\s*)?(?:users|dau|mau|people)/i);
+  let calculatedQps = 500;
+
+  if (userMatch && !hasExplicitRps) {
+    const rawNum = parseFloat(userMatch[1]);
+    const multiplier = userMatch[2]?.toLowerCase().startsWith('m') ? 1_000_000 : 1_000;
+    const totalUsers = rawNum * multiplier;
+    calculatedQps = Math.min(2500, Math.max(50, Math.round((totalUsers * 40) / (14 * 3600) * 2)));
+    additions.push(`Expected peak traffic throughput: ~${calculatedQps} requests/second (derived from ${userMatch[0]}).`);
+  } else if (!hasExplicitRps) {
+    additions.push('Expected peak traffic throughput: ~500 requests/second.');
+  }
+
+  if (!hasExplicitP95) {
+    additions.push('Latency SLA target: p95 latency under 100 ms.');
+  }
+
+  if (!hasExplicitBudget) {
+    additions.push('Monthly cloud budget limit: $250/mo.');
+  }
+
+  if (/photo|image|feed|stream|catalog|browse|read/i.test(text) && !/90%|80%|write-heavy/i.test(text)) {
+    additions.push('Traffic profile: Read-heavy access pattern (~85% reads, 15% writes).');
+  }
+
+  return `${conversationContext}\n\n[Architectural System Calibration]:\n${additions.join('\n')}`;
+}

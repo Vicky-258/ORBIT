@@ -98,11 +98,11 @@ export function analyzeRequirementsCompleteness(prompt, history = []) {
     }
   }
 
-  // Count clarifications collected so far
-  const userClarificationCount = history.filter(m => m.sender === 'user').length;
+  // Count user turns in this conversation so far
+  const userTurns = history.filter(m => m.sender === 'user').length;
 
-  // If user gave a rich prompt or answered 1-2 questions, proceed to architecture synthesis
-  const hasGatheredSufficientContext = userClarificationCount >= 2 || missingAspects.length === 0 || (fullContext.length > 350 && hasScaleClarified);
+  // We ask 1 focused clarification turn to gather key requirements, then synthesize
+  const hasGatheredSufficientContext = userTurns >= 1 || missingAspects.length === 0 || (fullContext.length > 350 && hasScaleClarified);
 
   return {
     isComplete: hasGatheredSufficientContext,

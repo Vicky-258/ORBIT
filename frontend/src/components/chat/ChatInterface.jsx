@@ -15,6 +15,7 @@ import {
 import { runDemoWorkflow } from '../../api/client';
 import { normalizeResponse } from '../../api/normalizer';
 import { analyzeRequirementsCompleteness } from '../../utils/requirementGathering';
+import { enrichPromptWithTechnicalEstimates } from '../../utils/workloadInference';
 
 const STORAGE_KEY = 'orbit_conversations_v1';
 
@@ -210,9 +211,16 @@ export default function ChatInterface() {
         );
       }, 1500);
 
-      // Build composite prompt including previous requirements gathered
-      const conversationContext = [...existingHistory.map(m => m.content), text].filter(Boolean).join('\n');
-      const rawResponse = await runDemoWorkflow(conversationContext, options);
+      // Build composite prompt including previous requirements gathered and calibration
+      const rawContext = [...existingHistory.map(m => m.content), text].filter(Boolean).join('\n');
+      const calibratedPrompt = enrichPromptWithTechnicalEstimates(rawContext);
+      
+      const workflowOptions = {
+        ...options,
+        clarification_turn: 1, // Advance past clarification gate so pipeline simulates candidates
+      };
+
+      const rawResponse = await runDemoWorkflow(calibratedPrompt, workflowOptions);
       const normalized = normalizeResponse(rawResponse);
       setResponse(normalized);
 
