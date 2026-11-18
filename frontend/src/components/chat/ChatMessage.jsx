@@ -10,7 +10,9 @@ import {
   ArrowRight,
   BarChart2,
   Sliders,
-  Cpu
+  Cpu,
+  AlertTriangle,
+  RotateCcw
 } from 'lucide-react';
 import AgentStatusIndicator from './AgentStatusIndicator';
 
@@ -20,28 +22,34 @@ import AgentStatusIndicator from './AgentStatusIndicator';
  * - 'question'      : Context-gathering clarification questions
  * - 'options'       : Selectable suggested responses
  * - 'status'        : Agent execution progress
+ * - 'error'         : Human-friendly error state with retry action
  * - 'visualization' : Embedded architecture visuals (foundation)
  * - 'metrics'       : Performance summaries (foundation)
  * - 'recommendation': Architecture recommendations (foundation)
  * - 'action'        : Navigation to deeper analysis
  */
 
-export default function ChatMessage({ message, onSelectOption, onOpenAnalysis }) {
+export default function ChatMessage({ message, onSelectOption, onOpenAnalysis, onRetry }) {
   const isUser = message.sender === 'user';
+  const isError = message.type === 'error';
 
   return (
-    <div className={`w-full py-4 flex gap-3.5 sm:gap-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`w-full py-3.5 flex gap-3.5 sm:gap-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {/* Bot Avatar (Left) */}
       {!isUser && (
-        <div className="w-8 h-8 rounded-xl bg-zinc-100 border border-white/[0.1] text-zinc-950 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-          <Bot className="w-4 h-4" />
+        <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${
+          isError 
+            ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' 
+            : 'bg-zinc-100 border-white/[0.1] text-zinc-950'
+        }`}>
+          {isError ? <AlertTriangle className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
         </div>
       )}
 
       {/* Message Content Container */}
       <div className={`flex flex-col max-w-[85%] sm:max-w-[78%] ${isUser ? 'items-end' : 'items-start'}`}>
-        {/* Author Label (optional subtle header) */}
-        <div className="text-[11px] text-zinc-500 mb-1 px-1">
+        {/* Author Label */}
+        <div className="text-[11px] text-zinc-400 mb-1 px-1">
           {isUser ? 'You' : 'ORBIT Architecture Copilot'}
         </div>
 
@@ -50,6 +58,8 @@ export default function ChatMessage({ message, onSelectOption, onOpenAnalysis })
           className={`rounded-2xl px-4.5 py-3.5 text-sm leading-relaxed ${
             isUser
               ? 'bg-zinc-100 text-zinc-950 font-normal rounded-tr-xs shadow-sm'
+              : isError
+              ? 'bg-rose-950/20 text-zinc-200 border border-rose-500/30 rounded-tl-xs shadow-xs'
               : 'bg-[#151518] text-zinc-200 border border-white/[0.08] rounded-tl-xs shadow-xs'
           }`}
         >
@@ -79,7 +89,7 @@ export default function ChatMessage({ message, onSelectOption, onOpenAnalysis })
                   className="px-3 py-1.5 rounded-lg border border-white/[0.12] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/[0.22] text-xs font-medium text-zinc-200 hover:text-white transition-all duration-150 cursor-pointer text-left shadow-xs flex items-center gap-1.5 active:scale-98"
                 >
                   <span>{opt}</span>
-                  <ArrowRight className="w-3 h-3 text-zinc-500" />
+                  <ArrowRight className="w-3 h-3 text-zinc-400" />
                 </button>
               ))}
             </div>
@@ -93,7 +103,26 @@ export default function ChatMessage({ message, onSelectOption, onOpenAnalysis })
             />
           )}
 
-          {/* 5. RECOMMENDATION TYPE (Rich architectural recommendation card) */}
+          {/* 5. ERROR TYPE (Humanized failure state with Retry action) */}
+          {isError && (
+            <div className="mt-3 pt-2.5 border-t border-rose-500/20 flex items-center justify-between gap-3">
+              <span className="text-xs text-zinc-400">
+                Would you like to try running the analysis again?
+              </span>
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={() => onRetry(message.retryPrompt)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-xs transition-colors cursor-pointer shadow-xs active:scale-95 shrink-0"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Retry</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* 6. RECOMMENDATION TYPE (Rich architectural recommendation card) */}
           {message.type === 'recommendation' && message.recommendationData && (
             <div className="mt-3 p-3.5 rounded-xl bg-white/[0.04] border border-white/[0.1] text-xs space-y-2.5">
               <div className="flex items-center justify-between">
@@ -104,25 +133,25 @@ export default function ChatMessage({ message, onSelectOption, onOpenAnalysis })
                   OPTIMAL SLA
                 </span>
               </div>
-              <p className="text-zinc-400 leading-relaxed">
+              <p className="text-zinc-300 leading-relaxed">
                 {message.recommendationData.summary}
               </p>
               {message.recommendationData.metrics && (
                 <div className="grid grid-cols-3 gap-2 pt-1 border-t border-white/[0.06] text-center">
                   <div className="p-2 rounded bg-black/30">
-                    <div className="text-[10px] text-zinc-500">p95 Latency</div>
+                    <div className="text-[10px] text-zinc-400">p95 Latency</div>
                     <div className="font-mono font-semibold text-zinc-200">
                       {message.recommendationData.metrics.p95_latency_ms} ms
                     </div>
                   </div>
                   <div className="p-2 rounded bg-black/30">
-                    <div className="text-[10px] text-zinc-500">Throughput</div>
+                    <div className="text-[10px] text-zinc-400">Throughput</div>
                     <div className="font-mono font-semibold text-zinc-200">
                       {message.recommendationData.metrics.throughput_achieved_rps} RPS
                     </div>
                   </div>
                   <div className="p-2 rounded bg-black/30">
-                    <div className="text-[10px] text-zinc-500">Monthly Cost</div>
+                    <div className="text-[10px] text-zinc-400">Monthly Cost</div>
                     <div className="font-mono font-semibold text-zinc-200">
                       ${message.recommendationData.metrics.estimated_monthly_cost_usd}
                     </div>
@@ -132,7 +161,7 @@ export default function ChatMessage({ message, onSelectOption, onOpenAnalysis })
             </div>
           )}
 
-          {/* 6. ACTION TYPE (e.g. Deep dive into visual blueprint / comparison) */}
+          {/* 7. ACTION TYPE (e.g. Deep dive into visual blueprint / comparison) */}
           {message.action && (
             <div className="mt-3.5 pt-2.5 border-t border-white/[0.08] flex items-center justify-end">
               <button
@@ -148,7 +177,7 @@ export default function ChatMessage({ message, onSelectOption, onOpenAnalysis })
         </div>
 
         {/* Timestamp */}
-        <span className="text-[10px] text-zinc-600 mt-1 px-1">
+        <span className="text-[10px] text-zinc-500 mt-1 px-1">
           {message.timestamp
             ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             : ''}

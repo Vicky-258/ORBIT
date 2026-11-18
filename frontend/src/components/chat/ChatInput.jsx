@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { ArrowUp, CornerDownLeft, Sparkles, Paperclip } from 'lucide-react';
+import { ArrowUp, Paperclip } from 'lucide-react';
 
 export default function ChatInput({
   value,
@@ -10,12 +10,13 @@ export default function ChatInput({
 }) {
   const textareaRef = useRef(null);
 
-  // Auto-resize textarea height up to a maximum
+  // Auto-resize textarea height cleanly up to 160px then scroll internally
   useEffect(() => {
     const el = textareaRef.current;
     if (el) {
       el.style.height = 'auto';
-      el.style.height = `${Math.min(el.scrollHeight, 180)}px`;
+      const scrollH = el.scrollHeight;
+      el.style.height = `${Math.min(Math.max(scrollH, 24), 160)}px`;
     }
   }, [value]);
 
@@ -28,52 +29,57 @@ export default function ChatInput({
     }
   };
 
+  const hasText = Boolean(value && value.trim().length > 0);
+
   return (
     <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 pb-5 pt-2">
-      <div className="relative rounded-2xl border border-white/[0.12] bg-[#141417] shadow-xl focus-within:border-zinc-500 focus-within:ring-1 focus-within:ring-zinc-500/50 transition-all duration-200">
-        <textarea
-          ref={textareaRef}
-          rows={1}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          placeholder={placeholder}
-          className="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 px-4 pt-3.5 pb-12 resize-none outline-none overflow-y-auto leading-relaxed scrollbar-thin scrollbar-thumb-zinc-700"
-          style={{ minHeight: '52px', maxHeight: '180px' }}
-        />
+      <div className="flex flex-col rounded-2xl border border-white/[0.12] bg-[#141417] shadow-xl focus-within:border-zinc-500/80 focus-within:ring-1 focus-within:ring-zinc-500/30 transition-all duration-200 overflow-hidden">
+        {/* Top Textarea Container: Pure text input that expands naturally */}
+        <div className="px-4 pt-3.5 pb-2">
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={disabled}
+            placeholder={placeholder}
+            className="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 resize-none outline-none overflow-y-auto leading-relaxed scrollbar-thin scrollbar-thumb-zinc-700 m-0 p-0 block"
+            style={{ minHeight: '24px', maxHeight: '160px' }}
+          />
+        </div>
 
-        {/* Input Bar Controls */}
-        <div className="absolute left-3 right-3 bottom-2.5 flex items-center justify-between pointer-events-none">
-          {/* Left placeholder for attachments / future tools */}
-          <div className="flex items-center gap-1 pointer-events-auto">
+        {/* Bottom Toolbar: Completely separate row with helper hint on left and action button on right */}
+        <div className="flex items-center justify-between px-3 py-2 border-t border-white/[0.04] bg-[#121215]/60 min-h-[38px]">
+          {/* Left Action / Keyboard Shortcut Hint */}
+          <div className="flex items-center gap-2">
             <button
               type="button"
               disabled
               title="Attachments coming in future phase"
-              className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-500 transition-colors cursor-not-allowed opacity-50"
+              className="p-1 rounded-lg text-zinc-500 hover:text-zinc-400 transition-colors cursor-not-allowed opacity-60"
             >
-              <Paperclip className="w-4 h-4" />
+              <Paperclip className="w-3.5 h-3.5" />
             </button>
-            <span className="text-[11px] text-zinc-600 hidden sm:inline-block ml-1">
-              Press <kbd className="font-mono px-1 py-0.5 rounded bg-white/[0.06] text-zinc-400 text-[10px]">Enter</kbd> to send, <kbd className="font-mono px-1 py-0.5 rounded bg-white/[0.06] text-zinc-400 text-[10px]">Shift+Enter</kbd> for newline
+            <span className="text-[11px] text-zinc-400 hidden sm:inline-block">
+              Shift + Enter for a new line
             </span>
           </div>
 
-          {/* Right: Submit Button */}
-          <div className="pointer-events-auto">
+          {/* Right Action: Send Button */}
+          <div>
             <button
               type="button"
               onClick={onSubmit}
-              disabled={disabled || !value.trim()}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${
-                disabled || !value.trim()
-                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+              disabled={disabled || !hasText}
+              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer ${
+                disabled || !hasText
+                  ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50'
                   : 'bg-zinc-100 hover:bg-white text-zinc-950 shadow-sm active:scale-95'
               }`}
               title="Send message"
             >
-              <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+              <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
           </div>
         </div>

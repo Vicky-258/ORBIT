@@ -80,7 +80,7 @@ export default function WelcomeScreen({ onSelectPrompt }) {
                 <h3 className="text-xs font-semibold text-zinc-200 group-hover:text-white mb-1">
                   {item.title}
                 </h3>
-                <p className="text-[11px] text-zinc-500 group-hover:text-zinc-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-zinc-400 group-hover:text-zinc-300 line-clamp-2 leading-relaxed">
                   {item.description}
                 </p>
               </div>
@@ -90,13 +90,13 @@ export default function WelcomeScreen({ onSelectPrompt }) {
       </div>
 
       {/* Subtext info */}
-      <div className="mt-8 flex items-center gap-4 text-[11px] text-zinc-600">
+      <div className="mt-8 flex items-center gap-4 text-xs text-zinc-400">
         <span className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-zinc-500" /> Grounded in SimPy Discrete-Event Physics
+          <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" /> Grounded in SimPy Discrete-Event Physics
         </span>
-        <span className="w-1 h-1 rounded-full bg-zinc-700" />
+        <span className="w-1 h-1 rounded-full bg-zinc-600" />
         <span className="flex items-center gap-1.5">
-          <Cpu className="w-3.5 h-3.5 text-zinc-500" /> Validated Infrastructure Primitives
+          <Cpu className="w-3.5 h-3.5 text-zinc-400" /> Validated Infrastructure Primitives
         </span>
       </div>
     </div>

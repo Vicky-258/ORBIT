@@ -144,15 +144,15 @@ export default function ChatSidebar({
                 backendConnected ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500'
               }`}
             />
-            <span className="truncate">{backendConnected ? 'Simulation Engine Online' : 'Engine Standby'}</span>
+            <span className="truncate">{backendConnected ? 'Simulation engine active' : 'Simulation engine ready'}</span>
           </div>
         ) : (
           <div className="w-full flex justify-center">
             <span
               className={`w-2 h-2 rounded-full ${
-                backendConnected ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500'
+                backendConnected ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-emerald-500/70'
               }`}
-              title={backendConnected ? 'Engine Online' : 'Engine Standby'}
+              title={backendConnected ? 'Simulation engine active' : 'Simulation engine ready'}
             />
           </div>
         )}
