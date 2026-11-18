@@ -1,56 +1,78 @@
 import React from 'react';
-import { Server, Zap, Database, Layers, Cpu, ArrowRight } from 'lucide-react';
+import {
+  Server,
+  Zap,
+  Database,
+  Layers,
+  Cpu,
+  ArrowRight,
+  HardDrive,
+  Globe,
+  Radio,
+  Share2
+} from 'lucide-react';
+
+/**
+ * ArchitectureTopology: Cohesive, connected system topology visualization
+ * Displays the infrastructure primitives, category badges, operational roles,
+ * and data flow connections derived from actual backend architecture candidates.
+ */
 
 export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
   const displayNodes = nodes.length > 0 ? nodes : deriveNodes(topologyStr);
 
   return (
-    <div className="p-4 sm:p-5 rounded-xl bg-[#09090b] border border-zinc-800 relative overflow-hidden">
-      <div className="relative z-10 flex items-center justify-between gap-3 sm:gap-4 flex-wrap lg:flex-nowrap">
+    <div className="w-full rounded-2xl bg-[#09090b] border border-white/[0.08] p-5 sm:p-6 overflow-hidden">
+      {/* Topology Track */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 relative">
         {displayNodes.map((node, idx) => {
           const isLast = idx === displayNodes.length - 1;
-          const config = getNodeConfig(node.type);
+          const config = getNodeConfig(node.type, node.name);
 
           return (
             <React.Fragment key={idx}>
-              {/* Node Card */}
-              <div
-                className="flex-1 min-w-[170px] p-3.5 sm:p-4 rounded-xl bg-[#141417] border border-zinc-800 hover:border-zinc-700 transition-all shadow-xs"
-              >
-                {/* Top Node Header: Icon + Type Badge */}
-                <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <div className={`w-7 h-7 rounded-lg ${config.iconBg} flex items-center justify-center ${config.iconColor} border ${config.iconBorder}`}>
+              {/* Component Node Card */}
+              <div className="flex-1 min-w-[210px] p-4 rounded-xl bg-[#141417] border border-white/[0.08] hover:border-zinc-500/60 transition-all duration-200 shadow-md group relative">
+                {/* Header: Icon + Category Badge */}
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className={`w-8 h-8 rounded-lg ${config.iconBg} border ${config.iconBorder} flex items-center justify-center ${config.iconColor} shadow-inner`}>
                     {config.icon}
                   </div>
-                  <span className={`text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full ${config.badgeBg} ${config.badgeColor} border ${config.badgeBorder}`}>
+                  <span className={`text-[10px] font-mono tracking-tight px-2 py-0.5 rounded-full ${config.badgeBg} ${config.badgeColor} border ${config.badgeBorder}`}>
                     {config.roleLabel}
                   </span>
                 </div>
 
-                {/* Node Name & Description */}
+                {/* Node Title & Description */}
                 <div className="space-y-1">
-                  <div className="font-semibold text-sm text-white tracking-tight flex items-center gap-1.5">
+                  <div className="font-semibold text-sm text-zinc-100 flex items-center gap-1.5">
                     <span>{node.name}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Active & Calibrated" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="Simulated & Validated" />
                   </div>
                   <div className="text-xs text-zinc-400 leading-snug">
                     {node.note || config.defaultNote}
                   </div>
                 </div>
+
+                {/* Bottom spec pill */}
+                <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+                  <span>{config.techFamily}</span>
+                  <span className="text-zinc-400">{config.latencyClass}</span>
+                </div>
               </div>
 
-              {/* Connector between Nodes */}
+              {/* Data Flow Connector between Nodes */}
               {!isLast && (
-                <div className="flex flex-col items-center justify-center px-1 shrink-0">
+                <div className="flex md:flex-col items-center justify-center px-1 py-2 md:py-0 shrink-0">
                   <div className="flex items-center gap-1">
-                    <div className="w-3 sm:w-5 h-px bg-zinc-800" />
-                    <div className="w-5 h-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
-                      <ArrowRight className="w-3 h-3 text-zinc-400 shrink-0" />
+                    <div className="w-4 sm:w-6 h-px bg-zinc-700 hidden md:block" />
+                    <div className="w-6 h-6 rounded-full bg-[#18181c] border border-zinc-700 flex items-center justify-center text-zinc-400 shadow-xs group-hover:border-zinc-500">
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-300" />
                     </div>
-                    <div className="w-3 sm:w-5 h-px bg-zinc-800" />
+                    <div className="w-4 sm:w-6 h-px bg-zinc-700 hidden md:block" />
                   </div>
-                  <span className="text-[10px] text-zinc-500 mt-1 font-mono">
-                    {idx === 0 ? 'sub-ms read' : 'sync fallback'}
+                  <span className="text-[10px] text-zinc-400 mt-1 font-mono tracking-tight text-center">
+                    {idx === 0 ? 'sync call' : idx === 1 && displayNodes.length > 2 ? 'persist write' : 'data flow'}
                   </span>
                 </div>
               )}
@@ -62,91 +84,119 @@ export default function ArchitectureTopology({ nodes = [], topologyStr = '' }) {
   );
 }
 
-function getNodeConfig(type) {
-  switch (type) {
-    case 'cache':
-      return {
-        icon: <Zap className="w-3.5 h-3.5 fill-current" />,
-        iconBg: 'bg-zinc-800',
-        iconColor: 'text-zinc-200',
-        iconBorder: 'border-zinc-700',
-        badgeBg: 'bg-zinc-800',
-        badgeColor: 'text-zinc-300',
-        badgeBorder: 'border-zinc-700',
-        roleLabel: 'In-Memory Cache',
-        defaultNote: 'Sub-millisecond Read Shield',
-      };
-    case 'database':
-      return {
-        icon: <Database className="w-3.5 h-3.5 fill-current" />,
-        iconBg: 'bg-zinc-800',
-        iconColor: 'text-zinc-200',
-        iconBorder: 'border-zinc-700',
-        badgeBg: 'bg-zinc-800',
-        badgeColor: 'text-zinc-300',
-        badgeBorder: 'border-zinc-700',
-        roleLabel: 'Primary Database',
-        defaultNote: 'ACID Persistence Store',
-      };
-    case 'queue':
-      return {
-        icon: <Layers className="w-3.5 h-3.5" />,
-        iconBg: 'bg-zinc-800',
-        iconColor: 'text-zinc-200',
-        iconBorder: 'border-zinc-700',
-        badgeBg: 'bg-zinc-800',
-        badgeColor: 'text-zinc-300',
-        badgeBorder: 'border-zinc-700',
-        roleLabel: 'Message Queue',
-        defaultNote: 'Bursty Ingestion Buffer',
-      };
-    case 'worker':
-      return {
-        icon: <Cpu className="w-3.5 h-3.5" />,
-        iconBg: 'bg-emerald-500/10',
-        iconColor: 'text-emerald-400',
-        iconBorder: 'border-emerald-500/20',
-        badgeBg: 'bg-emerald-500/10',
-        badgeColor: 'text-emerald-400',
-        badgeBorder: 'border-emerald-500/20',
-        roleLabel: 'Async Worker Pool',
-        defaultNote: 'Batch Persistence Worker',
-      };
-    case 'ingress':
-    default:
-      return {
-        icon: <Server className="w-3.5 h-3.5" />,
-        iconBg: 'bg-zinc-800',
-        iconColor: 'text-zinc-300',
-        iconBorder: 'border-zinc-700',
-        badgeBg: 'bg-zinc-800',
-        badgeColor: 'text-zinc-300',
-        badgeBorder: 'border-zinc-700',
-        roleLabel: 'API Ingress',
-        defaultNote: 'HTTP Router & Controller',
-      };
+function getNodeConfig(type, name = '') {
+  const lower = (name || '').toLowerCase();
+
+  if (type === 'cache' || lower.includes('redis') || lower.includes('memcached')) {
+    return {
+      icon: <Zap className="w-4 h-4 fill-amber-400/20 text-amber-400" />,
+      iconBg: 'bg-amber-500/10',
+      iconBorder: 'border-amber-500/20',
+      iconColor: 'text-amber-400',
+      badgeBg: 'bg-amber-500/10',
+      badgeBorder: 'border-amber-500/20',
+      badgeColor: 'text-amber-300',
+      roleLabel: 'In-Memory Cache',
+      defaultNote: 'Sub-millisecond Read Shield',
+      techFamily: 'Redis 7.2',
+      latencyClass: '< 1ms p95'
+    };
   }
+
+  if (type === 'database' || lower.includes('postgres') || lower.includes('mysql') || lower.includes('db')) {
+    return {
+      icon: <Database className="w-4 h-4 text-sky-400" />,
+      iconBg: 'bg-sky-500/10',
+      iconBorder: 'border-sky-500/20',
+      iconColor: 'text-sky-400',
+      badgeBg: 'bg-sky-500/10',
+      badgeBorder: 'border-sky-500/20',
+      badgeColor: 'text-sky-300',
+      roleLabel: 'Primary Database',
+      defaultNote: 'ACID Relational Persistence',
+      techFamily: 'PostgreSQL 16',
+      latencyClass: '~10-15ms p95'
+    };
+  }
+
+  if (type === 'queue' || lower.includes('kafka') || lower.includes('rabbitmq') || lower.includes('queue')) {
+    return {
+      icon: <Layers className="w-4 h-4 text-purple-400" />,
+      iconBg: 'bg-purple-500/10',
+      iconBorder: 'border-purple-500/20',
+      iconColor: 'text-purple-400',
+      badgeBg: 'bg-purple-500/10',
+      badgeBorder: 'border-purple-500/20',
+      badgeColor: 'text-purple-300',
+      roleLabel: 'Message Queue',
+      defaultNote: 'Bursty Ingestion Buffer',
+      techFamily: 'Kafka / SQS',
+      latencyClass: '~3ms enqueue'
+    };
+  }
+
+  if (type === 'worker' || lower.includes('worker') || lower.includes('consumer')) {
+    return {
+      icon: <Cpu className="w-4 h-4 text-emerald-400" />,
+      iconBg: 'bg-emerald-500/10',
+      iconBorder: 'border-emerald-500/20',
+      iconColor: 'text-emerald-400',
+      badgeBg: 'bg-emerald-500/10',
+      badgeBorder: 'border-emerald-500/20',
+      badgeColor: 'text-emerald-300',
+      roleLabel: 'Async Worker Pool',
+      defaultNote: 'Decoupled Batch Execution',
+      techFamily: 'Python / Go Workers',
+      latencyClass: 'Decoupled'
+    };
+  }
+
+  return {
+    icon: <Server className="w-4 h-4 text-zinc-300" />,
+    iconBg: 'bg-zinc-800',
+    iconBorder: 'border-zinc-700',
+    iconColor: 'text-zinc-200',
+    badgeBg: 'bg-zinc-800',
+    badgeBorder: 'border-zinc-700',
+    badgeColor: 'text-zinc-300',
+    roleLabel: 'API & Ingress Gateway',
+    defaultNote: 'Edge Routing & Rate Limiting',
+    techFamily: 'FastAPI / Envoy',
+    latencyClass: '< 3ms p95'
+  };
 }
 
-function deriveNodes(str = '') {
-  const lower = str.toLowerCase();
-  if (lower.includes('redis') || lower.includes('cache')) {
+function deriveNodes(topologyStr = '') {
+  if (!topologyStr) {
     return [
       { name: 'API Gateway', type: 'ingress', note: 'FastAPI / Go Controller' },
-      { name: 'Redis 7.2', type: 'cache', note: '84.8% Cache Read Shield' },
-      { name: 'PostgreSQL 16', type: 'database', note: 'Transactional Writes & Misses' },
+      { name: 'PostgreSQL 16', type: 'database', note: 'Direct Relational Queries' }
     ];
   }
-  if (lower.includes('kafka') || lower.includes('queue') || lower.includes('worker')) {
-    return [
-      { name: 'API Gateway', type: 'ingress', note: 'Immediate HTTP 202 Ack' },
-      { name: 'Kafka Queue', type: 'queue', note: 'Partitioned Event Log' },
-      { name: 'Async Worker', type: 'worker', note: 'Batch Persistence' },
-      { name: 'PostgreSQL 16', type: 'database', note: 'Durable Database Store' },
-    ];
-  }
-  return [
-    { name: 'API Gateway', type: 'ingress', note: 'FastAPI / Go Controller' },
-    { name: 'PostgreSQL 16', type: 'database', note: 'Direct Relational Queries' },
-  ];
+
+  const parts = topologyStr.split(/➔|->|→/).map((p) => p.trim());
+  return parts.map((part) => {
+    const lower = part.toLowerCase();
+    let type = 'ingress';
+    let note = 'Traffic Routing';
+
+    if (lower.includes('redis') || lower.includes('cache')) {
+      type = 'cache';
+      note = 'Sub-millisecond Read Shield';
+    } else if (lower.includes('postgres') || lower.includes('mysql') || lower.includes('database') || lower.includes('db')) {
+      type = 'database';
+      note = 'Relational Persistence';
+    } else if (lower.includes('kafka') || lower.includes('queue') || lower.includes('mq') || lower.includes('rabbit')) {
+      type = 'queue';
+      note = 'Asynchronous Buffering';
+    } else if (lower.includes('worker') || lower.includes('batch')) {
+      type = 'worker';
+      note = 'Background Processing';
+    } else if (lower.includes('api') || lower.includes('gateway') || lower.includes('sync')) {
+      type = 'ingress';
+      note = 'Ingress Controller';
+    }
+
+    return { name: part, type, note };
+  });
 }
