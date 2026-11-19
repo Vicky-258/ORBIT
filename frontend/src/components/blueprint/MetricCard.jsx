@@ -13,14 +13,16 @@ export default function MetricCard({
   isPrimary = false
 }) {
   return (
-    <div className={`rounded-xl border p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 ${
-      isPrimary
-        ? 'bg-[#151a17] border-emerald-500/30 shadow-md ring-1 ring-emerald-500/10'
-        : 'bg-[#121215] border-white/[0.06] hover:border-white/[0.12]'
-    }`}>
-      {/* Header: Title & subtle provenance */}
+    <div
+      className={`rounded-lg border p-4 sm:p-5 flex flex-col justify-between transition-all ${
+        isPrimary
+          ? 'bg-[#16181f] border-[#1e222b] border-l-4 border-l-[#34d399]'
+          : 'bg-[#16181f] border-[#1e222b]'
+      }`}
+    >
+      {/* Header: Title & Provenance */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider">
+        <span className="text-[11px] font-mono font-medium text-slate-400 uppercase tracking-wider">
           {title}
         </span>
         <EvidenceBadge provenance={provenance} />
@@ -29,19 +31,19 @@ export default function MetricCard({
       {/* Main Metric Value */}
       <div className="my-1">
         <div className="flex items-baseline gap-1.5">
-          <span className={`text-2xl sm:text-3xl font-extrabold font-mono tracking-tight ${statusColor}`}>
+          <span className={`text-2xl sm:text-3xl font-extrabold font-mono tracking-tight ${isPrimary ? 'text-[#34d399]' : statusColor}`}>
             {value}
           </span>
           {unit && (
-            <span className="text-xs text-zinc-400 font-mono">{unit}</span>
+            <span className="text-xs text-slate-400 font-mono">{unit}</span>
           )}
         </div>
 
         {/* Progress Bar */}
         {progressPercent != null && (
-          <div className="w-full h-1 rounded-full bg-white/[0.06] overflow-hidden mt-3">
+          <div className="w-full h-1 rounded-full bg-slate-800 overflow-hidden mt-3">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
+              className={`h-full rounded-full transition-all duration-500 ${isPrimary ? 'bg-[#34d399]' : progressColor}`}
               style={{ width: `${Math.min(100, Math.max(5, progressPercent))}%` }}
             />
           </div>
@@ -50,7 +52,7 @@ export default function MetricCard({
 
       {/* Target Comparison Footer */}
       {targetComparison && (
-        <div className="pt-2.5 mt-2 border-t border-white/[0.04] text-[11px] text-zinc-400 font-mono">
+        <div className="text-[11px] text-slate-500 font-mono mt-3 pt-2 border-t border-[#1e222b]">
           {targetComparison}
         </div>
       )}

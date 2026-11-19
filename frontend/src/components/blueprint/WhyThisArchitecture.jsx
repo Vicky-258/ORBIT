@@ -3,7 +3,6 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Check,
   AlertCircle,
   HelpCircle,
   ShieldCheck
@@ -32,124 +31,118 @@ export default function WhyThisArchitecture({ recommendation = {}, candidates = 
     : candidates.filter(c => !c.id?.includes('cached') && c.id !== recommendation.winner_id);
 
   return (
-    <div className="bg-[#121215] rounded-2xl border border-white/[0.08] p-6 space-y-5 shadow-xl">
+    <div className="bg-[#111317] rounded-xl border border-[#1e222b] p-6 space-y-5">
       <div>
-        <h2 className="text-base font-bold text-white tracking-tight">
+        <h2 className="text-base font-bold text-slate-100 tracking-tight">
           Senior Architect Rationale
         </h2>
-        <p className="text-xs text-zinc-400 mt-0.5">
+        <p className="text-xs text-slate-400 mt-0.5">
           Engineering justification grounded in simulation metrics
         </p>
       </div>
 
       <div className="space-y-3">
         {/* Accordion 1: Why This Architecture Fits */}
-        <div className="rounded-xl border border-white/[0.06] bg-[#09090b] overflow-hidden">
+        <div className="rounded-lg border border-[#1e222b] bg-[#16181f] overflow-hidden">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'why' ? null : 'why')}
-            className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-white/[0.02] transition-colors"
+            className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-800/20 transition-colors"
           >
-            <span className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              1. Workload Fit &amp; Advantages
-            </span>
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-[#34d399] shrink-0" />
+              <span className="font-semibold text-xs text-slate-200">
+                Workload Suitability Validation ({rationale.length} factors)
+              </span>
+            </div>
             {openSection === 'why' ? (
-              <ChevronUp className="w-4 h-4 text-zinc-400" />
+              <ChevronUp className="w-4 h-4 text-slate-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-zinc-500" />
+              <ChevronDown className="w-4 h-4 text-slate-400" />
             )}
           </button>
 
           {openSection === 'why' && (
-            <div className="px-4 pb-4 pt-1 border-t border-white/[0.04] space-y-2.5 text-xs text-zinc-300 leading-relaxed">
+            <div className="p-4 pt-1 border-t border-[#1e222b] space-y-2.5 text-xs text-slate-300">
               {rationale.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-emerald-500/20">
-                    <Check className="w-2.5 h-2.5 text-emerald-400" />
-                  </div>
-                  <span>{item}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#34d399] mt-0.5 shrink-0" />
+                  <span className="leading-relaxed">{item}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Accordion 2: Trade-offs & Operational Costs */}
-        <div className="rounded-xl border border-white/[0.06] bg-[#09090b] overflow-hidden">
+        {/* Accordion 2: Architectural Trade-Offs & Complexity */}
+        <div className="rounded-lg border border-[#1e222b] bg-[#16181f] overflow-hidden">
           <button
             type="button"
             onClick={() => setOpenSection(openSection === 'tradeoffs' ? null : 'tradeoffs')}
-            className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-white/[0.02] transition-colors"
+            className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-800/20 transition-colors"
           >
-            <span className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              2. Trade-offs &amp; Operational Costs
-            </span>
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-4 h-4 text-[#fef08a] shrink-0" />
+              <span className="font-semibold text-xs text-slate-200">
+                Operational Trade-offs ({tradeOffs.length} tradeoffs)
+              </span>
+            </div>
             {openSection === 'tradeoffs' ? (
-              <ChevronUp className="w-4 h-4 text-zinc-400" />
+              <ChevronUp className="w-4 h-4 text-slate-400" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-zinc-500" />
+              <ChevronDown className="w-4 h-4 text-slate-400" />
             )}
           </button>
 
           {openSection === 'tradeoffs' && (
-            <div className="px-4 pb-4 pt-1 border-t border-white/[0.04] space-y-2.5 text-xs text-zinc-300 leading-relaxed">
+            <div className="p-4 pt-1 border-t border-[#1e222b] space-y-2.5 text-xs text-slate-300">
               {tradeOffs.map((item, idx) => (
                 <div key={idx} className="flex items-start gap-2.5">
-                  <div className="w-4 h-4 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-amber-500/20">
-                    <AlertCircle className="w-2.5 h-2.5 text-amber-400" />
-                  </div>
-                  <span>{item}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#fef08a] mt-1.5 shrink-0" />
+                  <span className="leading-relaxed">{item}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Accordion 3: Rejected Alternatives Analysis */}
-        <div className="rounded-xl border border-white/[0.06] bg-[#09090b] overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setOpenSection(openSection === 'alternatives' ? null : 'alternatives')}
-            className="w-full p-4 flex items-center justify-between text-left cursor-pointer hover:bg-white/[0.02] transition-colors"
-          >
-            <span className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-zinc-400" />
-              3. Alternative Candidates Assessment
-            </span>
-            {openSection === 'alternatives' ? (
-              <ChevronUp className="w-4 h-4 text-zinc-400" />
-            ) : (
-              <ChevronDown className="w-4 h-4 text-zinc-500" />
-            )}
-          </button>
+        {/* Accordion 3: Rejected Alternatives */}
+        {alternatives.length > 0 && (
+          <div className="rounded-lg border border-[#1e222b] bg-[#16181f] overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setOpenSection(openSection === 'alternatives' ? null : 'alternatives')}
+              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-800/20 transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
+                <HelpCircle className="w-4 h-4 text-slate-400 shrink-0" />
+                <span className="font-semibold text-xs text-slate-200">
+                  Alternative Candidates Evaluated ({alternatives.length})
+                </span>
+              </div>
+              {openSection === 'alternatives' ? (
+                <ChevronUp className="w-4 h-4 text-slate-400" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              )}
+            </button>
 
-          {openSection === 'alternatives' && (
-            <div className="px-4 pb-4 pt-1 border-t border-white/[0.04] space-y-2 text-xs text-zinc-300 leading-relaxed">
-              {alternatives.length > 0 ? (
-                alternatives.map((alt, idx) => {
-                  const altName = alt.architecture_name || alt.name || alt.id || `Alternative #${idx + 1}`;
-                  const reason = alt.rejection_reason || alt.summary || (
-                    alt.id?.includes('simple') ? 'Direct relational database saturates connection pools under high read contention.' :
-                    alt.id?.includes('async') ? 'Queue buffering adds unnecessary asynchronous overhead for synchronous feed reading.' :
-                    'Higher operational complexity or cost profile compared to optimal cached topology.'
-                  );
+            {openSection === 'alternatives' && (
+              <div className="p-4 pt-1 border-t border-[#1e222b] space-y-2.5 text-xs text-slate-300">
+                {alternatives.map((alt, idx) => {
+                  const name = alt.name || alt.candidate_name || `Alternative ${idx + 1}`;
+                  const reason = alt.reason || alt.rejection_reason || 'Higher latency under queue contention in simulation.';
                   return (
-                    <div key={idx} className="p-3 rounded-lg bg-[#141417] border border-white/[0.04] space-y-1">
-                      <div className="font-semibold text-zinc-200">{altName}</div>
-                      <div className="text-zinc-400 text-xs">{reason}</div>
+                    <div key={idx} className="p-3 rounded-md bg-[#111317] border border-[#1e222b] space-y-1">
+                      <div className="font-bold text-slate-200 text-xs">{name}</div>
+                      <div className="text-[11px] text-slate-400">{reason}</div>
                     </div>
                   );
-                })
-              ) : (
-                <div className="text-zinc-400 text-xs">
-                  All candidate alternatives were benchmarked and evaluated against hard SLA latency ceilings.
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -11,6 +11,26 @@
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   color-scheme: dark;
+
+  /* V1 Pure Neutral Dark Canvas System */
+  --canvas: #090a0d;
+  --surface-1: #111317;
+  --surface-2: #16181f;
+  --surface-3: #1c1f28;
+
+  --border-subtle: #1e222b;
+  --border-strong: #2a2f3d;
+
+  --text-high: #f8fafc;
+  --text-medium: #cbd5e1;
+  --text-muted: #64748b;
+
+  /* Element Accents */
+  --accent-cache: #fef08a;          /* Buttermilk Cream */
+  --accent-storage: #ffffff;        /* Pure Crisp Alabaster */
+  --accent-win: #34d399;            /* Celadon / Emerald Mint */
+  --accent-queue: #c084fc;          /* Lilac */
+  --accent-alert: #f87171;          /* Terracotta Rose */
 }
 
 html, body, #root {
@@ -20,8 +40,8 @@ html, body, #root {
   padding: 0;
   overflow: hidden;
   box-sizing: border-box;
-  background-color: #09090b;
-  color: #f4f4f5;
+  background-color: var(--canvas);
+  color: var(--text-high);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 

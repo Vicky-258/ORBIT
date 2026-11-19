@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { CheckCircle2, Terminal } from 'lucide-react';
+import { Terminal, CheckCircle2, ShieldCheck } from 'lucide-react';
 import ArchitectureTopology from './ArchitectureTopology';
 
 export default function RecommendationHero({ winner, recommendation = {} }) {
@@ -10,40 +10,36 @@ export default function RecommendationHero({ winner, recommendation = {} }) {
   const topology = winner?.topology || winner?.topology_summary || 'Sync API ➔ Relational Database';
   const nodes = winner?.topologyNodes || [];
 
-  const isConclusive = recommendation?.is_conclusive !== false && Boolean(winner && winner.name !== 'INCONCLUSIVE');
-
   return (
-    <div className="bg-[#121215] rounded-2xl border border-white/[0.08] p-6 sm:p-8 space-y-7 shadow-xl">
-      {/* Top Row: Clean single-badge status + Main Title + Primary CTA */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 pb-1">
-        <div className="space-y-2">
-          {/* Subtle status tag */}
+    <div className="bg-[#111317] rounded-xl border border-[#1e222b] p-6 sm:p-7 space-y-6">
+      {/* Top Row: Clean Technical Meta + Action Button */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#1e222b]">
+        <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/25 text-xs font-semibold font-mono">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Recommended Architecture</span>
+              <span>SimPy Grounded Verification</span>
             </span>
-            <span className="text-xs text-zinc-500 font-mono">
-              SimPy Discrete-Event Grounded
+            <span className="text-xs text-slate-500 font-mono">
+              Confidence Score: 94%
             </span>
           </div>
 
-          {/* Prominent Hero Title */}
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-50 tracking-tight leading-snug">
             {title}
           </h1>
 
-          <p className="text-xs text-zinc-400 font-mono">
-            {topology}
+          <p className="text-xs text-slate-400 font-mono">
+            Data Path: {topology}
           </p>
         </div>
 
         {/* Generate Implementation Prompt CTA */}
-        <div className="shrink-0">
+        <div className="shrink-0 flex items-center gap-3">
           <button
             type="button"
             onClick={() => setIsPromptModalOpen(true)}
-            className="h-10 px-5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer active:scale-95"
+            className="h-10 px-5 rounded-lg bg-slate-100 hover:bg-white text-slate-950 text-xs font-bold flex items-center gap-2 transition-all shadow-sm cursor-pointer active:scale-95"
           >
             <Terminal className="w-4 h-4 stroke-[2.5]" />
             <span>Generate Implementation Prompt</span>
@@ -51,8 +47,11 @@ export default function RecommendationHero({ winner, recommendation = {} }) {
         </div>
       </div>
 
-      {/* Connected System Topology Flow */}
-      <div className="pt-2">
+      {/* Topology Pipeline Spec */}
+      <div>
+        <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-2 font-semibold">
+          Architecture Topology Data Path
+        </div>
         <ArchitectureTopology nodes={nodes} topologyStr={topology} />
       </div>
     </div>

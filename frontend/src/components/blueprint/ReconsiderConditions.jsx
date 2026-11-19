@@ -26,12 +26,12 @@ export default function ReconsiderConditions({ conditions = [] }) {
   const displayConditions = conditions.length > 0 ? conditions : defaultConditions;
 
   return (
-    <div className="bg-[#121215] rounded-2xl border border-white/[0.08] p-6 space-y-5 shadow-xl">
+    <div className="bg-[#111317] rounded-xl border border-[#1e222b] p-6 space-y-5">
       <div>
-        <h2 className="text-base font-bold text-white tracking-tight">
+        <h2 className="text-base font-bold text-slate-100 tracking-tight">
           Operational Boundaries
         </h2>
-        <p className="text-xs text-zinc-400 mt-0.5">
+        <p className="text-xs text-slate-400 mt-0.5">
           Scale or traffic shifts that require reassessing this topology
         </p>
       </div>
@@ -47,28 +47,28 @@ export default function ReconsiderConditions({ conditions = [] }) {
           return (
             <div
               key={idx}
-              className="p-4 rounded-xl border border-white/[0.06] bg-[#09090b] space-y-2 text-xs"
+              className="p-4 rounded-lg border border-[#1e222b] bg-[#16181f] space-y-2 text-xs border-l-4 border-l-[#f87171]"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-semibold text-zinc-100 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                  <span>{category}</span>
+              {/* Category + Affected Component */}
+              <div className="flex items-center justify-between gap-2 flex-wrap font-mono">
+                <span className="font-bold text-slate-200">
+                  {category}
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-zinc-400 border border-white/[0.06]">
-                  {component}
+                <span className="text-[10px] text-slate-400">
+                  Target: {component}
                 </span>
               </div>
 
-              <p className="text-zinc-300 leading-relaxed">
+              {/* Concrete Trigger Text */}
+              <div className="text-slate-300 leading-relaxed font-sans">
                 {text}
-              </p>
+              </div>
 
-              {adjustment && (
-                <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-zinc-400">
-                  <span className="text-zinc-500 font-medium">Action:</span>
-                  <span className="text-zinc-300 font-medium">{adjustment}</span>
-                </div>
-              )}
+              {/* Recommended Action */}
+              <div className="pt-2 border-t border-[#1e222b] flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span className="text-[#f87171] font-semibold">Recommended Action:</span>
+                <span className="text-slate-300">{adjustment}</span>
+              </div>
             </div>
           );
         })}
